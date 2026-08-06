@@ -11,27 +11,41 @@ st.set_page_config(page_title="LinkedIn Micro-Analytics AI", layout="centered", 
 st.title("🧲 LinkedIn Creator & SSI Report Generator")
 st.write("Genera tu informe estratégico A4 de 2 páginas adaptado a tu antigüedad real en la plataforma.")
 
-# --- SECCIÓN DE GUÍA DE USO PARA EL USUARIO EXTERNO ---
+# --- SECCIÓN DE GUÍA DE USO ACTUALIZADA CON EXPLICACIÓN DE LA CLAVE ---
 with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", expanded=True):
     st.markdown("""
-    ### 🚀 Instrucciones para generar tu informe con éxito:
+    ### ⚠️ NOTA IMPORTANTE SOBRE PRIVACIDAD Y COSTES:
+    Para garantizar la **máxima privacidad de tus datos**, esta aplicación no guarda tu información en ninguna base de datos externa. Todo se procesa en tiempo real. 
     
-    1. **🔑 Consigue tu OpenAI API Key**: Regístrate en [://openai.com](https://://openai.com/), ve a la sección *API Keys*, crea una nueva llave y pégala en la barra lateral izquierda de esta app. Necesitarás tener un saldo mínimo de $5 de crédito cargado en OpenAI.
+    Por ello, **cada usuario debe aportar su propia OpenAI API Key** en la barra lateral izquierda. La aplicación usará tu clave de forma segura para comunicarse con la IA. El coste por informe es minúsculo (aproximadamente **0,03€ o 3 céntimos de saldo** de tu cuenta de OpenAI).
+    
+    ---
+    
+    ### 🚀 Pasos para generar tu informe con éxito:
+    
+    1. **🔑 Consigue tu OpenAI API Key**: 
+       - Regístrate o inicia sesión en [://openai.com](https://://openai.com/).
+       - Ve a la sección **API Keys** en el menú izquierdo, crea una nueva llave (`Create new secret key`) y copia el código que empieza por `sk-...`.
+       - *Nota: Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de OpenAI si tu cuenta es antigua.*
+       - Pega esa clave en el cuadro de la barra lateral izquierda de esta aplicación.
+       
     2. **📊 Descarga tus Analíticas de LinkedIn**: 
        - Entra en tu panel de LinkedIn.
        - Accede a la sección de *Analíticas de Creador* (Análisis de contenido).
        - Haz clic en el botón **Exportar** arriba a la derecha y descarga el archivo en formato **Excel (.xlsx)** o **PDF**.
+       
     3. **🎯 Captura tu Social Selling Index (SSI)**:
        - Visita el enlace oficial: [://linkedin.com](https://www.://linkedin.com/).
-       - Usa la herramienta de recortes de tu ordenador (`Win + Shift + S` en Windows) y haz una captura de pantalla donde se vean tus gráficas y puntuación. **Guárdala como imagen (PNG o JPG)**. No la imprimas en PDF, arrastra la imagen directa para que la IA la analice visualmente.
-    4. **📅 Introduce tu Fecha de Alta**: Indica el día exacto en el que te registraste en LinkedIn para que la IA calcule tus promedios reales y no penalice tu puntuación con los meses de inactividad previos.
+       - Usa la herramienta de recortes de tu ordenador (`Win + Shift + S`) y haz una captura de pantalla de tus gráficas. **Guárdala como imagen (PNG o JPG)**. No la exportes en PDF.
+       
+    4. **📅 Introduce tu Fecha de Alta**: Indica el día exacto en el que te registraste en LinkedIn para que la IA calcule tus promedios de rendimiento reales basándose solo en tus meses activo.
     """)
 
 # 1. Configuración de Credenciales en la Barra Lateral
 with st.sidebar:
     st.header("⚙️ Configuración de Seguridad")
-    api_key = st.text_input("Introduce tu OpenAI API Key", type="password")
-    st.info("🔓 Tus credenciales viajan de forma segura y directa a OpenAI sin guardarse en bases de datos.")
+    api_key = st.text_input("Introduce tu OpenAI API Key", type="password", help="Tu clave sk-... necesaria para activar el motor de Inteligencia Artificial.")
+    st.info("🔓 Tus datos y claves viajan directamente y de forma segura a OpenAI. Esta aplicación es de código abierto y no almacena nada en servidores externos.")
 
 # 2. Entradas de datos del Usuario
 st.subheader("1. Información de Contexto")
@@ -112,7 +126,7 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                 1. Un resumen con datos clave ajustados a su tiempo real de vida en la red.
                 2. Diagnóstico del SSI con perspectiva de cuenta nueva.
                 3. Análisis de las temáticas y publicaciones con más éxito.
-                4. Un plan de acción detallado en 3 fases (1 mes, 3 meses, 1 año) con tareas prácticas diarias.
+                4. Un plan de acciónax detallado en 3 fases (1 mes, 3 meses, 1 año) con tareas prácticas diarias.
                 
                 Sé directo, profesional y utiliza viñetas estándar (-). Evita introducciones corporativas irrelevantes.
                 """
@@ -163,3 +177,4 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                 
             except Exception as e:
                 st.error(f"Ha ocurrido un error durante el procesamiento: {e}")
+
