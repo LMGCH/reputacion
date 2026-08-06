@@ -23,7 +23,7 @@ Por este motivo, **cada usuario debe aportar su propia OpenAI API Key** en la in
 
 1. **🔑 Consigue tu OpenAI API Key**: Regístrate o inicia sesión en [://openai.com](https://://openai.com/), ve a la sección *API Keys*, crea una nueva llave y copia el código que empieza por `sk-...`. *(Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de tu cuenta de OpenAI)*.
 2. **📊 Descarga tus Analíticas de LinkedIn**: Accede a tu sección de *Analíticas de Creador* en LinkedIn, haz clic en el botón **Exportar** (arriba a la derecha) y descarga el archivo **Excel (.xlsx)** o **PDF**.
-3. **🎯 Captura tu SSI**: Visita [://linkedin.com](https://www.://linkedin.com/) y haz una captura de pantalla de tus gráficas. Guárdala como **imagen (PNG o JPG)**.
+3. **🎯 Captura tu SSI**: Visita [://linkedin.com](https://www.linkedin.com/sales/ssi/) y haz una captura de pantalla de tus gráficas (Recomiendo usar el zoom de la web al 65-50% y efectuar captura con Herramienta de recorte, pj.) . Guárdala como **imagen (PNG o JPG)**.
 4. **🚀 Ejecuta la aplicación**: Introduce tus archivos y tu clave en la interfaz web para obtener tu plan de acción en 3 fases de inmediato.
 
 
