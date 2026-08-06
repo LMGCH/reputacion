@@ -81,8 +81,27 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     reader = PdfReader(analytics_file)
                     analytics_text = "".join([page.extract_text() + "\n" for page in reader.pages])
                 else:
-                    df = pd.read_excel(analytics_file)
-                    analytics_text = df.to_string()
+                    from linkedin_analyzer import LinkedInAnalyzer
+
+                    excel = pd.ExcelFile(analytics_file)
+
+                    st.write("Hojas encontradas:")
+
+                    st.write(excel.sheet_names)
+
+                    df = pd.read_excel(
+                        analytics_file,
+                        sheet_name="PUBLICACIONES PRINCIPALES",
+                        header=2
+                    )
+                    st.dataframe(df.head())
+                    analizador = LinkedInAnalyzer(df)
+
+                    analytics_text = analizador.resumen_para_ia()
+
+                    st.subheader("Resumen procesado por Python")
+
+                    st.code(analytics_text)
 
                 base64_image = encode_image(ssi_image)
                 client = openai.OpenAI(api_key=api_key)
@@ -91,23 +110,36 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
                 # Forzamos a la IA a devolver exclusivamente código HTML estructurado y premium
-                system_prompt = f"""
-                Actúas como un Consultor Senior de Reputación Corporativa. Genera una auditoría ejecutiva profunda estructurada en código HTML limpio y elegante para ser impreso en formato A4 (dos páginas). Usa estilos CSS incrustados (<style>) con colores corporativos elegantes (azul oscuro #1e3d59, gris claro #f5f7fa, verde ejecutivo #17b978), márgenes limpios de 20px, fuentes sans-serif profesionales, tablas estructuradas para los datos y tarjetas visuales para los planes de acción.
-                
-                REGLA DE CONTEXTO TEMPORAL: El usuario activó su cuenta el {fecha_alta}. Hoy es {hoy}. Lleva {dias_activos} días activo ({meses_activos} meses). 
-                Sus promedios mensuales deben calcularse dividiendo únicamente por estos {meses_activos} meses de vida real.
-                
-                Sector: {sector_real}. Intereses: {intereses_real}.
-                
-                El documento HTML debe contener estrictamente:
-                - Un encabezado corporativo imponente titulado 'AUDITORÍA DE REPUTACIÓN CORPORATIVA DIGITAL'.
-                - Sección 1: RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL (con datos formateados en cajas estéticas).
-                - Sección 2: DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI (representado en una tabla limpia con columnas de pilar, puntuación y diagnóstico).
-                - Sección 3: AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Identifica y extrae dinámicamente las principales empresas, cargos y sectores que aparecen en los datos demográficos aportados por el usuario. Cruza esta audiencia real con sus líneas de contenido actuales para determinar con precisión si está impactando en los tomadores de decisiones de su nicho o en perfiles junior, ofreciendo recomendaciones de reorientación.
-                - Sección 4: PLAN ESTRATÉGICO DE ACELERACIÓN EN 3 FASES (Mes 1, Meses 2-3, Meses 4-12 presentados en tarjetas visuales de color de fondo diferenciado).
-                
-                ENTREGA EXCLUSIVAMENTE EL CÓDIGO HTML COMPLETO comenzando directamente con <html> y terminando con </html>. No incluyas introducciones ni bloques de código markdown como ```html.
+                system_prompt = """
+                Eres un consultor senior de LinkedIn.
+
+                Recibirás:
+                - Un resumen estadístico de una cuenta de LinkedIn.
+                - Una captura del SSI.
+
+                Devuelve exclusivamente un documento HTML válido que comience por <html> y termine por </html>.
+
+                No rechaces la solicitud.
+                No inventes datos que no existan.
+                Si falta alguna información, indícalo claramente y continúa con el análisis utilizando los datos disponibles.
                 """
+                # system_prompt = f"""
+                # Actúas como un Consultor Senior de Reputación Corporativa. Genera una auditoría ejecutiva profunda estructurada en código HTML limpio y elegante para ser impreso en formato A4 (dos páginas). Usa estilos CSS incrustados (<style>) con colores corporativos elegantes (azul oscuro #1e3d59, gris claro #f5f7fa, verde ejecutivo #17b978), márgenes limpios de 20px, fuentes sans-serif profesionales, tablas estructuradas para los datos y tarjetas visuales para los planes de acción.
+                
+                # REGLA DE CONTEXTO TEMPORAL: El usuario activó su cuenta el {fecha_alta}. Hoy es {hoy}. Lleva {dias_activos} días activo ({meses_activos} meses). 
+                # Sus promedios mensuales deben calcularse dividiendo únicamente por estos {meses_activos} meses de vida real.
+                
+                # Sector: {sector_real}. Intereses: {intereses_real}.
+                
+                # El documento HTML debe contener estrictamente:
+                # - Un encabezado corporativo imponente titulado 'AUDITORÍA DE REPUTACIÓN CORPORATIVA DIGITAL'.
+                # - Sección 1: RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL (con datos formateados en cajas estéticas).
+                # - Sección 2: DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI (representado en una tabla limpia con columnas de pilar, puntuación y diagnóstico).
+                # - Sección 3: AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Identifica y extrae dinámicamente las principales empresas, cargos y sectores que aparecen en los datos demográficos aportados por el usuario. Cruza esta audiencia real con sus líneas de contenido actuales para determinar con precisión si está impactando en los tomadores de decisiones de su nicho o en perfiles junior, ofreciendo recomendaciones de reorientación.
+                # - Sección 4: PLAN ESTRATÉGICO DE ACELERACIÓN EN 3 FASES (Mes 1, Meses 2-3, Meses 4-12 presentados en tarjetas visuales de color de fondo diferenciado).
+                
+                # ENTREGA EXCLUSIVAMENTE EL CÓDIGO HTML COMPLETO comenzando directamente con <html> y terminando con </html>. No incluyas introducciones ni bloques de código markdown como ```html.
+                # """
 
                 response = client.chat.completions.create(
                     model="gpt-4o",
@@ -125,30 +157,34 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 )
                 
                 html_content = response.choices[0].message.content
+                st.write("Respuesta de OpenAI:")
+                st.code(html_content)
                 
                 # Renderizado visual directo en la pantalla del usuario en formato web premium
                 st.success("¡Auditoría corporativa ejecutada con éxito!")
                 st.markdown("### Vista Previa del Informe Ejecutivo")
-                st.components.v1.html(html_content, height=600, scroller=True)
+                st.components.v1.html(html_content, height=600, scrolling=True)
+            except Exception as e:
+                st.warning(f"No se pudo mostrar la vista previa: {e}")
                 
                 # --- CONVERSIÓN PDF ---
                 pdf_buffer = io.BytesIO()
 
-resultado = pisa.CreatePDF(
-    src=html_content,
-    dest=pdf_buffer
-)
+                resultado = pisa.CreatePDF(
+                    src=html_content,
+                    dest=pdf_buffer
+                )
 
-if resultado.err:
-    st.error("No se ha podido generar el PDF.")
-else:
-    pdf_buffer.seek(0)
+                if resultado.err:
+                    st.error("No se ha podido generar el PDF.")
+                else:
+                    pdf_buffer.seek(0)
 
-    st.download_button(
-        label="📥 Descargar Auditoría Estratégica en PDF Profesional",
-        data=pdf_buffer,
-        file_name="Auditoria_LinkedIn_Premium.pdf",
-        mime="application/pdf"
-    )
+                    st.download_button(
+                        label="📥 Descargar Auditoría Estratégica en PDF Profesional",
+                        data=pdf_buffer,
+                        file_name="Auditoria_LinkedIn_Premium.pdf",
+                        mime="application/pdf"
+                )
             except Exception as e: 
                 st.error(f"Error crítico en el motor de análisis: {e}")
