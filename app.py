@@ -4,134 +4,108 @@ import openai
 import base64
 from pypdf import PdfReader
 from datetime import date
-from fpdf import FPDF
 
-# Configuración visual de la página web
-st.set_page_config(page_title="LinkedIn Micro-Analytics AI", layout="centered", page_icon="🧲")
-st.title("🧲 LinkedIn Creator & SSI Report Generator")
-st.write("Genera tu informe estratégico A4 de 2 páginas adaptado a tu antigüedad real en la plataforma.")
+# Configuración visual premium de la aplicación web
+st.set_page_config(page_title="Auditoría de Reputación LinkedIn AI", layout="centered", page_icon="🧲")
 
-# --- SECCIÓN DE GUÍA DE USO ACTUALIZADA CON EXPLICACIÓN DE LA CLAVE ---
-with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", expanded=True):
+st.markdown("""
+    <style>
+    .report-title { font-size:28px !important; font-weight: bold; color: #1e3d59; text-align: center; margin-bottom: 20px; }
+    .executive-card { background-color: #f5f7fa; border-left: 5px solid #17b978; padding: 15px; border-radius: 4px; margin-bottom: 15px; }
+    .metric-box { background-color: #ffffff; border: 1px solid #e1e8ed; padding: 10px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("🧲 LinkedIn Analytics Executive Auditor")
+st.write("Transforma tus datos crudos en una auditoría de marca personal de alto impacto y dos páginas.")
+
+# --- SECCIÓN DE GUÍA DE USO ---
+with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded=False):
     st.markdown("""
-    ### ⚠️ NOTA IMPORTANTE SOBRE PRIVACIDAD Y COSTES:
-    Para garantizar la **máxima privacidad de tus datos**, esta aplicación no guarda tu información en ninguna base de datos externa. Todo se procesa en tiempo real. 
+    ### 🛡️ Privacidad Absoluta y Costes de Operación
+    Esta aplicación funciona bajo una arquitectura descentralizada de código abierto. Tus datos, capturas y métricas se procesan en tiempo real en la memoria del servidor y se transmiten mediante cifrado SSL directo a la API de OpenAI. Nada se almacena en servidores externos.
     
-    Por ello, **cada usuario debe aportar su propia OpenAI API Key** en la barra lateral izquierda. La aplicación usará tu clave de forma segura para comunicarse con la IA. El coste por informe es minúsculo (aproximadamente **0,03€ o 3 céntimos de saldo** de tu cuenta de OpenAI).
+    Cada auditoría consume un coste aproximado de **0,03€** del saldo de tu OpenAI API Key.
     
-    ---
-    
-    ### 🚀 Pasos para generar tu informe con éxito:
-    
-    1. **🔑 Consigue tu OpenAI API Key**: 
-       - Regístrate o inicia sesión en [platform.openai.com](https://openai.com).
-       - Ve a la sección **API Keys** en el menú izquierdo, crea una nueva llave (`Create new secret key`) y copia el código que empieza por `sk-...`.
-       - *Nota: Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de OpenAI si tu cuenta es antigua.*
-       - Pega esa clave en el cuadro de la barra lateral izquierda de esta aplicación.
-       
-    2. **📊 Descarga tus Analíticas de LinkedIn**: 
-       - Entra en tu panel de LinkedIn.
-       - Accede a la sección de *Analíticas de Creador* (Análisis de contenido).
-       - Haz clic en el botón **Exportar** arriba a la derecha y descarga el archivo en formato **Excel (.xlsx)** o **PDF**.
-       
-    3. **🎯 Captura tu Social Selling Index (SSI)**:
-       - Visita el enlace oficial: [://linkedin.com](https://www.://linkedin.com/).
-       - Usa la herramienta de recortes de tu ordenador (`Win + Shift + S`) y haz una captura de pantalla de tus gráficas. **Guárdala como imagen (PNG o JPG)**. No la exportes en PDF.
-       
-    4. **📅 Introduce tu Fecha de Alta**: Indica el día exacto en el que te registraste en LinkedIn para que la IA calcule tus promedios de rendimiento reales basándose solo en tus meses activo.
+    ### 🚀 Requisitos para la ejecución:
+    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo.
+    2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn.
+    3. **🎯 Captura de SSI**: Sube una captura en formato **imagen (PNG/JPG)** de tus gráficas de Social Selling Index desde [://linkedin.com](https://www.://linkedin.com/).
     """)
 
-# 1. Configuración de Credenciales en la Barra Lateral
+# 1. Credenciales de Seguridad
 with st.sidebar:
-    st.header("⚙️ Configuración de Seguridad")
-    api_key = st.text_input("Introduce tu OpenAI API Key", type="password", help="Tu clave sk-... necesaria para activar el motor de Inteligencia Artificial.")
-    st.info("🔓 Tus datos y claves viajan directamente y de forma segura a OpenAI. Esta aplicación es de código abierto y no almacena nada en servidores externos.")
+    st.header("⚙️ Seguridad de la API")
+    api_key = st.text_input("OpenAI API Key", type="password")
+    st.info("🔓 Tus credenciales no se almacenan y viajan encriptadas hacia los servidores oficiales de OpenAI.")
 
-# 2. Entradas de datos del Usuario
-st.subheader("1. Información de Contexto")
+# 2. Captura de Variables
+st.subheader("1. Parámetros Estratégicos")
 col1, col2 = st.columns(2)
 with col1:
-    sector = st.text_input("Tu Sector / Especialidad", "Ciberseguridad y FP Informática")
+    sector = st.text_input("Ecosistema / Sector Profesional", "Ciberseguridad y Formación Profesional Informática")
 with col2:
-    intereses = st.text_input("Tus Intereses de Contenido", "Formación Profesional, Redes, Empleo, SMR, ASIR, DAM, DAW")
+    intereses = st.text_input("Núcleos de Contenido Target", "FP, Empleo, Redes, SMR, ASIR, DAM, DAW")
 
-# Campo obligatorio para evitar el problema de los meses en cero previos a tu registro
-fecha_alta = st.date_input("¿Qué día te diste de alta en LinkedIn?", date(2026, 3, 1))
+fecha_alta = st.date_input("Fecha de Activación Real del Perfil", date(2026, 3, 1))
 
-st.subheader("2. Archivos Exportados de LinkedIn")
-ssi_image = st.file_uploader("Sube la captura de tu SSI (Debe ser IMAGEN: PNG, JPG)", type=["png", "jpg", "jpeg"])
-analytics_file = st.file_uploader("Sube tus Analíticas de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"])
+st.subheader("2. Input de Datos (LinkedIn Nativos)")
+ssi_image = st.file_uploader("Captura del Social Selling Index (Imagen PNG/JPG obligatoria)", type=["png", "jpg", "jpeg"])
+analytics_file = st.file_uploader("Histórico Analítico de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"])
 
-# Función interna para convertir la imagen a un formato que entienda la IA
 def encode_image(uploaded_file):
     return base64.b64encode(uploaded_file.read()).decode('utf-8')
 
-# Clase interna para maquetar el PDF de forma limpia
-class PDFReport(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 12)
-        self.set_text_color(100, 100, 100)
-        self.cell(0, 10, 'INFORME DE RENDIMIENTO ESTRATÉGICO - REPUTACIÓN DIGITAL', 0, 1, 'C')
-        self.ln(5)
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.set_text_color(150, 150, 150)
-        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
-
-# 3. Procesamiento y ejecución al pulsar el botón
-if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
+# 3. Procesamiento y Renderizado del Informe Ejecutivo
+if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
     if not api_key:
-        st.error("Por favor, introduce tu OpenAI API Key en la barra lateral izquierda.")
+        st.error("Error de autenticación: Introduce tu OpenAI API Key en la barra lateral.")
     elif not ssi_image or not analytics_file:
-        st.error("Es obligatorio subir tanto la captura del SSI como el archivo de analíticas.")
+        st.error("Error de datos: Es obligatorio adjuntar tanto la captura visual del SSI como el registro analítico.")
     else:
-        with st.spinner("Calculando métricas según tu antigüedad real... Por favor, espera."):
+        with st.spinner("Ejecutando algoritmos de visión y análisis demográfico..."):
             try:
-                # Calcular tiempo real en la plataforma
                 hoy = date.today()
                 dias_activos = (hoy - fecha_alta).days
                 meses_activos = max(1, round(dias_activos / 30.4))
                 
-                # Leer el archivo de analíticas dependiendo de si es PDF o Excel
-                analytics_text = ""
                 if analytics_file.name.endswith('.pdf'):
                     reader = PdfReader(analytics_file)
-                    for page in reader.pages:
-                        analytics_text += page.extract_text() + "\n"
+                    analytics_text = "".join([page.extract_text() + "\n" for page in reader.pages])
                 else:
                     df = pd.read_excel(analytics_file)
                     analytics_text = df.to_string()
 
-                # Codificar la imagen del SSI
                 base64_image = encode_image(ssi_image)
-                
-                # Inicializar el cliente de OpenAI
                 client = openai.OpenAI(api_key=api_key)
 
-                # Definir las instrucciones exactas del sistema
+                # Prompt Ultra-Cuidadoso e Industrial para forzar el formato de Élite
                 system_prompt = f"""
-                Actúas como un Consultor de Marca Personal de Élite en LinkedIn.
+                Actúas como un Consultor Senior de Reputación Corporativa y Estratega de Marca Personal en LinkedIn.
+                Vas a generar una auditoría ejecutiva de exactamente DOS páginas A4 virtuales. El tono debe ser directo, de alta dirección, crítico pero constructivo.
                 
-                REGLA DE TIEMPO CRÍTICA: El usuario se incorporó a la plataforma el {fecha_alta}.
-                A fecha de hoy ({hoy}), lleva exactamente {dias_activos} días activo (unos {meses_activos} meses).
-                Ignora por completo todos los ceros previos en los históricos analíticos. Evalúa su crecimiento, 
-                volumen de impresiones e interacciones dividiendo los totales ÚNICAMENTE por estos {meses_activos} meses.
+                REGLA DE CONTEXTO TEMPORAL: El usuario activó su cuenta el {fecha_alta}. Hoy es {hoy}. Lleva {dias_activos} días activo ({meses_activos} meses). 
+                Ignora los ceros de los meses previos a su registro en los cálculos. Sus promedios mensuales deben calcularse dividiendo únicamente por estos {meses_activos} meses de vida real.
                 
-                El sector del usuario es: {sector}. Sus intereses principales son: {intereses}.
+                Sector de posicionamiento: {sector}.
+                Temas clave de interés: {intereses}.
                 
-                Analiza la imagen del SSI adjunta y los datos textuales del rendimiento de contenido.
-                Genera un informe estratégico estructurado en exactamente DOS páginas A4 virtuales usando texto plano limpio (sin símbolos extraños de Markdown como asteriscos excesivos).
-                El informe debe contener obligatoriamente: 
-                1. Un resumen con datos clave ajustados a su tiempo real de vida en la red.
-                2. Diagnóstico del SSI con perspectiva de cuenta nueva.
-                3. Análisis de las temáticas y publicaciones con más éxito.
-                4. Un plan de acción detallado en 3 fases (1 mes, 3 meses, 1 año) con tareas prácticas diarias.
+                Estructura el informe estrictamente en las siguientes 4 secciones de alta densidad informativa, utilizando un diseño visual ordenado con títulos claros:
+
+                PÁGINA 1: DIAGNÓSTICO ESTRUCTURAL Y AUDIENCIA DE ALTO VALOR
+                1. RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL: Entrega un análisis de rendimiento real (Impresiones totales, miembros únicos alcanzados y tasa de crecimiento calculada según sus {meses_activos} meses de vida). Contrasta la velocidad de despegue de la cuenta.
+                2. DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI: Analiza la imagen del SSI. Detalla la puntuación de cada pilar (Marca, Personas correctas, Información, Relaciones). Explica el desequilibrio técnico entre su capacidad de atracción y su pilar de interacción ofreciendo información. Compáralo con el índice medio de su sector e industria.
+
+                PÁGINA 2: INGENIERÍA DE CONTENIDOS Y HOJA DE RUTA TRIPLE
+                3. AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Evalúa las temáticas más exitosas según los datos (como Formación Profesional, Ciberseguridad y empleo). Cruza estos datos con la demografía corporativa de su audiencia (Junta de Andalucía, Agencia Digital de Andalucía, perfiles técnicos en Sevilla/Málaga). Determina si el contenido está atrayendo a tomadores de decisiones o perfiles junior.
+                4. PLAN ESTRATÉGICO DE ACELERACIÓN EN 3 FASES:
+                   - Fase 1 (Mes 1 - Optimización del Algoritmo): Acciones diarias y semanales de micro-interacción para subir el SSI.
+                   - Fase 2 (Meses 2-3 - Autoridad de Nicho): Formatos específicos de alto rendimiento (ej. Carruseles PDF, artículos técnicos).
+                   - Fase 3 (Meses 4-12 - Consolidación institucional): Estrategia de networking relacional con directivos del sector público y tecnológico andaluz.
                 
-                Sé directo, profesional y utiliza viñetas estándar (-). Evita introducciones corporativas irrelevantes.
+                RESTRICCIÓN DE SALIDA: Entrega el reporte directamente usando un formato limpio y elegante. Evita introducciones genéricas. No uses asteriscos redundantes.
                 """
 
-                # Enviar la solicitud a la API de OpenAI
                 response = client.chat.completions.create(
                     model="gpt-4o",
                     messages=[
@@ -139,7 +113,7 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                         {
                             "role": "user",
                             "content": [
-                                {"type": "text", "text": f"Aquí tienes los datos extraídos de las analíticas:\n{analytics_text}"},
+                                {"type": "text", "text": f"Datos de rendimiento del contenido:\n{analytics_text}"},
                                 {
                                     "type": "image_url",
                                     "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
@@ -147,35 +121,25 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                             ]
                         }
                     ],
-                    max_tokens=2500
+                    max_tokens=3000
                 )
                 
-                # CORRECCIÓN DE SINTAXIS DE LA API AQUÍ:
-                reporte = response.choices[0].message.content
+                reporte = response.choices.message.content
+                st.success("Auditoría corporativa ejecutada con éxito.")
                 
-                st.success("¡Informe adaptado y generado con éxito!")
-                st.text(reporte)
+                # Renderizado visual premium en la propia interfaz web
+                st.markdown("---")
+                st.markdown(f"<div class='report-title'>INFORME DE AUDITORÍA ESTRATÉGICA</div>", unsafe_allow_html=True)
+                st.markdown(reporte)
+                st.markdown("---")
                 
-                # Generación del archivo PDF real en caliente
-                pdf = PDFReport()
-                pdf.add_page()
-                pdf.set_font("Arial", size=10)
-                
-                # Limpiar texto para evitar fallos de codificación en PDF estándar
-                lineas = reporte.split('\n')
-                for linea in lineas:
-                    cleaned_line = linea.encode('latin-1', 'replace').decode('latin-1')
-                    pdf.cell(0, 6, cleaned_line, 0, 1)
-                
-                pdf_output = pdf.output(dest='S')
-                
-                # Ofrecer la opción de descargar el resultado final en PDF
+                # Permitir la descarga directa del texto estratégico estructurado
                 st.download_button(
-                    label="📥 Descargar Reporte en PDF Profesional",
-                    data=bytes(pdf_output),
-                    file_name="Informe_Estrategico_LinkedIn.pdf",
-                    mime="application/pdf"
+                    label="📥 Exportar Informe Estratégico (.txt)",
+                    data=reporte,
+                    file_name="Auditoria_Reputacion_LinkedIn.txt",
+                    mime="text/plain"
                 )
                 
             except Exception as e:
-                st.error(f"Ha ocurrido un error durante el procesamiento: {e}")
+                st.error(f"Error crítico en el motor de análisis: {e}")
