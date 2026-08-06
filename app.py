@@ -32,14 +32,14 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Requiere saldo mínimo cargado en OpenAI)*.
     2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn.
     3. **🎯 Captura de SSI (¡MUY IMPORTANTE!)**:
-       - Haz clic en el botón de abajo o visita directamente: https://www.linkedin.com/sales/ssi/
+       - Haz clic en el botón de abajo o visita directamente: https://linkedin.com
        - Usa la herramienta de recortes (`Win + Shift + S`).
        - **⚠️ ATENCIÓN:** Al hacer la captura de pantalla, **recorta solo la zona de los gráficos y las puntuaciones numéricas. Deja fuera de la imagen tu foto de perfil (avatar)**. Esto evita que los sistemas de censura biométrica de OpenAI bloqueen el análisis por motivos de privacidad facial. Guárdala en tu ordenador como **PNG o JPG** y súbela al casillero inferior.
     4. **📅 Fecha de Alta**: Indica el día real en que activaste tu perfil para ajustar los promedios temporales con precisión.
     """)
     
     # Botón directo para el usuario
-    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://www.linkedin.com/sales/ssi/")
+    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://linkedin.com")
 
 # 1. Credenciales de Seguridad (Modo texto normal para evitar conflictos con el gestor de Windows)
 with st.sidebar:
@@ -123,7 +123,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                         {"role": "system", "content": system_prompt},
                         {
                             "role": "user",
-                            "content=[
+                            "content": [
                                 {"type": "text", "text": f"Datos de rendimiento del contenido:\n{analytics_text}"},
                                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                             ]
@@ -132,7 +132,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     max_tokens=3000
                 )
                 
-                reporte = response.choices.message.content
+                reporte = response.choices[0].message.content
                 st.success("Auditoría corporativa ejecutada con éxito.")
                 st.markdown("---")
                 st.markdown(f"<div class='report-title'>INFORME DE AUDITORÍA ESTRATÉGICA</div>", unsafe_allow_html=True)
@@ -140,5 +140,3 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 st.markdown("---")
                 st.download_button(label="📥 Exportar Informe Estratégico (.txt)", data=reporte, file_name="Auditoria_Reputacion_LinkedIn.txt", mime="text/plain")
             except Exception as e: st.error(f"Error crítico en el motor de análisis: {e}")
-
-
