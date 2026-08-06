@@ -24,7 +24,7 @@ with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", exp
     ### 🚀 Pasos para generar tu informe con éxito:
     
     1. **🔑 Consigue tu OpenAI API Key**: 
-       - Regístrate o inicia sesión en [://openai.com](https://platform.openai.com/).
+       - Regístrate o inicia sesión en [platform.openai.com](https://openai.com).
        - Ve a la sección **API Keys** en el menú izquierdo, crea una nueva llave (`Create new secret key`) y copia el código que empieza por `sk-...`.
        - *Nota: Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de OpenAI si tu cuenta es antigua.*
        - Pega esa clave en el cuadro de la barra lateral izquierda de esta aplicación.
@@ -35,7 +35,7 @@ with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", exp
        - Haz clic en el botón **Exportar** arriba a la derecha y descarga el archivo en formato **Excel (.xlsx)** o **PDF**.
        
     3. **🎯 Captura tu Social Selling Index (SSI)**:
-       - Visita el enlace oficial: [://linkedin.com](https://www.linkedin.com/sales/ssi/).
+       - Visita el enlace oficial: [://linkedin.com](https://www.://linkedin.com/).
        - Usa la herramienta de recortes de tu ordenador (`Win + Shift + S`) y haz una captura de pantalla de tus gráficas. **Guárdala como imagen (PNG o JPG)**. No la exportes en PDF.
        
     4. **📅 Introduce tu Fecha de Alta**: Indica el día exacto en el que te registraste en LinkedIn para que la IA calcule tus promedios de rendimiento reales basándose solo en tus meses activo.
@@ -126,7 +126,7 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                 1. Un resumen con datos clave ajustados a su tiempo real de vida en la red.
                 2. Diagnóstico del SSI con perspectiva de cuenta nueva.
                 3. Análisis de las temáticas y publicaciones con más éxito.
-                4. Un plan de acciónax detallado en 3 fases (1 mes, 3 meses, 1 año) con tareas prácticas diarias.
+                4. Un plan de acción detallado en 3 fases (1 mes, 3 meses, 1 año) con tareas prácticas diarias.
                 
                 Sé directo, profesional y utiliza viñetas estándar (-). Evita introducciones corporativas irrelevantes.
                 """
@@ -150,7 +150,9 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                     max_tokens=2500
                 )
                 
-                reporte = response.choices.message.content
+                # CORRECCIÓN DE SINTAXIS DE LA API AQUÍ:
+                reporte = response.choices[0].message.content
+                
                 st.success("¡Informe adaptado y generado con éxito!")
                 st.text(reporte)
                 
@@ -177,4 +179,3 @@ if st.button("🚀 Generar Informe Estratégico de 2 Páginas"):
                 
             except Exception as e:
                 st.error(f"Ha ocurrido un error durante el procesamiento: {e}")
-
