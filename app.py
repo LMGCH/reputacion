@@ -31,7 +31,7 @@ with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", exp
 with st.sidebar:
     st.header("⚙️ Configuración de Seguridad")
     api_key = st.text_input("Introduce tu OpenAI API Key", type="password")
-    st.info("🔓 Este proyecto se ejecuta localmente en tu entorno. Tu clave no se guarda ni se comparte en ningún servidor externo.")
+    st.info("🔓 Tus credenciales viajan de forma segura y directa a OpenAI sin guardarse en bases de datos.")
 
 # 2. Entradas de datos del Usuario
 st.subheader("1. Información de Contexto")
