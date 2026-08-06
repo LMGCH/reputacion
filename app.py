@@ -39,7 +39,7 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     """)
     
     # Botón directo para el usuario
-    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://linkedin.com")
+    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://www.linkedin.com/sales/ssi/")
 
 # 1. Credenciales de Seguridad (Modo texto normal para evitar conflictos con el gestor de Windows)
 with st.sidebar:
