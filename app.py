@@ -124,7 +124,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     max_tokens=3000
                 )
                 
-                reporte = response.choices.message.content
+                reporte = response.choices[0].message.content
                 st.success("Auditoría corporativa ejecutada con éxito.")
                 
                 # Renderizado visual premium en la propia interfaz web
