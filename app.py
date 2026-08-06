@@ -17,7 +17,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧲 LinkedIn Analytics Executive Auditor")
+st.title("🧲 LinkedIn Analytical Audit")
 st.write("Transforma tus datos crudos en una auditoría de marca de alto impacto en PDF.")
 
 # --- SECCIÓN DE GUÍA DE USO ---
