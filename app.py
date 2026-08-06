@@ -24,7 +24,7 @@ with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", exp
     ### 🚀 Pasos para generar tu informe con éxito:
     
     1. **🔑 Consigue tu OpenAI API Key**: 
-       - Regístrate o inicia sesión en [://openai.com](https://://openai.com/).
+       - Regístrate o inicia sesión en [://openai.com](https://platform.openai.com/).
        - Ve a la sección **API Keys** en el menú izquierdo, crea una nueva llave (`Create new secret key`) y copia el código que empieza por `sk-...`.
        - *Nota: Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de OpenAI si tu cuenta es antigua.*
        - Pega esa clave en el cuadro de la barra lateral izquierda de esta aplicación.
