@@ -35,7 +35,7 @@ with st.expander("📖 ¿Cómo usar esta aplicación? (Manual paso a paso)", exp
        - Haz clic en el botón **Exportar** arriba a la derecha y descarga el archivo en formato **Excel (.xlsx)** o **PDF**.
        
     3. **🎯 Captura tu Social Selling Index (SSI)**:
-       - Visita el enlace oficial: [://linkedin.com](https://www.://linkedin.com/).
+       - Visita el enlace oficial: [://linkedin.com](https://www.linkedin.com/sales/ssi/).
        - Usa la herramienta de recortes de tu ordenador (`Win + Shift + S`) y haz una captura de pantalla de tus gráficas. **Guárdala como imagen (PNG o JPG)**. No la exportes en PDF.
        
     4. **📅 Introduce tu Fecha de Alta**: Indica el día exacto en el que te registraste en LinkedIn para que la IA calcule tus promedios de rendimiento reales basándose solo en tus meses activo.
