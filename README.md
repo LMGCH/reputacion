@@ -1,52 +1,31 @@
-\# 🧲 LinkedIn Creator \& SSI Report Generator
+# 🧲 LinkedIn Creator & SSI Report Generator
 
-
-
-Esta es una microaplicación inteligente desarrollada en Python y Streamlit diseñada para generar un \*\*informe estratégico ejecutivo de 2 páginas en formato PDF\*\* analizando el perfil de LinkedIn del usuario. 
-
-
+Esta es una microaplicación inteligente desarrollada en Python y Streamlit diseñada para generar un **informe estratégico ejecutivo de 2 páginas en formato PDF** analizando el perfil de LinkedIn del usuario. 
 
 El sistema utiliza el motor de Inteligencia Artificial de OpenAI (`GPT-4o`) combinado con capacidades de visión para procesar datos reales y gráficos sin necesidad de conectar con la restrictiva API oficial de LinkedIn.
 
+---
 
+### ⚠️ AVISO IMPORTANTE SOBRE COSTES Y PRIVACIDAD
+Para garantizar la **máxima privacidad**, esta aplicación es de código abierto y **no almacena tus datos ni tus claves** en ninguna base de datos externa. Todo se procesa en tiempo real.
 
-\## 🛠️ Características Principales
+Por este motivo, **cada usuario debe aportar su propia OpenAI API Key** en la interfaz para poder utilizarla. Cada informe generado consume un coste ínfimo de aproximadamente **0,03€ (3 céntimos de euro)** del saldo de tu cuenta de OpenAI.
 
-\- \*\*Análisis de Visión Integrado\*\*: El usuario solo necesita subir una captura de pantalla de su Social Selling Index (SSI) y la IA la interpretará de forma visual.
+---
 
-\- \*\*Procesamiento de Datos Estructurados\*\*: Permite la carga directa del reporte Excel (`.xlsx`) o PDF exportado nativamente de las analíticas de creador de LinkedIn.
+## 🛠️ Características Principales
+- **Análisis de Visión Integrado**: El usuario solo necesita subir una captura de pantalla de su Social Selling Index (SSI) y la IA la interpretará de forma visual.
+- **Procesamiento de Datos Estructurados**: Permite la carga directa del reporte Excel (`.xlsx`) o PDF exportado nativamente de las analíticas de creador de LinkedIn.
+- **Filtro de Antigüedad Quirúrgico**: Evita falsos diagnósticos al permitir introducir la fecha exacta de alta en la plataforma, calculando los promedios de rendimiento basándose únicamente en los meses de actividad real.
+- **Exportación Limpia**: Genera un archivo PDF maquetado y listo para descargar en formato A4.
 
-\- \*\*Filtro de Antigüedad Quirúrgico\*\*: Evita falsos diagnósticos al permitir introducir la fecha exacta de alta en la plataforma, calculando los promedios de rendimiento basándose únicamente en los meses de actividad real.
+## 📖 Instrucciones de Uso para el Visitante
 
-\- \*\*Exportación Limpia\*\*: Genera un archivo PDF maquetado y listo para imprimir en formato A4.
+1. **🔑 Consigue tu OpenAI API Key**: Regístrate o inicia sesión en [://openai.com](https://://openai.com/), ve a la sección *API Keys*, crea una nueva llave y copia el código que empieza por `sk-...`. *(Asegúrate de tener al menos el mínimo de 5$ de saldo cargado en la pestaña 'Billing' de tu cuenta de OpenAI)*.
+2. **📊 Descarga tus Analíticas de LinkedIn**: Accede a tu sección de *Analíticas de Creador* en LinkedIn, haz clic en el botón **Exportar** (arriba a la derecha) y descarga el archivo **Excel (.xlsx)** o **PDF**.
+3. **🎯 Captura tu SSI**: Visita [://linkedin.com](https://www.://linkedin.com/) y haz una captura de pantalla de tus gráficas. Guárdala como **imagen (PNG o JPG)**.
+4. **🚀 Ejecuta la aplicación**: Introduce tus archivos y tu clave en la interfaz web para obtener tu plan de acción en 3 fases de inmediato.
 
-
-
-\## 🚀 Cómo ponerlo en marcha en local
-
-
-
-1\. \*\*Clona o descarga este repositorio\*\* en tu ordenador.
-
-2\. Abre tu terminal de comandos en la carpeta del proyecto e \*\*instala las dependencias necesarias\*\*:
-
-&#x20;  ```bash
-
-&#x20;  pip install streamlit openai pandas openpyxl pypdf fpdf2
-
-&#x20;  ```
-
-3\. \*\*Arranca el servidor local\*\* ejecutando:
-
-&#x20;  ```bash
-
-&#x20;  python -m streamlit run app.py
-
-&#x20;  ```
-
-
-
-\## 📖 Requisitos de Uso para el Usuario
 
 Para que la IA genere el informe, se requiere introducir una \*\*OpenAI API Key\*\* válida en la barra lateral con saldo de crédito disponible, adjuntar el Excel de analíticas descargado de LinkedIn y la captura de pantalla del SSI en formato de imagen (PNG/JPG).
 
