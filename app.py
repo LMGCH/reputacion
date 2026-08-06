@@ -28,9 +28,9 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     Cada auditoría consume un coste aproximado de **0,03€** del saldo de tu OpenAI API Key.
     
     ### 🚀 Requisitos para la ejecución:
-    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo.
+    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo, obtenla de [://platform.openai.com](https://platform.openai.com/).
     2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn.
-    3. **🎯 Captura de SSI**: Sube una captura en formato **imagen (PNG/JPG)** de tus gráficas de Social Selling Index desde [://linkedin.com](https://www.://linkedin.com/).
+    3. **🎯 Captura de SSI**: Sube una captura en formato **imagen (PNG/JPG)** de tus gráficas de Social Selling Index desde [://linkedin.com](https://www.linkedin.com/sales/ssi/).
     """)
 
 # 1. Credenciales de Seguridad
