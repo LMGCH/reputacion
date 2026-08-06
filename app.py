@@ -29,7 +29,7 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     
     ### 🚀 Requisitos para la ejecución:
     
-    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Require saldo): puedes obtenerlo de [://platform.openai.com](https://platform.openai.com/).*.
+    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Requiere saldo mínimo cargado en OpenAI)*.
     2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn.
     3. **🎯 Captura de SSI (¡MUY IMPORTANTE!)**:
        - Visita [://linkedin.com](https://www.linkedin.com/sales/ssi/).
@@ -38,13 +38,13 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     4. **📅 Fecha de Alta**: Indica el día real en que activaste tu perfil para ajustar los promedios temporales con precisión.
     """)
 
-# 1. Credenciales de Seguridad (Cambiado a texto normal para burlar el gestor de contraseñas de Windows)
+# 1. Credenciales de Seguridad (Modo texto normal para evitar conflictos con el gestor de Windows)
 with st.sidebar:
     st.header("⚙️ Seguridad de la API")
     api_key = st.text_input("OpenAI API Key", type="default", placeholder="Pega tu clave sk-...")
     st.info("🔓 Tus credenciales no se almacenan en ningún sitio. Al usar el modo texto, Windows no te molestará sugiriendo contraseñas seguras.")
 
-# 2. Captura de Variables (Implementación de marcadores en gris 'placeholder')
+# 2. Captura de Variables con marcadores 'placeholder'
 st.subheader("1. Parámetros Estratégicos")
 col1, col2 = st.columns(2)
 with col1:
@@ -84,7 +84,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 base64_image = encode_image(ssi_image)
                 client = openai.OpenAI(api_key=api_key)
 
-                # Si el usuario no escribe nada en los inputs, asignamos los tuyos por defecto para la IA
+                # Valores por defecto para la IA si el usuario decide dejarlos vacíos
                 sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
