@@ -32,11 +32,14 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Requiere saldo mínimo cargado en OpenAI)*.
     2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn.
     3. **🎯 Captura de SSI (¡MUY IMPORTANTE!)**:
-       - Visita [://linkedin.com](https://www.linkedin.com/sales/ssi/).
+       - Haz clic en el botón de abajo o visita directamente: https://www.linkedin.com/sales/ssi/
        - Usa la herramienta de recortes (`Win + Shift + S`).
-       - **⚠️ ATENCIÓN:** Al hacer la captura de pantalla, **recorta solo la zona de los gráficos y las puntuaciones numéricas. Deja fuera de la imagen tu foto de perfil (avatar)**. Esto evita que los sistemas de censura biométrica de OpenAI bloqueen el análisis por motivos de privacidad facial. Guárdala como **PNG o JPG**.
+       - **⚠️ ATENCIÓN:** Al hacer la captura de pantalla, **recorta solo la zona de los gráficos y las puntuaciones numéricas. Deja fuera de la imagen tu foto de perfil (avatar)**. Esto evita que los sistemas de censura biométrica de OpenAI bloqueen el análisis por motivos de privacidad facial. Guárdala en tu ordenador como **PNG o JPG** y súbela al casillero inferior.
     4. **📅 Fecha de Alta**: Indica el día real en que activaste tu perfil para ajustar los promedios temporales con precisión.
     """)
+    
+    # Botón directo para el usuario
+    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://www.linkedin.com/sales/ssi/")
 
 # 1. Credenciales de Seguridad (Modo texto normal para evitar conflictos con el gestor de Windows)
 with st.sidebar:
@@ -55,8 +58,8 @@ with col2:
 fecha_alta = st.date_input("Fecha de Activación Real del Perfil", date(2026, 3, 1))
 
 st.subheader("2. Input de Datos (LinkedIn Nativos)")
-ssi_image = st.file_uploader("Captura del Social Selling Index (Imagen PNG/JPG sin foto de perfil)", type=["png", "jpg", "jpeg"])
-analytics_file = st.file_uploader("Histórico Analítico de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"])
+ssi_image = st.file_uploader("Sube la captura de tu SSI guardada en tu PC (Imagen PNG/JPG sin foto de perfil)", type=["png", "jpg", "jpeg"])
+analytics_file = st.file_uploader("Sube tu archivo de Analíticas descargado (Excel .xlsx o PDF)", type=["xlsx", "pdf"])
 
 def encode_image(uploaded_file):
     return base64.b64encode(uploaded_file.read()).decode('utf-8')
@@ -64,7 +67,7 @@ def encode_image(uploaded_file):
 # 3. Procesamiento y Renderizado del Informe Ejecutivo
 if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
     if not api_key:
-        st.error("Error de autenticación: Introduce tu OpenAI API Key en la barra lateral.")
+        st.error("Error de autenticación: Introduce tu OpenAI API Key del menú lateral.")
     elif not ssi_image or not analytics_file:
         st.error("Error de datos: Es obligatorio adjuntar tanto la captura visual del SSI como el registro analítico.")
     else:
@@ -84,13 +87,12 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 base64_image = encode_image(ssi_image)
                 client = openai.OpenAI(api_key=api_key)
 
-                # Valores por defecto para la IA si el usuario decide dejarlos vacíos
                 sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
                 system_prompt = f"""
                 Actúas como un Consultor Senior de Reputación Corporativa y Estratega de Marca Personal en LinkedIn.
-                Vas a generar una auditoría ejecutiva profunda de dos páginas A4 virtuales. El tono debe ser directo, ejecutivo, analítico, crítico pero constructivo.
+                Genera una auditoría ejecutiva profunda de dos páginas A4 virtuales. El tono debe ser directo, ejecutivo, analítico, crítico pero constructivo.
                 Concéntrate exclusivamente en los datos numéricos, textos corporativos y barras estadísticas de los gráficos de la imagen del SSI.
                 
                 REGLA DE CONTEXTO TEMPORAL: El usuario activó su cuenta el {fecha_alta}. Hoy es {hoy}. Lleva {dias_activos} días activo ({meses_activos} meses). 
@@ -99,20 +101,20 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 Sector de posicionamiento: {sector_real}.
                 Temas clave de interés: {intereses_real}.
                 
-                Estructura el informe estrictamente en las siguientes 4 secciones de alta densidad informativa, utilizando un diseño visual ordenado con títulos claros:
+                Estructura el informe estrictamente en las siguientes 4 secciones utilizando títulos claros:
 
                 PÁGINA 1: DIAGNÓSTICO ESTRUCTURAL Y AUDIENCIA DE ALTO VALOR
-                1. RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL: Entrega un análisis de rendimiento real profundo (Impresiones totales, miembros únicos alcanzados y tasa de crecimiento calculada según sus {meses_activos} meses de vida). Contrasta la velocidad de despegue de la cuenta.
-                2. DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI: Analiza la imagen del SSI. Detalla la puntuación de cada pilar (Marca, Personas correctas, Información, Relaciones). Explica el desequilibrio técnico entre su capacidad de atracción y su pilar de interacción ofreciendo información. Compáralo con el índice medio de su sector e industria.
+                1. RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL: Análisis de rendimiento real profundo (Impresiones totales, miembros únicos alcanzados y tasa de crecimiento calculada según sus {meses_activos} meses de vida). Contrasta la velocidad de despegue de la cuenta.
+                2. DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI: Analiza la imagen del SSI. Detalla la puntuación de cada pilar. Explica el desequilibrio técnico entre su capacidad de atracción y su pilar de interacción ofreciendo información. Compáralo con el índice medio de su sector e industria.
 
                 PÁGINA 2: INGENIERÍA DE CONTENIDOS Y HOJA DE RUTA TRIPLE
-                3. AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Evalúa las temáticas más exitosas según los datos (como Formación Profesional, Ciberseguridad y empleo). Cruza estos datos con la demografía corporativa de su audiencia (Junta de Andalucía, Agencia Digital de Andalucía, perfiles técnicos en Sevilla/Málaga). Determina si el contenido está atrayendo a tomadores de decisiones o perfiles junior.
+                3. AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Evalúa las temáticas más exitosas según los datos. Cruza estos datos con la demografía corporativa de su audiencia (Junta de Andalucía, Agencia Digital de Andalucía, perfiles técnicos en Sevilla/Málaga). Determina si el contenido está atrayendo a tomadores de decisiones o perfiles junior.
                 4. PLAN ESTRATÉGICO DE ACELERACIÓN EN 3 FASES:
-                   - Fase 1 (Mes 1 - Optimización del Algoritmo): Acciones diarias y semanales de micro-interacción para subir el SSI.
-                   - Fase 2 (Meses 2-3 - Autoridad de Nicho): Formatos específicos de alto rendimiento (ej. Carruseles PDF, artículos técnicos).
-                   - Fase 3 (Meses 4-12 - Consolidación institucional): Estrategia de networking relacional con directivos del sector público y tecnológico andaluz.
+                   - Fase 1 (Mes 1): Acciones de micro-interacción para subir el SSI.
+                   - Fase 2 (Meses 2-3): Formatos de alto rendimiento (Carruseles PDF, artículos técnicos).
+                   - Fase 3 (Meses 4-12): Estrategia de networking relacional con directivos del sector público y tecnológico andaluz.
                 
-                RESTRICCIÓN DE SALIDA: Entrega el reporte directamente usando un formato limpio y elegante. Evita introducciones genéricas. No uses asteriscos redundantes. Ofrece un desarrollo muy extenso, detallado y rico en texto estratégico (mínimo 1000 palabras) para asegurar que el contenido cubra las dos páginas completas con un valor de consultoría premium.
+                RESTRICCIÓN DE SALIDA: Entrega el reporte directamente usando un formato limpio. Evita introducciones genéricas. No uses asteriscos redundantes. Desarrollo muy extenso, detallado y rico en texto estratégico (mínimo 1000 palabras) para asegurar que el contenido cubra las dos páginas completas con un valor premium.
                 """
 
                 response = client.chat.completions.create(
@@ -121,32 +123,22 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                         {"role": "system", "content": system_prompt},
                         {
                             "role": "user",
-                            "content": [
+                            "content=[
                                 {"type": "text", "text": f"Datos de rendimiento del contenido:\n{analytics_text}"},
-                                {
-                                    "type": "image_url",
-                                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
-                                }
+                                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                             ]
                         }
                     ],
                     max_tokens=3000
                 )
                 
-                reporte = response.choices[0].message.content
+                reporte = response.choices.message.content
                 st.success("Auditoría corporativa ejecutada con éxito.")
-                
                 st.markdown("---")
                 st.markdown(f"<div class='report-title'>INFORME DE AUDITORÍA ESTRATÉGICA</div>", unsafe_allow_html=True)
                 st.markdown(reporte)
                 st.markdown("---")
-                
-                st.download_button(
-                    label="📥 Exportar Informe Estratégico (.txt)",
-                    data=reporte,
-                    file_name="Auditoria_Reputacion_LinkedIn.txt",
-                    mime="text/plain"
-                )
-                
-            except Exception as e:
+                st.download_button(label="📥 Exportar Informe Estratégico (.txt)", data=reporte, file_name="Auditoria_Reputacion_LinkedIn.txt", mime="text/plain")
+            except Exception as e: st.error(f"Error crítico en el motor de análisis: {e}")
+
 
