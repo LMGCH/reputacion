@@ -43,9 +43,9 @@ with st.sidebar:
 st.subheader("1. Parámetros Estratégicos")
 col1, col2 = st.columns(2)
 with col1:
-    sector = st.text_input("Ecosistema / Sector Profesional", "Ciberseguridad y Formación Profesional Informática")
+    sector = st.text_input("Ecosistema / Sector Profesional", "Ej. Ciberseguridad y Formación Profesional Informática")
 with col2:
-    intereses = st.text_input("Núcleos de Contenido Target", "FP, Empleo, Redes, SMR, ASIR, DAM, DAW")
+    intereses = st.text_input("Núcleos de Contenido Target", "Ej. FP, Empleo, Redes, SMR, ASIR, DAM, DAW")
 
 fecha_alta = st.date_input("Fecha de Activación Real del Perfil", date(2026, 3, 1))
 
