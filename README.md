@@ -1,4 +1,4 @@
-# 🧲 LinkedIn Creator & SSI Report Generator
+# 🧭 LinkedIn Creator & SSI Report Generator
 
 Esta es una microaplicación inteligente desarrollada en Python y Streamlit diseñada para generar un **informe estratégico ejecutivo de 2 páginas en formato PDF** analizando el perfil de LinkedIn del usuario. 
 
