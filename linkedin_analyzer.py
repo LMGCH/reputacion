@@ -95,6 +95,101 @@ class LinkedInAnalyzer:
         return None
 
     # ======================================================
+    # NORMALIZAR PUBLICACIONES PRINCIPALES
+    # ======================================================
+
+    def obtener_publicaciones(self):
+
+        url_columna = self.buscar_columna([
+            "URL de la publicación",
+            "URL"
+        ])
+
+        fecha_columna = self.buscar_columna([
+            "Fecha de publicación",
+            "Fecha"
+        ])
+
+        interacciones_columna = self.buscar_columna([
+            "Interacciones"
+        ])
+
+        impresiones_columna = self.buscar_columna([
+            "Impresiones",
+            "Impressions"
+        ])
+
+        if url_columna is None:
+            return []
+
+        publicaciones = []
+
+        for _, fila in self.df.iterrows():
+
+            url = fila[url_columna]
+
+            # Ignorar filas sin URL
+            if pd.isna(url) or str(url).strip() == "":
+                continue
+
+            publicacion = {
+                "URL": str(url).strip()
+            }
+
+            # ----------------------------------------------
+            # FECHA
+            # ----------------------------------------------
+
+            if fecha_columna:
+
+                fecha = pd.to_datetime(
+                    fila[fecha_columna],
+                    errors="coerce",
+                    dayfirst=True
+                )
+
+                if pd.notna(fecha):
+                    publicacion["Fecha"] = fecha.strftime(
+                        "%d/%m/%Y"
+                    )
+
+            # ----------------------------------------------
+            # INTERACCIONES
+            # ----------------------------------------------
+
+            if interacciones_columna:
+
+                interacciones = pd.to_numeric(
+                    fila[interacciones_columna],
+                    errors="coerce"
+                )
+
+                if pd.notna(interacciones):
+                    publicacion["Interacciones"] = int(
+                        interacciones
+                    )
+
+            # ----------------------------------------------
+            # IMPRESIONES
+            # ----------------------------------------------
+
+            if impresiones_columna:
+
+                impresiones = pd.to_numeric(
+                    fila[impresiones_columna],
+                    errors="coerce"
+                )
+
+                if pd.notna(impresiones):
+                    publicacion["Impresiones"] = int(
+                        impresiones
+                    )
+
+            publicaciones.append(publicacion)
+
+        return publicaciones
+
+    # ======================================================
     # MÉTRICAS
     # ======================================================
 
