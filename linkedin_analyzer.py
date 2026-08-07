@@ -93,6 +93,7 @@ class LinkedInAnalyzer:
 
         return None
 
+```python
     # ======================================================
     # MÉTRICAS
     # ======================================================
@@ -121,18 +122,65 @@ class LinkedInAnalyzer:
 
         estadisticas = {}
 
+        # --------------------------------------------------
+        # PUBLICACIONES
+        # --------------------------------------------------
+
         estadisticas["Publicaciones"] = len(self.df)
+
+        # --------------------------------------------------
+        # IMPRESIONES
+        # --------------------------------------------------
 
         if impresiones:
 
-            serie = pd.to_numeric(
+            serie_impresiones = pd.to_numeric(
                 self.df[impresiones],
                 errors="coerce"
-            ).fillna(0)
+            ).dropna()
 
-            estadisticas["Impresiones totales"] = int(serie.sum())
-            estadisticas["Impresiones medias"] = round(serie.mean(), 1)
-            estadisticas["Máximo impresiones"] = int(serie.max())
+            if not serie_impresiones.empty:
+
+                estadisticas["Impresiones totales"] = int(
+                    serie_impresiones.sum()
+                )
+
+                estadisticas["Impresiones medias"] = round(
+                    serie_impresiones.mean(),
+                    1
+                )
+
+                estadisticas["Mediana de impresiones"] = round(
+                    serie_impresiones.median(),
+                    1
+                )
+
+                estadisticas["Mínimo impresiones"] = int(
+                    serie_impresiones.min()
+                )
+
+                estadisticas["Máximo impresiones"] = int(
+                    serie_impresiones.max()
+                )
+
+                estadisticas["Desviación estándar impresiones"] = round(
+                    serie_impresiones.std(),
+                    1
+                )
+
+                # Publicaciones por encima de la media
+                estadisticas["Publicaciones por encima de la media"] = int(
+                    (serie_impresiones > serie_impresiones.mean()).sum()
+                )
+
+                # Publicaciones por debajo de la media
+                estadisticas["Publicaciones por debajo de la media"] = int(
+                    (serie_impresiones < serie_impresiones.mean()).sum()
+                )
+
+        # --------------------------------------------------
+        # REACCIONES
+        # --------------------------------------------------
 
         if reacciones:
 
@@ -141,7 +189,13 @@ class LinkedInAnalyzer:
                 errors="coerce"
             ).fillna(0)
 
-            estadisticas["Reacciones"] = int(serie.sum())
+            estadisticas["Reacciones totales"] = int(
+                serie.sum()
+            )
+
+        # --------------------------------------------------
+        # COMENTARIOS
+        # --------------------------------------------------
 
         if comentarios:
 
@@ -150,7 +204,13 @@ class LinkedInAnalyzer:
                 errors="coerce"
             ).fillna(0)
 
-            estadisticas["Comentarios"] = int(serie.sum())
+            estadisticas["Comentarios totales"] = int(
+                serie.sum()
+            )
+
+        # --------------------------------------------------
+        # COMPARTIDOS
+        # --------------------------------------------------
 
         if compartidos:
 
@@ -159,9 +219,13 @@ class LinkedInAnalyzer:
                 errors="coerce"
             ).fillna(0)
 
-            estadisticas["Compartidos"] = int(serie.sum())
+            estadisticas["Compartidos totales"] = int(
+                serie.sum()
+            )
 
         return estadisticas
+    ```
+
 
     # ======================================================
     # RESUMEN IA
