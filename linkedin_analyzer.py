@@ -187,7 +187,72 @@ class LinkedInAnalyzer:
 
             publicaciones.append(publicacion)
 
+        print("PUBLICACIONES NORMALIZADAS:", len(publicaciones))
+
         return publicaciones
+
+    # ======================================================
+    # PUBLICACIONES DESTACADAS
+    # ======================================================
+
+    def publicaciones_destacadas(self):
+
+        publicaciones = self.obtener_publicaciones()
+
+        if not publicaciones:
+            return {
+                "Top 5": [],
+                "Bottom 5": []
+            }
+
+        publicaciones_validas = [
+            p for p in publicaciones
+            if "Impresiones" in p
+        ]
+
+        # --------------------------------------------------
+        # CALCULAR ENGAGEMENT
+        # --------------------------------------------------
+
+        for publicacion in publicaciones_validas:
+
+            impresiones = publicacion.get("Impresiones", 0)
+            interacciones = publicacion.get("Interacciones", 0)
+
+            if impresiones > 0:
+
+                engagement = (
+                    interacciones / impresiones
+                ) * 100
+
+                publicacion["Engagement"] = round(
+                    engagement,
+                    2
+                )
+
+            else:
+
+                publicacion["Engagement"] = 0.0
+
+        # --------------------------------------------------
+        # ORDENAR POR IMPRESIONES
+        # --------------------------------------------------
+
+        top_5 = sorted(
+            publicaciones_validas,
+            key=lambda p: p["Impresiones"],
+            reverse=True
+        )[:5]
+
+        bottom_5 = sorted(
+            publicaciones_validas,
+            key=lambda p: p["Impresiones"]
+        )[:5]
+
+        return {
+            "Top 5": top_5,
+            "Bottom 5": bottom_5
+        }
 
     # ======================================================
     # MÉTRICAS
@@ -380,6 +445,37 @@ class LinkedInAnalyzer:
                 serie.sum()
             )
 
+            # --------------------------------------------------
+            # ENGAGEMENT GLOBAL
+            # --------------------------------------------------
+
+            if impresiones and reacciones:
+
+                serie_impresiones = pd.to_numeric(
+                    self.df[impresiones],
+                    errors="coerce"
+                ).fillna(0)
+
+                serie_reacciones = pd.to_numeric(
+                    self.df[reacciones],
+                    errors="coerce"
+                ).fillna(0)
+
+                impresiones_totales = serie_impresiones.sum()
+                reacciones_totales = serie_reacciones.sum()
+
+                if impresiones_totales > 0:
+
+                    engagement_global = (
+                        reacciones_totales
+                        / impresiones_totales
+                    ) * 100
+
+                    estadisticas["Engagement global (%)"] = round(
+                        engagement_global,
+                        2
+                    )
+
         # --------------------------------------------------
         # COMENTARIOS
         # --------------------------------------------------
@@ -413,9 +509,8 @@ class LinkedInAnalyzer:
         return estadisticas    
     
 
-
     # ======================================================
-    # RESUMEN IA
+    # RESUMEN PARA IA
     # ======================================================
 
     def resumen_para_ia(self):
@@ -425,6 +520,11 @@ class LinkedInAnalyzer:
         texto = []
 
         texto.append("RESUMEN DEL HISTÓRICO DE LINKEDIN")
+
+        # --------------------------------------------------
+        # PERIODO
+        # --------------------------------------------------
+
         periodo = self.obtener_periodo()
 
         if periodo:
@@ -432,11 +532,65 @@ class LinkedInAnalyzer:
             texto.append(
                 f"Periodo analizado: {periodo[0]} - {periodo[1]}"
             )
+
+        # --------------------------------------------------
+        # MÉTRICAS GENERALES
+        # --------------------------------------------------
+
         texto.append("")
 
         for clave, valor in resumen.items():
-
             texto.append(f"{clave}: {valor}")
 
+        # --------------------------------------------------
+        # PUBLICACIONES DESTACADAS
+        # --------------------------------------------------
+
+        destacadas = self.publicaciones_destacadas()
+
+        texto.append("")
+        texto.append("PUBLICACIONES DESTACADAS")
+        texto.append("")
+
+        # --------------------------------------------------
+        # TOP 5
+        # --------------------------------------------------
+
+        texto.append("TOP 5 PUBLICACIONES POR IMPRESIONES")
+
+        for posicion, publicacion in enumerate(
+            destacadas["Top 5"],
+            start=1
+        ):
+
+            texto.append(
+                f"{posicion}. "
+                f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
+                f"Impresiones: {publicacion.get('Impresiones', 0)} | "
+                f"Interacciones: {publicacion.get('Interacciones', 0)} | "
+                f"Engagement: {publicacion.get('Engagement', 0)}% | "
+                f"URL: {publicacion.get('URL', 'N/D')}"
+            )
+
+        # --------------------------------------------------
+        # BOTTOM 5
+        # --------------------------------------------------
+
+        texto.append("")
+        texto.append("BOTTOM 5 PUBLICACIONES POR IMPRESIONES")
+
+        for posicion, publicacion in enumerate(
+            destacadas["Bottom 5"],
+            start=1
+        ):
+
+            texto.append(
+                f"{posicion}. "
+                f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
+                f"Impresiones: {publicacion.get('Impresiones', 0)} | "
+                f"Interacciones: {publicacion.get('Interacciones', 0)} | "
+                f"Engagement: {publicacion.get('Engagement', 0)}% | "
+                f"URL: {publicacion.get('URL', 'N/D')}"
+            )
 
         return "\n".join(texto)

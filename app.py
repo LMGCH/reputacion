@@ -97,6 +97,11 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     st.dataframe(df.head())
                     analizador = LinkedInAnalyzer(df)
 
+                    destacadas = analizador.publicaciones_destacadas()
+
+                    st.write("TOP 5:", destacadas["Top 5"])
+                    st.write("BOTTOM 5:", destacadas["Bottom 5"])
+                    st.write("MÉTRICAS PYTHON:", analizador.metricas())                    
                     analytics_text = analizador.resumen_para_ia()
 
                     st.subheader("Resumen procesado por Python")
