@@ -9,7 +9,7 @@ El sistema utiliza el motor de Inteligencia Artificial de OpenAI (`GPT-4o`) comb
 ### ⚠️ AVISO IMPORTANTE SOBRE COSTES Y PRIVACIDAD
 Para garantizar la **máxima privacidad**, esta aplicación es de código abierto y **no almacena tus datos ni tus claves** en ninguna base de datos externa. Todo se procesa en tiempo real.
 
-Por este motivo, **cada usuario debe aportar su propia OpenAI API Key** en la interfaz para poder utilizarla. Cada informe generado consume un coste ínfimo de aproximadamente **0,03€ (3 céntimos de euro)** del saldo de tu cuenta de OpenAI.
+Por este motivo, **cada usuario debe aportar su propia OpenAI API Key** en la interfaz para poder utilizarla. Cada informe generado consume un coste ínfimo de aproximadamente **0,06€ (6 céntimos de euro)** del saldo de tu cuenta de OpenAI.
 
 ---
 
