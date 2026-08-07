@@ -233,9 +233,8 @@ class LinkedInAnalyzer:
             else:
 
                 publicacion["Engagement"] = 0.0
-
         # --------------------------------------------------
-        # ORDENAR POR IMPRESIONES
+        # TOP 5
         # --------------------------------------------------
 
         top_5 = sorted(
@@ -244,15 +243,220 @@ class LinkedInAnalyzer:
             reverse=True
         )[:5]
 
+        # --------------------------------------------------
+        # BOTTOM 5
+        # --------------------------------------------------
+
         bottom_5 = sorted(
             publicaciones_validas,
             key=lambda p: p["Impresiones"]
         )[:5]
 
+        # --------------------------------------------------
+        # TOP 5 POR ENGAGEMENT
+        # --------------------------------------------------
+
+        top_engagement = sorted(
+            publicaciones_validas,
+            key=lambda p: p.get("Engagement", 0),
+            reverse=True
+        )[:5]
+
         return {
             "Top 5": top_5,
-            "Bottom 5": bottom_5
+            "Bottom 5": bottom_5,
+            "Top 5 Engagement": top_engagement
         }
+
+    # ======================================================
+    # ANÁLISIS DE RENDIMIENTO
+    # ======================================================
+
+    def analisis_rendimiento(self):
+
+        publicaciones = self.obtener_publicaciones()
+
+        if not publicaciones:
+            return {}
+
+        publicaciones_validas = [
+            p for p in publicaciones
+            if p.get("Impresiones", 0) > 0
+        ]
+
+        if not publicaciones_validas:
+            return {}
+
+        analisis = {}
+
+        # --------------------------------------------------
+        # IMPRESIONES
+        # --------------------------------------------------
+
+        impresiones = [
+            p["Impresiones"]
+            for p in publicaciones_validas
+        ]
+
+        media_impresiones = sum(impresiones) / len(impresiones)
+
+        # --------------------------------------------------
+        # MEDIANA DE IMPRESIONES
+        # --------------------------------------------------
+
+        impresiones_ordenadas = sorted(impresiones)
+
+        n = len(impresiones_ordenadas)
+
+        if n % 2 == 1:
+
+            mediana_impresiones = impresiones_ordenadas[n // 2]
+
+        else:
+
+            mediana_impresiones = (
+                impresiones_ordenadas[n // 2 - 1]
+                + impresiones_ordenadas[n // 2]
+            ) / 2
+
+        analisis["Mediana de impresiones"] = round(
+            mediana_impresiones,
+            1
+        )
+
+        # --------------------------------------------------
+        # PUBLICACIONES POR ENCIMA DE LA MEDIA
+        # --------------------------------------------------
+
+        publicaciones_sobre_media = [
+            p for p in publicaciones_validas
+            if p["Impresiones"] > media_impresiones
+        ]
+
+        analisis["Publicaciones sobre la media"] = len(
+            publicaciones_sobre_media
+        )
+
+        analisis["Porcentaje sobre la media"] = round(
+            (
+                len(publicaciones_sobre_media)
+                / len(publicaciones_validas)
+            ) * 100,
+            1
+        )
+
+        # --------------------------------------------------
+        # PUBLICACIONES POR DEBAJO DE LA MEDIA
+        # --------------------------------------------------
+
+        publicaciones_bajo_media = [
+            p for p in publicaciones_validas
+            if p["Impresiones"] < media_impresiones
+        ]
+
+        analisis["Publicaciones bajo la media"] = len(
+            publicaciones_bajo_media
+        )
+
+        analisis["Porcentaje bajo la media"] = round(
+            (
+                len(publicaciones_bajo_media)
+                / len(publicaciones_validas)
+            ) * 100,
+            1
+        )
+
+        # --------------------------------------------------
+        # MEJOR ENGAGEMENT
+        # --------------------------------------------------
+
+        publicaciones_con_engagement = [
+            p for p in publicaciones_validas
+            if "Engagement" in p
+        ]
+
+        if publicaciones_con_engagement:
+
+            mejor_engagement = max(
+                publicaciones_con_engagement,
+                key=lambda p: p["Engagement"]
+            )
+
+            analisis["Mejor engagement"] = (
+                mejor_engagement["Engagement"]
+            )
+
+            analisis["Impresiones mejor engagement"] = (
+                mejor_engagement["Impresiones"]
+            )
+
+            analisis["Interacciones mejor engagement"] = (
+                mejor_engagement.get("Interacciones", 0)
+            )
+
+            analisis["Fecha mejor engagement"] = (
+                mejor_engagement.get("Fecha", "N/D")
+            )
+
+        # --------------------------------------------------
+        # PUBLICACIÓN CON MAYOR ALCANCE
+        # --------------------------------------------------
+
+        mejor_alcance = max(
+            publicaciones_validas,
+            key=lambda p: p["Impresiones"]
+        )
+
+        analisis["Mayor alcance"] = (
+            mejor_alcance["Impresiones"]
+        )
+
+        analisis["Interacciones mayor alcance"] = (
+            mejor_alcance.get("Interacciones", 0)
+        )
+
+        impresiones_mejor = mejor_alcance.get("Impresiones", 0)
+        interacciones_mejor = mejor_alcance.get("Interacciones", 0)
+
+        if impresiones_mejor > 0:
+
+            analisis["Engagement mayor alcance"] = round(
+                (interacciones_mejor / impresiones_mejor) * 100,
+                2
+            )
+
+        else:
+
+            analisis["Engagement mayor alcance"] = 0.0
+
+        analisis["Fecha mayor alcance"] = (
+            mejor_alcance.get("Fecha", "N/D")
+        )
+
+        # --------------------------------------------------
+        # DIFERENCIA ENTRE MEDIA Y MEDIANA
+        # --------------------------------------------------
+
+        media = metricas.get("Impresiones medias", 0)
+        mediana = metricas.get("Mediana de impresiones", 0)
+
+        analisis["Diferencia media-mediana"] = round(
+            media - mediana,
+            1
+        )
+
+        if mediana > 0:
+
+            analisis["Ratio media/mediana"] = round(
+                media / mediana,
+                2
+            )
+
+        else:
+
+            analisis["Ratio media/mediana"] = 0
+
+        return analisis
 
     # ======================================================
     # MÉTRICAS
@@ -552,9 +756,35 @@ class LinkedInAnalyzer:
         texto.append("PUBLICACIONES DESTACADAS")
         texto.append("")
 
-        # --------------------------------------------------
+        # ======================================================
+        # ANÁLISIS DE RENDIMIENTO
+        # ======================================================
+
+        def analisis_rendimiento(self):
+
+            metricas = self.metricas()
+            destacadas = self.publicaciones_destacadas()
+
+            analisis = {}
+
+            # --------------------------------------------------
+            # MÉTRICAS GENERALES
+            # --------------------------------------------------
+
+            analisis["metricas"] = metricas
+
+            # --------------------------------------------------
+            # PUBLICACIONES DESTACADAS
+            # --------------------------------------------------
+
+            analisis["top_5"] = destacadas["Top 5"]
+            analisis["bottom_5"] = destacadas["Bottom 5"]
+
+            return analisis
+
+        # ==================================================
         # TOP 5
-        # --------------------------------------------------
+        # ==================================================
 
         texto.append("TOP 5 PUBLICACIONES POR IMPRESIONES")
 
@@ -572,9 +802,9 @@ class LinkedInAnalyzer:
                 f"URL: {publicacion.get('URL', 'N/D')}"
             )
 
-        # --------------------------------------------------
+        # ==================================================
         # BOTTOM 5
-        # --------------------------------------------------
+        # ==================================================
 
         texto.append("")
         texto.append("BOTTOM 5 PUBLICACIONES POR IMPRESIONES")
@@ -592,5 +822,25 @@ class LinkedInAnalyzer:
                 f"Engagement: {publicacion.get('Engagement', 0)}% | "
                 f"URL: {publicacion.get('URL', 'N/D')}"
             )
+        # ==================================================
+        # TOP 5 POR ENGAGEMENT
+        # ==================================================
 
+        texto.append("")
+        texto.append("TOP 5 PUBLICACIONES POR ENGAGEMENT")
+        texto.append("")
+
+        for posicion, publicacion in enumerate(
+            destacadas["Top 5 Engagement"],
+            start=1
+        ):
+
+            texto.append(
+                f"{posicion}. "
+                f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
+                f"Impresiones: {publicacion.get('Impresiones', 0)} | "
+                f"Interacciones: {publicacion.get('Interacciones', 0)} | "
+                f"Engagement: {publicacion.get('Engagement', 0)}% | "
+                f"URL: {publicacion.get('URL', 'N/D')}"
+            )
         return "\n".join(texto)

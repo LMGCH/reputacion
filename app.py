@@ -99,7 +99,15 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                     destacadas = analizador.publicaciones_destacadas()
 
-                  
+                    st.write("TOP 5:", destacadas["Top 5"])
+                    st.write("BOTTOM 5:", destacadas["Bottom 5"])
+                    st.write("TOP 5 ENGAGEMENT:", destacadas["Top 5 Engagement"])
+                    st.write("MÉTRICAS PYTHON:", analizador.metricas())
+                    st.write(
+                        "ANÁLISIS DE RENDIMIENTO:",
+                        analizador.analisis_rendimiento()
+                    )
+
                     analytics_text = analizador.resumen_para_ia()
 
                     st.subheader("Resumen procesado por Python")
@@ -160,17 +168,28 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 )
                 
                 html_content = response.choices[0].message.content
+
                 st.write("Respuesta de OpenAI:")
                 st.code(html_content)
-                
-                # Renderizado visual directo en la pantalla del usuario en formato web premium
+
+                # --------------------------------------------------
+                # VISTA PREVIA DEL INFORME
+                # --------------------------------------------------
+
                 st.success("¡Auditoría corporativa ejecutada con éxito!")
+
                 st.markdown("### Vista Previa del Informe Ejecutivo")
-                st.components.v1.html(html_content, height=600, scrolling=True)
-            except Exception as e:
-                st.warning(f"No se pudo mostrar la vista previa: {e}")
-                
-                # --- CONVERSIÓN PDF ---
+
+                st.components.v1.html(
+                    html_content,
+                    height=600,
+                    scrolling=True
+                )
+
+                # --------------------------------------------------
+                # CONVERSIÓN PDF
+                # --------------------------------------------------
+
                 pdf_buffer = io.BytesIO()
 
                 resultado = pisa.CreatePDF(
@@ -179,15 +198,24 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 )
 
                 if resultado.err:
-                    st.error("No se ha podido generar el PDF.")
+
+                    st.error(
+                        "No se ha podido generar el PDF."
+                    )
+
                 else:
+
                     pdf_buffer.seek(0)
 
                     st.download_button(
                         label="📥 Descargar Auditoría Estratégica en PDF Profesional",
                         data=pdf_buffer,
                         file_name="Auditoria_LinkedIn_Premium.pdf",
-                        mime="application/pdf"
+                        mime="application/pdf",
+                        key="descargar_auditoria_pdf"
+                    )
+            except Exception as e:
+
+                st.error(
+                    f"Error crítico en el motor de análisis: {e}"
                 )
-            except Exception as e: 
-                st.error(f"Error crítico en el motor de análisis: {e}")
