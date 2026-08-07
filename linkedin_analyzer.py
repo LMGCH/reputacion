@@ -36,7 +36,8 @@ class LinkedInAnalyzer:
 
         fechas = pd.to_datetime(
             self.df[columna],
-            errors="coerce"
+            errors="coerce",
+            dayfirst=True
         ).dropna()
 
         if fechas.empty:
@@ -167,15 +168,107 @@ class LinkedInAnalyzer:
                     1
                 )
 
-                # Publicaciones por encima de la media
                 estadisticas["Publicaciones por encima de la media"] = int(
                     (serie_impresiones > serie_impresiones.mean()).sum()
                 )
 
-                # Publicaciones por debajo de la media
                 estadisticas["Publicaciones por debajo de la media"] = int(
                     (serie_impresiones < serie_impresiones.mean()).sum()
                 )
+
+        # --------------------------------------------------
+        # FRECUENCIA DE PUBLICACIÓN
+        # --------------------------------------------------
+
+        posibles_fechas = [
+            "Fecha",
+            "Fecha de publicación",
+            "Fecha de creación",
+            "Fecha de publicación del contenido",
+            "Date",
+            "Published date",
+            "Publication date",
+            "Publish date",
+            "Created date",
+            "Creation date"
+        ]
+
+        columna_fecha = self.buscar_columna(posibles_fechas)
+
+        if columna_fecha:
+
+            fechas = pd.to_datetime(
+                self.df[columna_fecha],
+                errors="coerce",
+                dayfirst=True
+            ).dropna().sort_values()
+
+            if not fechas.empty:
+
+                fecha_inicio = fechas.min()
+                fecha_fin = fechas.max()
+
+                dias_periodo = (
+                    fecha_fin - fecha_inicio
+                ).days
+
+                # Evitamos divisiones por cero si todas
+                # las publicaciones tienen la misma fecha.
+                dias_calculo = max(1, dias_periodo)
+
+                semanas_periodo = max(
+                    1,
+                    dias_calculo / 7
+                )
+
+                meses_periodo = max(
+                    1,
+                    dias_calculo / 30.44
+                )
+
+                estadisticas["Días del periodo analizado"] = int(
+                    dias_periodo
+                )
+
+                estadisticas["Semanas del periodo analizado"] = round(
+                    semanas_periodo,
+                    1
+                )
+
+                estadisticas["Meses del periodo analizado"] = round(
+                    meses_periodo,
+                    1
+                )
+
+                estadisticas["Publicaciones por semana"] = round(
+                    len(fechas) / semanas_periodo,
+                    2
+                )
+
+                estadisticas["Publicaciones por mes"] = round(
+                    len(fechas) / meses_periodo,
+                    2
+                )
+
+                # --------------------------------------------------
+                # INTERVALO MEDIO ENTRE PUBLICACIONES
+                # --------------------------------------------------
+
+                if len(fechas) > 1:
+
+                    diferencias = fechas.diff().dropna()
+
+                    intervalo_medio = (
+                        diferencias.dt.total_seconds().mean()
+                        / 86400
+                    )
+
+                    estadisticas[
+                        "Intervalo medio entre publicaciones (días)"
+                    ] = round(
+                        intervalo_medio,
+                        2
+                    )
 
         # --------------------------------------------------
         # REACCIONES
@@ -222,7 +315,7 @@ class LinkedInAnalyzer:
                 serie.sum()
             )
 
-        return estadisticas
+        return estadisticas    
     
 
 
