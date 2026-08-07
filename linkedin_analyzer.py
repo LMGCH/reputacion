@@ -199,6 +199,25 @@ class LinkedInAnalyzer:
 
         publicaciones = self.obtener_publicaciones()
 
+        # Asegurar que todas las publicaciones tienen Engagement
+        for publicacion in publicaciones:
+
+            impresiones = publicacion.get("Impresiones", 0)
+            interacciones = publicacion.get("Interacciones", 0)
+
+            if impresiones > 0:
+
+                publicacion["Engagement"] = round(
+                    (interacciones / impresiones) * 100,
+                    2
+                )
+
+            else:
+
+                publicacion["Engagement"] = 0.0
+
+          
+
         if not publicaciones:
             return {
                 "Top 5": [],
@@ -210,29 +229,6 @@ class LinkedInAnalyzer:
             if "Impresiones" in p
         ]
 
-        # --------------------------------------------------
-        # CALCULAR ENGAGEMENT
-        # --------------------------------------------------
-
-        for publicacion in publicaciones_validas:
-
-            impresiones = publicacion.get("Impresiones", 0)
-            interacciones = publicacion.get("Interacciones", 0)
-
-            if impresiones > 0:
-
-                engagement = (
-                    interacciones / impresiones
-                ) * 100
-
-                publicacion["Engagement"] = round(
-                    engagement,
-                    2
-                )
-
-            else:
-
-                publicacion["Engagement"] = 0.0
         # --------------------------------------------------
         # TOP 5
         # --------------------------------------------------
@@ -324,6 +320,7 @@ class LinkedInAnalyzer:
             1
         )
 
+
         # --------------------------------------------------
         # PUBLICACIONES POR ENCIMA DE LA MEDIA
         # --------------------------------------------------
@@ -366,28 +363,39 @@ class LinkedInAnalyzer:
             1
         )
 
+
         # --------------------------------------------------
         # MEJOR ENGAGEMENT
         # --------------------------------------------------
 
-        publicaciones_con_engagement = [
-            p for p in publicaciones_validas
-            if "Engagement" in p
-        ]
+        mejor_engagement = None
+        mejor_valor_engagement = 0.0
 
-        if publicaciones_con_engagement:
+        for publicacion in publicaciones_validas:
 
-            mejor_engagement = max(
-                publicaciones_con_engagement,
-                key=lambda p: p["Engagement"]
-            )
+            impresiones = publicacion.get("Impresiones", 0)
+            interacciones = publicacion.get("Interacciones", 0)
+
+            if impresiones > 0:
+
+                engagement = round(
+                    (interacciones / impresiones) * 100,
+                    2
+                )
+
+                if engagement > mejor_valor_engagement:
+
+                    mejor_valor_engagement = engagement
+                    mejor_engagement = publicacion
+
+        if mejor_engagement:
 
             analisis["Mejor engagement"] = (
-                mejor_engagement["Engagement"]
+                mejor_valor_engagement
             )
 
             analisis["Impresiones mejor engagement"] = (
-                mejor_engagement["Impresiones"]
+                mejor_engagement.get("Impresiones", 0)
             )
 
             analisis["Interacciones mejor engagement"] = (
@@ -396,6 +404,10 @@ class LinkedInAnalyzer:
 
             analisis["Fecha mejor engagement"] = (
                 mejor_engagement.get("Fecha", "N/D")
+            )
+
+            analisis["URL mejor engagement"] = (
+                mejor_engagement.get("URL", "N/D")
             )
 
         # --------------------------------------------------
@@ -437,18 +449,15 @@ class LinkedInAnalyzer:
         # DIFERENCIA ENTRE MEDIA Y MEDIANA
         # --------------------------------------------------
 
-        media = metricas.get("Impresiones medias", 0)
-        mediana = metricas.get("Mediana de impresiones", 0)
-
         analisis["Diferencia media-mediana"] = round(
-            media - mediana,
+            media_impresiones - mediana_impresiones,
             1
         )
 
-        if mediana > 0:
+        if mediana_impresiones > 0:
 
             analisis["Ratio media/mediana"] = round(
-                media / mediana,
+                media_impresiones / mediana_impresiones,
                 2
             )
 
@@ -712,6 +721,106 @@ class LinkedInAnalyzer:
 
         return estadisticas    
     
+    # ======================================================
+    # NIVEL DE MADUREZ DEL PERFIL
+    # ======================================================
+
+    def nivel_madurez(self):
+
+        publicaciones = self.obtener_publicaciones()
+
+        if not publicaciones:
+            return {
+                "actividad": "Inicial",
+                "traccion": "Sin datos suficientes",
+                "madurez_estrategica": "Inicial"
+            }
+
+        numero_publicaciones = len(publicaciones)
+
+        publicaciones_validas = [
+            p for p in publicaciones
+            if p.get("Impresiones", 0) > 0
+        ]
+
+        if not publicaciones_validas:
+            return {
+                "actividad": "Inicial",
+                "traccion": "Sin datos suficientes",
+                "madurez_estrategica": "Inicial"
+            }
+
+        # --------------------------------------------------
+        # ACTIVIDAD
+        # --------------------------------------------------
+
+        if numero_publicaciones < 15:
+            actividad = "Inicial"
+
+        elif numero_publicaciones < 50:
+            actividad = "En desarrollo"
+
+        else:
+            actividad = "Consolidada"
+
+        # --------------------------------------------------
+        # TRACCIÓN
+        # --------------------------------------------------
+
+        analisis = self.analisis_rendimiento()
+
+        mayor_alcance = analisis.get(
+            "Mayor alcance",
+            0
+        )
+
+        publicaciones_sobre_media = analisis.get(
+            "Publicaciones sobre la media",
+            0
+        )
+
+        porcentaje_sobre_media = analisis.get(
+            "Porcentaje sobre la media",
+            0
+        )
+
+        if mayor_alcance == 0:
+            traccion = "Sin datos suficientes"
+
+        elif porcentaje_sobre_media < 20:
+            traccion = "Inicial con picos de alcance"
+
+        elif porcentaje_sobre_media < 40:
+            traccion = "En desarrollo"
+
+        else:
+            traccion = "Consolidada"
+
+        # --------------------------------------------------
+        # MADUREZ ESTRATÉGICA
+        # --------------------------------------------------
+
+        # Importante:
+        # No confundimos cantidad de publicaciones
+        # con experiencia estratégica en LinkedIn.
+
+        if numero_publicaciones < 15:
+
+            madurez_estrategica = "Inicial"
+
+        elif numero_publicaciones < 50:
+
+            madurez_estrategica = "Inicial"
+
+        else:
+
+            madurez_estrategica = "En desarrollo"
+
+        return {
+            "actividad": actividad,
+            "traccion": traccion,
+            "madurez_estrategica": madurez_estrategica
+        }
 
     # ======================================================
     # RESUMEN PARA IA
@@ -720,10 +829,27 @@ class LinkedInAnalyzer:
     def resumen_para_ia(self):
 
         resumen = self.metricas()
+        madurez = self.nivel_madurez()
 
         texto = []
 
         texto.append("RESUMEN DEL HISTÓRICO DE LINKEDIN")
+
+        # --------------------------------------------------
+        # NIVEL DE MADUREZ DEL PERFIL
+        # --------------------------------------------------
+
+        texto.append("")
+        texto.append("NIVEL DE MADUREZ DEL PERFIL")
+        texto.append(
+            f"Actividad: {madurez.get('actividad', 'N/D')}"
+        )
+        texto.append(
+            f"Tracción: {madurez.get('traccion', 'N/D')}"
+        )
+        texto.append(
+            f"Madurez estratégica: {madurez.get('madurez_estrategica', 'N/D')}"
+        )
 
         # --------------------------------------------------
         # PERIODO
@@ -756,31 +882,6 @@ class LinkedInAnalyzer:
         texto.append("PUBLICACIONES DESTACADAS")
         texto.append("")
 
-        # ======================================================
-        # ANÁLISIS DE RENDIMIENTO
-        # ======================================================
-
-        def analisis_rendimiento(self):
-
-            metricas = self.metricas()
-            destacadas = self.publicaciones_destacadas()
-
-            analisis = {}
-
-            # --------------------------------------------------
-            # MÉTRICAS GENERALES
-            # --------------------------------------------------
-
-            analisis["metricas"] = metricas
-
-            # --------------------------------------------------
-            # PUBLICACIONES DESTACADAS
-            # --------------------------------------------------
-
-            analisis["top_5"] = destacadas["Top 5"]
-            analisis["bottom_5"] = destacadas["Bottom 5"]
-
-            return analisis
 
         # ==================================================
         # TOP 5

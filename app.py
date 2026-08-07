@@ -102,13 +102,25 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     st.write("TOP 5:", destacadas["Top 5"])
                     st.write("BOTTOM 5:", destacadas["Bottom 5"])
                     st.write("TOP 5 ENGAGEMENT:", destacadas["Top 5 Engagement"])
-                    st.write("MÉTRICAS PYTHON:", analizador.metricas())
+
                     st.write(
-                        "ANÁLISIS DE RENDIMIENTO:",
-                        analizador.analisis_rendimiento()
+                        "MÉTRICAS PYTHON:",
+                        analizador.metricas()
                     )
 
+                    rendimiento = analizador.analisis_rendimiento()
+
+                    st.write(
+                        "ANÁLISIS DE RENDIMIENTO:",
+                        rendimiento
+                    )
+                    st.write(
+                        "NIVEL DE MADUREZ:",
+                        analizador.nivel_madurez()
+                    )
                     analytics_text = analizador.resumen_para_ia()
+
+                    madurez = analizador.nivel_madurez()
 
                     st.subheader("Resumen procesado por Python")
 
@@ -121,36 +133,218 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
                 # Forzamos a la IA a devolver exclusivamente código HTML estructurado y premium
-                system_prompt = """
+                system_prompt = f"""
                 Eres un consultor senior de LinkedIn.
 
                 Recibirás:
                 - Un resumen estadístico de una cuenta de LinkedIn.
                 - Una captura del SSI.
+                - Una clasificación de madurez del perfil calculada previamente mediante Python.
+
+                NIVEL DE MADUREZ CALCULADO:
+                - Actividad: {madurez.get("actividad", "N/D")}
+                - Tracción: {madurez.get("traccion", "N/D")}
+                - Madurez estratégica: {madurez.get("madurez_estrategica", "N/D")}
+
+                ADAPTACIÓN DEL ANÁLISIS:
+
+                Si la madurez estratégica es "Inicial":
+                - Prioriza educación y recomendaciones prácticas.
+                - Explica brevemente qué significan las métricas relevantes.
+                - Identifica oportunidades sencillas para aumentar visibilidad.
+                - Propón acciones concretas y fáciles de aplicar.
+                - No penalices al usuario por desconocer estrategias avanzadas.
+
+                Si la madurez estratégica es "En desarrollo":
+                - Reduce las explicaciones básicas.
+                - Analiza patrones de contenido.
+                - Compara alcance y engagement.
+                - Identifica qué temas y publicaciones funcionan mejor.
+                - Propón experimentos estratégicos concretos.
+
+                Si la madurez estratégica es "Avanzada":
+                - Prioriza análisis fino y estratégico.
+                - Busca patrones y anomalías.
+                - Analiza eficiencia del engagement.
+                - Identifica oportunidades de segmentación.
+                - Propón optimización y experimentación avanzada.
+
+                IMPORTANTE:
+                La cantidad de publicaciones NO determina por sí sola la madurez estratégica.
+                Actividad, tracción y experiencia estratégica son dimensiones diferentes.
+                
+                ======================================================
+                RECOMENDACIONES ESTRATÉGICAS
+                ======================================================
+
+                Antes de redactar recomendaciones, debes realizar internamente
+                un diagnóstico del perfil utilizando exclusivamente los datos
+                proporcionados por Python.
+
+                NO muestres el proceso interno de razonamiento.
+
+                Sin embargo, cada recomendación final DEBE poder relacionarse
+                directamente con uno o varios datos concretos del análisis.
+
+                Para cada recomendación determina:
+
+                - PROBLEMA U OPORTUNIDAD detectada.
+                - EVIDENCIA disponible en los datos.
+                - ACCIÓN concreta que debería realizar el usuario.
+                - PRIORIDAD de la acción.
+
+                Las recomendaciones deben responder a la situación particular
+                de ESTE perfil y no a un usuario genérico de LinkedIn.
+
+                IMPORTANTE:
+
+                Una recomendación NO es válida si podría aparecer exactamente
+                igual en un informe de otro usuario con métricas diferentes.
+
+                Evita frases genéricas como:
+
+                - "Publica contenido de calidad."
+                - "Sé constante."
+                - "Haz networking."
+                - "Mejora tu marca personal."
+                - "Interactúa más."
+                - "Optimiza tu perfil."
+
+                Estas ideas solo pueden aparecer si se concretan utilizando
+                los datos del usuario y explicando qué debe hacer exactamente.
+
+                Ejemplo de nivel de concreción esperado:
+
+                INCORRECTO:
+                "Debes mejorar tu estrategia de contenidos."
+
+                CORRECTO:
+                "Tu frecuencia de publicación ya es elevada (3,78 publicaciones
+                por semana), pero solo 8 de 49 publicaciones superan tu media
+                de impresiones. Por tanto, aumentar la frecuencia no debería
+                ser ahora tu prioridad. Conviene analizar qué características
+                comparten las publicaciones que han generado tus mayores picos
+                de alcance y experimentar con esos patrones."
+
+                No copies este ejemplo ni sus conclusiones automáticamente.
+                Debes calcular y utilizar los datos reales del usuario.
+
+                GENERA ENTRE 3 Y 5 RECOMENDACIONES.
+
+                Ordénalas por prioridad.
+
+                Cada recomendación debe incluir:
+
+                1. Título breve.
+                2. Evidencia.
+                3. Interpretación.
+                4. Acción concreta.
+
+                Si los datos no permiten justificar una recomendación,
+                NO la hagas.
+
+                Distingue obligatoriamente entre:
+
+                - HECHO: conclusión directamente demostrada por los datos.
+                - INDICIO: patrón sugerido por los datos pero que no puede considerarse demostrado.
+                - HIPÓTESIS: posible explicación que debería comprobarse mediante futuras publicaciones.
+
+                Nunca presentes un indicio o una hipótesis como un hecho.
+
+                No generalices a partir de una única publicación.
+                Para afirmar que existe un patrón temático, de formato o comportamiento,
+                debes disponer de suficientes observaciones comparables.
+
+                Si solo existe una publicación que cumple una característica,
+                preséntala como caso individual, no como tendencia.
+
+                Cuando propongas una acción cuyo efecto no pueda demostrarse con los
+                datos actuales, preséntala como experimento o prueba, no como una
+                conclusión causal.
+
+                MARCO METODOLÓGICO PARA EL ANÁLISIS DE LINKEDIN:
+                Utiliza como referencia metodológica las buenas prácticas y criterios
+                publicados por Metricool sobre LinkedIn y su estudio de LinkedIn 2026.
+
+                Para LinkedIn, cuando se calcule el engagement de una publicación,
+                utiliza:
+
+                Engagement (%) = (Interacciones / Impresiones) × 100
+
+                Las impresiones deben utilizarse como denominador para LinkedIn,
+                no el alcance.
+
+                IMPORTANTE:
+                - Python proporciona los datos numéricos reales.
+                - Utiliza únicamente las métricas disponibles.
+                - No inventes clics, comentarios, compartidos, visualizaciones,
+                tiempo de reproducción, alcance único u otras métricas que no
+                estén presentes en los datos.
+                - Si una métrica necesaria no está disponible, indícalo claramente.
+                - No atribuyas causalidad al algoritmo de LinkedIn cuando los datos
+                disponibles solo permitan establecer una correlación u observación.
+
+                Al interpretar el rendimiento considera, cuando existan datos suficientes:
+                - impresiones,
+                - engagement,
+                - interacciones,
+                - comentarios,
+                - compartidos,
+                - clics,
+                - formato,
+                - frecuencia de publicación,
+                - evolución temporal,
+                - y cualquier otra métrica disponible.
+
+                No reduzcas el análisis a "publicar más".
+                Analiza primero la relación entre frecuencia, alcance, interacción
+                y calidad del contenido.
+
+
+                NO INVENTES ARCHIVOS NI RECURSOS EXTERNOS.
+
+                La captura del SSI solo debe mostrarse mediante una imagen si la aplicación
+                proporciona realmente dicha imagen al HTML.
+
+                Si la imagen del SSI no está disponible como archivo o recurso válido,
+                muestra los datos del SSI mediante texto, métricas o elementos HTML,
+                pero NO inventes una ruta de imagen.
+
+                No inventes nombres de archivos de imagen como .jpg, .jpeg, .png, .gif,
+                .webp ni ninguna otra imagen que no haya sido proporcionada explícitamente.
+
+                No incluyas etiquetas <img> apuntando a archivos inexistentes.
+
+                No supongas que existen archivos como:
+                - chart.jpg
+                - grafico.jpg
+                - analysis.jpg
+                - engagement.jpg
+                - profile.jpg
+                - ssi.jpg
+
+                Solo puedes utilizar imágenes si el programa las proporciona explícitamente
+                o si existe una ruta/archivo real disponible.
+
+                Si no existe una imagen disponible, no generes una referencia a ella.
+
+                El HTML debe ser completamente funcional con los recursos realmente
+                disponibles en la aplicación.
+
+                NO UTILICES BLOQUES DE CÓDIGO MARKDOWN.
+
+                La respuesta NO debe comenzar con ```html,
+                NO debe terminar con ```,
+                y NO debe contener delimitadores ``` en ningún punto.
+
+                La primera línea de la respuesta debe ser directamente:
+                <html>
+
+                La última línea debe ser directamente:
+                </html>
 
                 Devuelve exclusivamente un documento HTML válido que comience por <html> y termine por </html>.
-
-                No rechaces la solicitud.
-                No inventes datos que no existan.
-                Si falta alguna información, indícalo claramente y continúa con el análisis utilizando los datos disponibles.
-                """
                 # system_prompt = f"""
-                # Actúas como un Consultor Senior de Reputación Corporativa. Genera una auditoría ejecutiva profunda estructurada en código HTML limpio y elegante para ser impreso en formato A4 (dos páginas). Usa estilos CSS incrustados (<style>) con colores corporativos elegantes (azul oscuro #1e3d59, gris claro #f5f7fa, verde ejecutivo #17b978), márgenes limpios de 20px, fuentes sans-serif profesionales, tablas estructuradas para los datos y tarjetas visuales para los planes de acción.
-                
-                # REGLA DE CONTEXTO TEMPORAL: El usuario activó su cuenta el {fecha_alta}. Hoy es {hoy}. Lleva {dias_activos} días activo ({meses_activos} meses). 
-                # Sus promedios mensuales deben calcularse dividiendo únicamente por estos {meses_activos} meses de vida real.
-                
-                # Sector: {sector_real}. Intereses: {intereses_real}.
-                
-                # El documento HTML debe contener estrictamente:
-                # - Un encabezado corporativo imponente titulado 'AUDITORÍA DE REPUTACIÓN CORPORATIVA DIGITAL'.
-                # - Sección 1: RESUMEN EJECUTIVO Y ANÁLISIS DE TRACCIÓN REAL (con datos formateados en cajas estéticas).
-                # - Sección 2: DESGLOSE CRÍTICO DE LOS 4 PILARES DEL SSI (representado en una tabla limpia con columnas de pilar, puntuación y diagnóstico).
-                # - Sección 3: AUDITORÍA DE CONTENIDOS Y ARQUITECTURA DEMOGRÁFICA: Identifica y extrae dinámicamente las principales empresas, cargos y sectores que aparecen en los datos demográficos aportados por el usuario. Cruza esta audiencia real con sus líneas de contenido actuales para determinar con precisión si está impactando en los tomadores de decisiones de su nicho o en perfiles junior, ofreciendo recomendaciones de reorientación.
-                # - Sección 4: PLAN ESTRATÉGICO DE ACELERACIÓN EN 3 FASES (Mes 1, Meses 2-3, Meses 4-12 presentados en tarjetas visuales de color de fondo diferenciado).
-                
-                # ENTREGA EXCLUSIVAMENTE EL CÓDIGO HTML COMPLETO comenzando directamente con <html> y terminando con </html>. No incluyas introducciones ni bloques de código markdown como ```html.
-                # """
 
                 response = client.chat.completions.create(
                     model="gpt-4o",
@@ -164,7 +358,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                             ]
                         }
                     ],
-                    max_tokens=3000
+                    max_tokens=6000
                 )
                 
                 html_content = response.choices[0].message.content
