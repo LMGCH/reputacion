@@ -24,7 +24,7 @@ st.write("Transforma tus datos crudos en una auditoría de marca de alto impacto
 with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded=True):
     st.markdown("""
     ### 🛡️ Privacidad Absoluta y Costes de Operación
-    Esta aplicación funciona bajo una arquitectura de código abierto. Tus datos se procesan en tiempo real en la memoria del servidor y se transmiten mediante cifrado SSL directo a la API de OpenAI. Nada se almacena en servidores externos. Cada auditoría consume unos **0,03€** del saldo de tu OpenAI API Key.
+    Esta aplicación funciona bajo una arquitectura de código abierto. Tus datos se procesan en tiempo real en la memoria del servidor y se transmiten mediante cifrado SSL directo a la API de OpenAI. Nada se almacena en servidores externos. Cada auditoría consume unos **0,06€** del saldo de tu OpenAI API Key.
     
     ---
     
