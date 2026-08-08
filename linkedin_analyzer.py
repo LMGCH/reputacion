@@ -827,10 +827,8 @@ class LinkedInAnalyzer:
     # ======================================================
 
     def resumen_para_ia(self):
-
         resumen = self.metricas()
         madurez = self.nivel_madurez()
-
         texto = []
 
         texto.append("RESUMEN DEL HISTÓRICO DE LINKEDIN")
@@ -838,62 +836,40 @@ class LinkedInAnalyzer:
         # --------------------------------------------------
         # NIVEL DE MADUREZ DEL PERFIL
         # --------------------------------------------------
-
         texto.append("")
         texto.append("NIVEL DE MADUREZ DEL PERFIL")
-        texto.append(
-            f"Actividad: {madurez.get('actividad', 'N/D')}"
-        )
-        texto.append(
-            f"Tracción: {madurez.get('traccion', 'N/D')}"
-        )
-        texto.append(
-            f"Madurez estratégica: {madurez.get('madurez_estrategica', 'N/D')}"
-        )
+        texto.append(f"Actividad: {madurez.get('actividad', 'N/D')}")
+        texto.append(f"Tracción: {madurez.get('traccion', 'N/D')}")
+        texto.append(f"Madurez estratégica: {madurez.get('madurez_estrategica', 'N/D')}")
 
         # --------------------------------------------------
         # PERIODO
         # --------------------------------------------------
-
         periodo = self.obtener_periodo()
-
         if periodo:
             texto.append("")
-            texto.append(
-                f"Periodo analizado: {periodo[0]} - {periodo[1]}"
-            )
+            texto.append(f"Periodo analizado: {periodo[0]} - {periodo[1]}")
 
         # --------------------------------------------------
         # MÉTRICAS GENERALES
         # --------------------------------------------------
-
         texto.append("")
-
         for clave, valor in resumen.items():
             texto.append(f"{clave}: {valor}")
 
         # --------------------------------------------------
         # PUBLICACIONES DESTACADAS
         # --------------------------------------------------
-
         destacadas = self.publicaciones_destacadas()
-
         texto.append("")
         texto.append("PUBLICACIONES DESTACADAS")
         texto.append("")
 
-
         # ==================================================
         # TOP 5
         # ==================================================
-
         texto.append("TOP 5 PUBLICACIONES POR IMPRESIONES")
-
-        for posicion, publicacion in enumerate(
-            destacadas["Top 5"],
-            start=1
-        ):
-
+        for posicion, publicacion in enumerate(destacadas["Top 5"], start=1):
             texto.append(
                 f"{posicion}. "
                 f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
@@ -906,15 +882,9 @@ class LinkedInAnalyzer:
         # ==================================================
         # BOTTOM 5
         # ==================================================
-
         texto.append("")
         texto.append("BOTTOM 5 PUBLICACIONES POR IMPRESIONES")
-
-        for posicion, publicacion in enumerate(
-            destacadas["Bottom 5"],
-            start=1
-        ):
-
+        for posicion, publicacion in enumerate(destacadas["Bottom 5"], start=1):
             texto.append(
                 f"{posicion}. "
                 f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
@@ -923,19 +893,14 @@ class LinkedInAnalyzer:
                 f"Engagement: {publicacion.get('Engagement', 0)}% | "
                 f"URL: {publicacion.get('URL', 'N/D')}"
             )
+
         # ==================================================
         # TOP 5 POR ENGAGEMENT
         # ==================================================
-
         texto.append("")
         texto.append("TOP 5 PUBLICACIONES POR ENGAGEMENT")
         texto.append("")
-
-        for posicion, publicacion in enumerate(
-            destacadas["Top 5 Engagement"],
-            start=1
-        ):
-
+        for posicion, publicacion in enumerate(destacadas["Top 5 Engagement"], start=1):
             texto.append(
                 f"{posicion}. "
                 f"Fecha: {publicacion.get('Fecha', 'N/D')} | "
@@ -944,4 +909,38 @@ class LinkedInAnalyzer:
                 f"Engagement: {publicacion.get('Engagement', 0)}% | "
                 f"URL: {publicacion.get('URL', 'N/D')}"
             )
+
+        # CIERRE CORRECTO DEL MÉTODO RESUMEN
         return "\n".join(texto)
+
+    # ======================================================
+    # CONTEXTO ESTRATÉGICO DEL USUARIO (Método independiente)
+    # ======================================================
+
+    def contexto_estrategico(
+        self,
+        sector="",
+        intereses="",
+        objetivo="",
+        fecha_activacion=""
+    ):
+        texto_contexto = []
+
+        texto_contexto.append("CONTEXTO ESTRATÉGICO DECLARADO POR EL USUARIO")
+        texto_contexto.append("")
+
+        texto_contexto.append(f"Sector objetivo: {sector if sector else 'N/D'}")
+        texto_contexto.append(f"Intereses profesionales: {intereses if intereses else 'N/D'}")
+        texto_contexto.append(f"Objetivo profesional: {objetivo if objetivo else 'N/D'}")
+        texto_contexto.append(f"Fecha de activación estratégica: {fecha_activacion if fecha_activacion else 'N/D'}")
+
+        texto_contexto.append("")
+        texto_contexto.append(
+            "Este contexto debe utilizarse posteriormente para "
+            "delimitar la investigación web y evaluar la relevancia "
+            "del contenido respecto al campo profesional declarado."
+        )
+
+        return "\n".join(texto_contexto)
+
+
