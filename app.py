@@ -682,255 +682,13 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - Mantén exactamente estos nombres, orden y número de secciones.
                 - No añadas, elimines, combines ni dividas secciones principales.
                 - Si faltan datos, conserva la sección e indica la limitación.
-                - Personaliza mediante el análisis de los datos, no modificando la arquitectura.
+                - Personaliza mediante la aportaciones de python y el análisis de los datos, no modificando la arquitectura.
                 - Cada sección debe aportar una función analítica diferente; evita repetir
                 conclusiones ya desarrolladas.
                 - Las secciones forman una única pieza analítica y deben mantener coherencia
                 entre sí.
 
                 FLUJO ANALÍTICO:# ======================================================
-# BLOQUE 2 — CONTENIDO DE CADA SECCIÓN
-# ======================================================
-
-Cada sección tiene una función específica dentro del informe.
-
-No repitas mecánicamente información entre secciones.
-
-La información debe avanzar desde la descripción de los datos hasta
-el diagnóstico y la toma de decisiones.
-
-Las reglas detalladas de interpretación se encuentran en los BLOQUES 3–8.
-
-
-# ======================================================
-# 2.1 — RESUMEN EJECUTIVO
-# ======================================================
-
-Sintetiza el diagnóstico completo para permitir comprender rápidamente:
-
-- situación actual;
-- principal fortaleza;
-- principal limitación, cuando exista;
-- principal oportunidad;
-- principal incertidumbre;
-- prioridad estratégica.
-
-No enumeres todas las métricas ni introduzcas recomendaciones que todavía
-no hayan sido justificadas.
-
-
-# ======================================================
-# 2.2 — ESTADO ACTUAL DEL PERFIL
-# ======================================================
-
-Describe la situación general de la cuenta integrando:
-
-- actividad;
-- resultados observados;
-- tracción;
-- madurez estratégica, cuando Python la proporcione.
-
-Debe responder:
-
-"¿En qué situación se encuentra actualmente la cuenta?"
-
-Distingue actividad, resultado y eficacia estratégica.
-
-
-# ======================================================
-# 2.3 — RADIOGRAFÍA CUANTITATIVA
-# ======================================================
-
-Presenta las principales métricas del periodo analizado y explica qué
-muestran conjuntamente sobre el comportamiento de la cuenta.
-
-Utiliza únicamente las métricas disponibles y calculadas por Python.
-
-
-# ======================================================
-# 2.4 — DISTRIBUCIÓN DEL RENDIMIENTO
-# ======================================================
-
-Explica cómo se distribuyen los resultados entre las publicaciones.
-
-Analiza, cuando los datos lo permitan:
-
-- concentración;
-- dispersión;
-- comportamiento habitual;
-- valores extremos;
-- estabilidad;
-- resultados excepcionales.
-
-Puede utilizarse la comparación entre grupos, extremos y medidas centrales.
-
-
-# ======================================================
-# 2.5 — FRECUENCIA Y ACTIVIDAD
-# ======================================================
-
-Describe el patrón de actividad durante el periodo analizado utilizando,
-cuando estén disponibles:
-
-- publicaciones;
-- frecuencia semanal y mensual;
-- intervalo entre publicaciones;
-- duración del periodo;
-- resultados observados.
-
-No conviertas la frecuencia en una recomendación automática.
-
-
-# ======================================================
-# 2.6 — ANÁLISIS DEL ALCANCE
-# ======================================================
-
-Analiza el comportamiento de las impresiones.
-
-Explica:
-
-- comportamiento habitual;
-- valores centrales y extremos;
-- concentración;
-- publicaciones que destacan por exposición.
-
-No interpretes las impresiones automáticamente como calidad, relevancia
-o éxito estratégico.
-
-
-# ======================================================
-# 2.7 — ANÁLISIS DEL ENGAGEMENT
-# ======================================================
-
-Analiza la eficiencia relativa de interacción y su relación con:
-
-- impresiones;
-- interacciones absolutas;
-- publicaciones con mayor engagement.
-
-Distingue siempre eficiencia, volumen de interacción y alcance.
-
-
-# ======================================================
-# 2.8 — TOP 5 PUBLICACIONES POR IMPRESIONES
-# ======================================================
-
-Presenta las cinco publicaciones con mayor número de impresiones,
-conservando los datos proporcionados por Python:
-
-- posición;
-- fecha;
-- impresiones;
-- interacciones;
-- engagement;
-- URL.
-
-Explica qué representan dentro de la distribución del alcance.
-
-
-# ======================================================
-# 2.9 — BOTTOM 5 PUBLICACIONES POR IMPRESIONES
-# ======================================================
-
-Presenta las cinco publicaciones con menor número de impresiones,
-conservando los mismos datos disponibles.
-
-Explica qué representan dentro de la distribución del alcance.
-
-No las clasifiques automáticamente como publicaciones deficientes.
-
-
-# ======================================================
-# 2.10 — TOP 5 PUBLICACIONES POR ENGAGEMENT
-# ======================================================
-
-Presenta las cinco publicaciones con mayor engagement y sus métricas
-disponibles.
-
-Analiza conjuntamente eficiencia de interacción y volumen de exposición.
-
-
-# ======================================================
-# 2.11 — CRUCE ENTRE ALCANCE Y ENGAGEMENT
-# ======================================================
-
-Integra las dimensiones de alcance y eficiencia.
-
-Compara los rankings anteriores e identifica, cuando existan:
-
-- coincidencias;
-- diferencias;
-- separación entre exposición y eficiencia;
-- casos excepcionales.
-
-No inventes combinaciones que no estén presentes en los datos.
-
-
-# ======================================================
-# 2.12 — DIAGNÓSTICO ESTRATÉGICO
-# ======================================================
-
-Integra los hallazgos anteriores para responder:
-
-"¿Qué comportamiento está demostrando realmente esta cuenta?"
-
-Cuando exista evidencia suficiente, identifica:
-
-- fortalezas;
-- limitaciones;
-- oportunidades;
-- anomalías;
-- incertidumbres;
-- prioridad estratégica.
-
-No repitas mecánicamente las secciones anteriores.
-
-
-# ======================================================
-# 2.13 — RECOMENDACIONES PRIORITARIAS
-# ======================================================
-
-Convierte los hallazgos del diagnóstico en acciones concretas y
-priorizadas.
-
-Cada recomendación debe estar vinculada a un hallazgo concreto.
-
-Utiliza, cuando corresponda:
-
-- MANTENER;
-- OPTIMIZAR;
-- INVESTIGAR;
-- EXPERIMENTAR;
-- CORREGIR.
-
-No introduzcas consejos genéricos.
-
-
-# ======================================================
-# 2.14 — EXPERIMENTOS Y PRÓXIMOS PASOS
-# ======================================================
-
-Convierte las hipótesis relevantes en pruebas destinadas a reducir
-incertidumbre.
-
-Cada experimento debe responder a una pregunta concreta y permitir
-comparar resultados y tomar una decisión posterior.
-
-Si los datos no permiten diseñar un experimento sólido, declara la
-limitación en lugar de inventar variables.
-
-
-# ======================================================
-# REGLA DE INTEGRACIÓN
-# ======================================================
-
-El BLOQUE 2 define QUÉ debe contener cada sección.
-
-Los BLOQUES 3–8 definen CÓMO debe analizarse, diagnosticarse, recomendarse,
-experimentarse y verificarse ese contenido.
-
-No dupliques en este bloque las reglas detalladas de interpretación.
-
                 DATOS → DISTRIBUCIÓN → ALCANCE → ENGAGEMENT →
                 CRUCE DE MÉTRICAS → DIAGNÓSTICO → RECOMENDACIONES → EXPERIMENTOS
 
@@ -2676,39 +2434,475 @@ No dupliques en este bloque las reglas detalladas de interpretación.
 
 
                 # ======================================================
-                # MÓDULO 9 — GENERACIÓN DEL INFORME HTML
+                # MÓDULO 9 — GENERACIÓN DEL HTML FINAL
                 # ======================================================
 
-                [MÓDULO 9 — GENERACIÓN DEL INFORME HTML]
-                Objetivo: Transformar EXCLUSIVAMENTE el análisis auditado del Módulo 8 en HTML profesional para visualización y exportación a PDF. No realices nuevos análisis, no inventes métricas, contenido, ni modifiques el nivel de certeza.
 
-                REGLA ABSOLUTA DE SALIDA:
-                - Devuelve ÚNICAMENTE HTML válido. Primera línea: <html>, última línea: </html>.
-                - Prohibido incluir explicaciones, comentarios, Markdown o bloques de código (```) fuera o dentro del flujo.
+                ## 9.1 — FUNCIÓN Y FUENTE DE VERDAD
 
-                ESTRUCTURA OBLIGATORIA (Conservar el orden exacto de estas 14 secciones, sin añadir ni eliminar):
-                1. RESUMEN EJECUTIVO | 2. ESTADO ACTUAL DEL PERFIL | 3. RADIOGRAFÍA CUANTITATIVA | 4. DISTRIBUCIÓN DEL RENDIMIENTO | 5. FRECUENCIA Y ACTIVIDAD | 6. ANÁLISIS DEL ALCANCE | 7. ANÁLISIS DEL ENGAGEMENT | 8. TOP 5 PUBLICACIONES POR IMPRESIONES | 9. BOTTOM 5 PUBLICACIONES POR IMPRESIONES | 10. TOP 5 PUBLICACIONES POR ENGAGEMENT | 11. CRUCE ENTRE ALCANCE Y ENGAGEMENT | 12. DIAGNÓSTICO ESTRATÉGICO | 13. RECOMENDACIONES PRIORITARIAS | 14. EXPERIMENTOS Y PRÓXIMOS PASOS.
+                Este módulo recibe EXCLUSIVAMENTE el análisis auditado y validado por el Módulo 8.
 
-                DISEÑO Y SISTEMA VISUAL:
-                - Estilo editorial, limpio y jerárquico (evitar aspecto de app móvil o dashboard financiero).
-                - Todo el CSS embebido en <style> dentro del <head>. Documento 100% autónomo.
-                - PROHIBIDO usar frameworks (Tailwind, Bootstrap), CDN, fuentes, imágenes o JS externos.
-                - Paleta: Fondo claro, texto oscuro, azul corporativo principal y neutros secundarios. Sin degradados ni sombras excesivas.
-                - Tipografía Sans-Serif. H1 para título, H2 para secciones, H3 subsecciones. Mayúsculas solo en títulos y etiquetas.
-                - Tablas profesionales con cabeceras claras y cifras alineadas. Prohibido usar placeholders ("etc.", "más filas"). Muestra exactamente los datos auditados (ej. los Top/Bottom 5 completos si existen).
-                - Si el informe está marcado como BETA, incluye una etiqueta visual clara.
-                - Gráficos opcionales solo mediante HTML/CSS/SVG interno nativo.
-                - Preparado para impresión: Usa '@media print' para controlar márgenes y evitar que los títulos, filas de tablas o recomendaciones se corten entre páginas. Diseño responsive sin desbordamiento horizontal.
+                Su única función es transformar ese resultado en un informe HTML profesional, preparado para visualización y exportación a PDF.
 
-                PROCESAMIENTO DE DATOS Y COMPROBACIÓN FINAL:
-                - Presenta las dimensiones disponibles (Fortaleza, Debilidad, Oportunidad, etc.) en bloques visuales sutiles sin usar semáforos automáticos (Rojo=Malo, Verde=Bueno).
-                - Conserva para cada recomendación su: prioridad, hallazgo, evidencia, interpretación, acción y comprobación.
-                - Conserva para cada experimento su: hipótesis, pregunta, variable, modificación, referencia, métricas, duración, evaluación y decisión.
-                - Si hay URLs válidas, preséntalas exclusivamente como <a href="URL_REAL">Ver publicación</a>. No modifiques ni inventes enlaces.
-                - PROHIBIDO REINTERPRETAR: Mantén la literalidad analítica ("se observa", "podría estar relacionado", "hipótesis"). No alteres certezas.
+                Flujo:
 
-                Antes de responder, verifica internamente:
-                ¿Inicia con <html> y termina con </html>? ¿Están las 14 secciones en orden? ¿Están ausentes el markdown y los comentarios externos? ¿El CSS está integrado y no hay dependencias de internet? Procesa y genera el HTML directo.
+                MÓDULOS 0–7 → ANÁLISIS
+                MÓDULO 8 → AUDITORÍA
+                MÓDULO 9 → PRESENTACIÓN HTML
+
+                El Módulo 9 NO analiza, recalcula, corrige, interpreta, diagnostica ni genera nuevas recomendaciones, hipótesis o experimentos.
+
+                El contenido auditado por el Módulo 8 es la FUENTE DE VERDAD.
+
+                ---
+
+                ## 9.2 — INTEGRIDAD DEL CONTENIDO
+
+                NO inventar ni completar información ausente.
+
+                Esto incluye, entre otros:
+
+                * métricas o estadísticas;
+                * publicaciones, fechas, títulos o temas;
+                * URLs, hashtags o formatos;
+                * audiencia, imágenes o archivos;
+                * causas, conclusiones o recomendaciones;
+                * hipótesis o experimentos.
+
+                Si un dato no existe en el análisis auditado, simplemente no se muestra.
+
+                NO sustituir datos ausentes por estimaciones, placeholders, ejemplos o contenido inventado.
+
+                NO modificar URLs ni crear rutas de archivos inexistentes.
+
+                Conservar exactamente el nivel de certeza del Módulo 8:
+
+                "se observa" no puede convertirse en "demuestra".
+
+                "podría estar relacionado" no puede convertirse en "provoca".
+
+                "hipótesis" no puede convertirse en "conclusión".
+
+                El HTML no puede introducir causalidad ni interpretaciones nuevas.
+
+                ---
+
+                ## 9.3 — SALIDA HTML
+
+                La salida debe ser ÚNICAMENTE HTML.
+
+                Primera línea:
+
+                <html>
+
+                Última línea:
+
+                </html>
+
+                Estructura mínima obligatoria:
+
+                <html>
+                <head>
+                <meta charset="UTF-8">
+                <title>...</title>
+                <style>...</style>
+                </head>
+                <body>
+                ...
+                </body>
+                </html>
+
+                No incluir:
+
+                * Markdown;
+                * bloques ```html;
+                * explicaciones antes o después;
+                * comentarios fuera del documento.
+
+                El resultado se copiará directamente a la aplicación.
+
+                ---
+
+                ## 9.4 — ESTRUCTURA OBLIGATORIA
+
+                Conservar EXACTAMENTE estas 14 secciones, en este orden:
+
+                1. RESUMEN EJECUTIVO
+                2. ESTADO ACTUAL DEL PERFIL
+                3. RADIOGRAFÍA CUANTITATIVA
+                4. DISTRIBUCIÓN DEL RENDIMIENTO
+                5. FRECUENCIA Y ACTIVIDAD
+                6. ANÁLISIS DEL ALCANCE
+                7. ANÁLISIS DEL ENGAGEMENT
+                8. TOP 5 PUBLICACIONES POR IMPRESIONES
+                9. BOTTOM 5 PUBLICACIONES POR IMPRESIONES
+                10. TOP 5 PUBLICACIONES POR ENGAGEMENT
+                11. CRUCE ENTRE ALCANCE Y ENGAGEMENT
+                12. DIAGNÓSTICO ESTRATÉGICO
+                13. RECOMENDACIONES PRIORITARIAS
+                14. EXPERIMENTOS Y PRÓXIMOS PASOS
+
+                NO añadir, eliminar ni reordenar secciones principales.
+
+                ---
+
+                ## 9.5 — CABECERA
+
+                Crear una cabecera editorial profesional y diferenciada del contenido.
+
+                Mostrar, cuando estén disponibles:
+
+                * nombre del informe;
+                * usuario/cuenta analizada;
+                * periodo;
+                * fecha de generación;
+                * estado;
+                * versión.
+
+                Si el análisis indica estado BETA, mostrar visualmente "BETA".
+
+                NO inventar información ausente.
+
+                La cabecera debe ser discreta y no contener análisis estratégico extenso.
+
+                ---
+
+                ## 9.6 — DISEÑO EDITORIAL
+
+                El resultado debe parecer un INFORME PROFESIONAL DE AUDITORÍA Y ANALÍTICA, no un dashboard ni una página web.
+
+                Prioridades visuales:
+
+                LEGIBILIDAD → JERARQUÍA → COMPRENSIÓN → ESTÉTICA → DENSIDAD
+
+                Debe ser:
+
+                * profesional;
+                * elegante;
+                * limpio;
+                * jerárquico;
+                * fácil de escanear;
+                * apto para impresión/PDF;
+                * visualmente coherente.
+
+                Utilizar CSS para crear una composición editorial, no una sucesión de párrafos y tablas.
+
+                Debe existir una jerarquía clara entre:
+
+                CABECERA → SECCIONES → SUBTÍTULOS → MÉTRICAS → DATOS → EVIDENCIA → INTERPRETACIÓN → DIAGNÓSTICO → RECOMENDACIONES → EXPERIMENTOS.
+
+                Los títulos de las 14 secciones deben destacar visualmente.
+
+                ---
+
+                ## 9.7 — LENGUAJE VISUAL
+
+                Mantener un sistema visual único en todo el documento:
+
+                * tipografía sans-serif moderna;
+                * títulos claramente jerarquizados;
+                * texto legible;
+                * espacios verticales suficientes;
+                * márgenes coherentes;
+                * tablas consistentes;
+                * bloques visuales reutilizables.
+
+                Usar espacio en blanco. No saturar el documento.
+
+                Paleta sobria:
+
+                * azul oscuro para estructura y títulos;
+                * azul medio para destacados;
+                * gris oscuro para texto;
+                * gris claro para fondos secundarios;
+                * blanco como fondo principal;
+                * un color de acento moderado.
+
+                Los colores deben crear jerarquía, no decorar.
+
+                NO utilizar fondos saturados, degradados excesivos ni colores fluorescentes.
+
+                NO utilizar automáticamente rojo = malo o verde = bueno.
+
+                Una anomalía no implica necesariamente algo negativo y una oportunidad no implica necesariamente algo positivo.
+
+                ---
+
+                ## 9.8 — MÉTRICAS Y BLOQUES
+
+                Cuando existan varias métricas relevantes, pueden presentarse mediante bloques destacados.
+
+                Utilizar tarjetas solo cuando mejoren la comprensión. NO convertir todo el informe en tarjetas.
+
+                Los bloques pueden diferenciar:
+
+                * DATOS;
+                * EVIDENCIA;
+                * INTERPRETACIÓN;
+                * DIAGNÓSTICO;
+                * RECOMENDACIÓN;
+                * HIPÓTESIS;
+                * LIMITACIÓN;
+                * EXPERIMENTO.
+
+                La diferenciación debe realizarse mediante tipografía, espaciado, bordes, fondos y etiquetas.
+
+                No es obligatorio utilizar un color diferente para cada categoría.
+
+                ---
+
+                ## 9.9 — TABLAS
+
+                Utilizar tablas cuando faciliten la comparación.
+
+                Deben tener:
+
+                * encabezados diferenciados;
+                * alineación coherente;
+                * bordes discretos;
+                * separación visual entre filas;
+                * números correctamente alineados;
+                * tamaño legible en PDF.
+
+                Las tablas de publicaciones deben utilizar, cuando estén disponibles:
+
+                * posición;
+                * fecha;
+                * impresiones;
+                * interacciones;
+                * engagement;
+                * URL.
+
+                Mostrar todas las filas existentes.
+
+                NO utilizar:
+
+                "etc."
+
+                "más publicaciones"
+
+                "Additional rows as per data"
+
+                ni ningún placeholder similar.
+
+                Las tablas de las secciones 8, 9 y 10 deben ir acompañadas de una breve interpretación basada exclusivamente en el análisis auditado.
+
+                ---
+
+                ## 9.10 — PUBLICACIONES TOP/BOTTOM
+
+                Las secciones 8, 9 y 10 deben tratarse como bloques analíticos relevantes.
+
+                Después de cada tabla, resumir brevemente los patrones que estén respaldados por el análisis.
+
+                Cuando exista evidencia suficiente, destacar:
+
+                * mayor alcance;
+                * mayor engagement;
+                * coincidencias entre rankings;
+                * diferencias entre alcance e interacción.
+
+                No añadir conclusiones que no estén presentes en el análisis auditado.
+
+                ---
+
+                ## 9.11 — DIAGNÓSTICO
+
+                La sección 12 debe tener una jerarquía visual superior a las secciones descriptivas.
+
+                Presentar, únicamente cuando existan en el análisis:
+
+                * FORTALEZAS;
+                * DEBILIDADES;
+                * OPORTUNIDADES;
+                * ANOMALÍAS;
+                * INCERTIDUMBRES;
+                * PRIORIDAD ESTRATÉGICA.
+
+                NO crear categorías vacías para completar el diseño.
+
+                El diagnóstico debe reflejar exactamente el contenido y nivel de certeza del Módulo 8.
+
+                ---
+
+                ## 9.12 — RECOMENDACIONES
+
+                La sección 13 debe ser claramente accionable y fácil de escanear.
+
+                Cuando la información esté disponible, presentar cada recomendación mediante:
+
+                PRIORIDAD
+                HALLAZGO
+                EVIDENCIA
+                INTERPRETACIÓN
+                ACCIÓN
+                CÓMO COMPROBARLA
+
+                No convertir las recomendaciones en párrafos innecesariamente largos.
+
+                No generar recomendaciones nuevas.
+
+                ---
+
+                ## 9.13 — EXPERIMENTOS
+
+                La sección 14 debe diferenciarse visualmente del diagnóstico y las recomendaciones.
+
+                Cuando existan experimentos auditados, presentar:
+
+                HIPÓTESIS
+                VARIABLE
+                CAMBIO
+                MÉTRICA
+                REFERENCIA
+                CRITERIO DE ÉXITO
+                DECISIÓN POSTERIOR
+
+                NO crear experimentos inexistentes.
+
+                ---
+
+                ## 9.14 — URLs, IMÁGENES Y GRÁFICOS
+
+                ### URLs
+
+                Solo utilizar URLs presentes en el análisis auditado.
+
+                Presentarlas como enlaces HTML reales:
+
+                <a href="URL_REAL">Ver publicación</a>
+
+                NO modificar ni inventar URLs.
+
+                NO utilizar Markdown dentro de href.
+
+                ### Imágenes
+
+                Solo utilizar <img> cuando la aplicación haya proporcionado realmente el recurso.
+
+                NO inventar nombres ni rutas de imágenes.
+
+                Si no existe una imagen, utilizar HTML/CSS cuando sea útil.
+
+                ### Gráficos
+
+                Solo crear gráficos con datos existentes en el análisis auditado.
+
+                Se permite utilizar:
+
+                * HTML;
+                * CSS;
+                * SVG interno.
+
+                No crear gráficos únicamente como decoración.
+
+                Prioridad:
+
+                PRECISIÓN → CLARIDAD → LEGIBILIDAD → COMPARACIÓN → ESTÉTICA
+
+                ---
+
+                ## 9.15 — AUTONOMÍA TÉCNICA
+
+                Todo el CSS debe estar dentro de <style>.
+
+                NO utilizar:
+
+                * Bootstrap;
+                * Tailwind;
+                * frameworks;
+                * CDN;
+                * hojas CSS externas;
+                * fuentes externas;
+                * librerías externas.
+
+                El documento debe funcionar de forma autónoma.
+
+                JavaScript no debe ser necesario para comprender ninguna información esencial.
+
+                No utilizar JavaScript externo ni depender de interactividad para mostrar contenido.
+
+                ---
+
+                ## 9.16 — PREPARACIÓN PARA PDF
+
+                El HTML debe estar preparado para impresión y PDF.
+
+                Evitar:
+
+                * desbordamiento horizontal;
+                * tablas ilegibles;
+                * texto demasiado pequeño;
+                * columnas innecesarias;
+                * elementos flotantes problemáticos.
+
+                Puede utilizarse @media print y reglas de salto de página cuando mejoren el resultado.
+
+                Evitar separar encabezados, tablas o bloques analíticos de forma que pierdan sentido.
+
+                ---
+
+                ## 9.17 — CONSISTENCIA
+
+                Todas las secciones deben compartir:
+
+                * tipografía;
+                * márgenes;
+                * jerarquía;
+                * paleta;
+                * estilos de tabla;
+                * bloques;
+                * lenguaje visual.
+
+                El documento debe parecer una única pieza editorial.
+
+                El diseño debe conservar la separación conceptual:
+
+                DATOS → EVIDENCIA → INTERPRETACIÓN → DIAGNÓSTICO → RECOMENDACIÓN → EXPERIMENTO
+
+                La presentación visual nunca puede alterar el nivel de certeza del análisis.
+
+                ---
+
+                ## 9.18 — COMPROBACIÓN FINAL
+
+                Antes de devolver el resultado, verificar internamente:
+
+                1. La salida comienza exactamente con <html>.
+                2. Termina exactamente con </html>.
+                3. Existe <head>, charset UTF-8, <title> y <style>.
+                4. Existe <body>.
+                5. No existe Markdown ni texto fuera del HTML.
+                6. CSS integrado y sin dependencias externas innecesarias.
+                7. Existen exactamente las 14 secciones y están en orden.
+                8. Las cifras coinciden con el análisis auditado.
+                9. Las URLs coinciden con el análisis auditado.
+                10. Las publicaciones TOP/BOTTOM contienen todos los registros disponibles.
+                11. No existen placeholders ni datos inventados.
+                12. No existen imágenes o archivos inventados.
+                13. Diagnóstico, recomendaciones y experimentos coinciden con el Módulo 8.
+                14. No se ha añadido interpretación ni causalidad nueva.
+                15. El documento es legible y adecuado para PDF.
+
+                ---
+
+                ## 9.19 — REGLA ABSOLUTA
+
+                DEVOLVER ÚNICAMENTE EL DOCUMENTO HTML.
+
+                Primera línea:
+
+                <html>
+
+                Última línea:
+
+                </html>
+
+                Sin explicaciones, Markdown, bloques de código ni contenido externo al HTML.
+
+                # ======================================================
+                # FIN DEL MÓDULO 9
+                # ====================================================== 
                 """
                 st.write("===== CONTROL DE TAMAÑO DEL PROMPT =====")
 
