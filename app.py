@@ -170,7 +170,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     excel = pd.ExcelFile(analytics_file)
 
                     st.write("Hojas encontradas:")
-
                     st.write(excel.sheet_names)
 
                     df = pd.read_excel(
@@ -178,7 +177,68 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                         sheet_name="PUBLICACIONES PRINCIPALES",
                         header=2
                     )
+
                     st.dataframe(df.head())
+
+                    # ======================================================
+                    # PROPIEDADES DEL EXCEL
+                    # ======================================================
+
+                    from openpyxl import load_workbook
+
+                    wb = load_workbook(analytics_file, read_only=True)
+
+                    props = wb.properties
+
+                    st.write("===== PROPIEDADES EXCEL =====")
+                    st.write("title:", props.title)
+                    st.write("subject:", props.subject)
+                    st.write("creator:", props.creator)
+                    st.write("description:", props.description)
+                    st.write("keywords:", props.keywords)
+
+                    wb.close()
+
+                    # ======================================================
+                    # IDENTIFICACIÓN DEL USUARIO
+                    # ======================================================
+
+                    import re
+
+                    excel_title = props.title or ""
+
+                    linkedin_name = excel_title
+
+                    # Eliminar prefijo generado por LinkedIn
+                    if linkedin_name.startswith("AnalisisConjunto_"):
+                        linkedin_name = linkedin_name[len("AnalisisConjunto_"):]
+
+                    # Eliminar extensión
+                    if linkedin_name.lower().endswith(".xlsx"):
+                        linkedin_name = linkedin_name[:-5]
+
+                    # Eliminar las dos fechas finales
+                    linkedin_name = re.sub(
+                        r"_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}$",
+                        "",
+                        linkedin_name
+                    )
+
+                    # Eliminar emojis e iconos del nombre
+                    linkedin_name = re.sub(
+                        r"[\U0001F000-\U0001FAFF"
+                        r"\U00002600-\U000027BF"
+                        r"\U0001F1E6-\U0001F1FF]+",
+                        "",
+                        linkedin_name
+                    )
+
+                    # Limpiar espacios sobrantes
+                    linkedin_name = re.sub(r"\s+", " ", linkedin_name).strip()
+
+                    st.write("===== USUARIO IDENTIFICADO =====")
+                    st.write(linkedin_name)
+
                     analizador = LinkedInAnalyzer(df)
 
                     destacadas = analizador.publicaciones_destacadas()
@@ -220,57 +280,63 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 st.subheader("Datos SSI extraídos")
                 st.code(ssi_text)
 
-                st.write("===== FECHA ALTA =====")
-                st.write(fecha_alta)
-
-                st.write("===== HOY =====")
-                st.write(hoy)
-
-                st.write("===== REPORT METADATA =====")
-                st.write(report_metadata)
-
-                st.write("===== REPORT GENERATED AT =====")
-                st.write(report_generated_at)
                 
                 sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
                 # ======================================================
-                # METADATOS DEL INFORME
+                # METADATOS OFICIALES DEL INFORME
                 # ======================================================
 
                 from datetime import datetime
 
+                # Fecha de generación
                 report_generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-                report_metadata = f"""
-                ======================================================
-                DATOS OFICIALES DE CABECERA DEL INFORME
-                ======================================================
+                # Fechas para presentación
+                fecha_alta_display = (
+                    fecha_alta.strftime("%d/%m/%Y")
+                    if hasattr(fecha_alta, "strftime")
+                    else str(fecha_alta)
+                )
 
-                Estos datos proceden de la aplicación y están destinados
-                EXCLUSIVAMENTE a identificar el informe generado.
+                hoy_display = (
+                    hoy.strftime("%d/%m/%Y")
+                    if hasattr(hoy, "strftime")
+                    else str(hoy)
+                )
 
-                NO deben ser interpretados ni modificados.
+                # Periodo REAL del análisis
+                analysis_period = f"{fecha_alta_display} — {hoy_display}"
 
-                USUARIO ANALIZADO:
-                {__name__}
+                # Estado del informe
+                report_status = "BETA · FASE PRELIMINAR"
 
-                PERIODO ANALIZADO:
-                {df}
+                # Metadatos oficiales
+                report_metadata = {
+                    "usuario": linkedin_name,
+                    "periodo": analysis_period,
+                    "fecha_inicio": fecha_alta_display,
+                    "fecha_fin": hoy_display,
+                    "fecha_generacion": report_generated_at,
+                    "estado": report_status
+                }
 
-                FECHA DE GENERACIÓN:
-                {report_generated_at}
+                # ======================================================
+                # PRUEBA DE METADATOS
+                # ======================================================
 
-                ESTADO DEL INFORME:
-                BETA · INFORME PRELIMINAR
+                st.write("===== METADATOS DEL INFORME =====")
+                st.write("USUARIO:", linkedin_name)
+                st.write("PERIODO:", analysis_period)
+                st.write("FECHA DE INICIO:", fecha_alta_display)
+                st.write("FECHA DE FIN:", hoy_display)
+                st.write("GENERADO:", report_generated_at)
+                st.write("ESTADO:", report_status)
 
-                ======================================================
-                FIN DE DATOS OFICIALES DE CABECERA
-                ======================================================
-                """
 
                 system_prompt = f"""
+
                 # ======================================================
                 # MÓDULO 0 — IDENTIDAD, ROL Y PRINCIPIOS DEL ANALISTA
                 # ======================================================
@@ -593,10 +659,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 # BLOQUE 1 — ARQUITECTURA DEL INFORME
                 # ======================================================
 
-                La arquitectura del informe es FIJA.
-
-                El análisis debe contener EXACTAMENTE las siguientes 14 secciones,
-                en este orden:
+                La arquitectura del informe es FIJA. Debe contener exactamente estas
+                14 secciones y en este orden:
 
                 1. RESUMEN EJECUTIVO
                 2. ESTADO ACTUAL DEL PERFIL
@@ -613,269 +677,396 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 13. RECOMENDACIONES PRIORITARIAS
                 14. EXPERIMENTOS Y PRÓXIMOS PASOS
 
-                ## REGLAS ESTRUCTURALES
+                REGLAS:
 
-                - No cambiar los nombres de las secciones.
-                - No cambiar su orden.
-                - No eliminar ninguna sección.
-                - No añadir nuevas secciones principales.
-                - No combinar dos secciones.
-                - No dividir una sección principal en varias.
+                - Mantén exactamente estos nombres, orden y número de secciones.
+                - No añadas, elimines, combines ni dividas secciones principales.
+                - Si faltan datos, conserva la sección e indica la limitación.
+                - Personaliza mediante el análisis de los datos, no modificando la arquitectura.
+                - Cada sección debe aportar una función analítica diferente; evita repetir
+                conclusiones ya desarrolladas.
+                - Las secciones forman una única pieza analítica y deben mantener coherencia
+                entre sí.
 
-                La personalización debe producirse mediante el contenido y el análisis
-                de los datos, no mediante cambios en la arquitectura.
+                FLUJO ANALÍTICO:# ======================================================
+# BLOQUE 2 — CONTENIDO DE CADA SECCIÓN
+# ======================================================
 
-                Si una sección no puede desarrollarse completamente por falta de datos,
-                debe conservarse e indicar la limitación correspondiente.
+Cada sección tiene una función específica dentro del informe.
 
-                La profundidad del análisis debe desarrollarse dentro de estas 14
-                secciones, sin crear secciones principales adicionales.
+No repitas mecánicamente información entre secciones.
 
-                ## PRINCIPIO DE FLUJO
+La información debe avanzar desde la descripción de los datos hasta
+el diagnóstico y la toma de decisiones.
 
-                Las secciones deben formar una progresión lógica:
+Las reglas detalladas de interpretación se encuentran en los BLOQUES 3–8.
 
-                DATOS
-                → DISTRIBUCIÓN
-                → ALCANCE
-                → ENGAGEMENT
-                → CRUCE DE MÉTRICAS
-                → DIAGNÓSTICO
-                → RECOMENDACIONES
-                → EXPERIMENTOS
 
-                No adelantes conclusiones estratégicas que correspondan a secciones
-                posteriores.
+# ======================================================
+# 2.1 — RESUMEN EJECUTIVO
+# ======================================================
 
-                Las recomendaciones deben aparecer después del diagnóstico.
+Sintetiza el diagnóstico completo para permitir comprender rápidamente:
 
-                Los experimentos deben aparecer después de las recomendaciones.
+- situación actual;
+- principal fortaleza;
+- principal limitación, cuando exista;
+- principal oportunidad;
+- principal incertidumbre;
+- prioridad estratégica.
 
-                ## PRINCIPIO DE NO REPETICIÓN
+No enumeres todas las métricas ni introduzcas recomendaciones que todavía
+no hayan sido justificadas.
 
-                Cada sección debe aportar una función diferente.
 
-                No repitas mecánicamente una conclusión ya desarrollada en una sección
-                anterior.
+# ======================================================
+# 2.2 — ESTADO ACTUAL DEL PERFIL
+# ======================================================
 
-                Cuando un hallazgo deba recuperarse posteriormente, debe utilizarse
-                para avanzar hacia una interpretación, diagnóstico o decisión,
-                no simplemente volver a describirse.
+Describe la situación general de la cuenta integrando:
 
-                La existencia de una misma evidencia en varias secciones no implica
-                que deba repetirse su explicación completa.
+- actividad;
+- resultados observados;
+- tracción;
+- madurez estratégica, cuando Python la proporcione.
 
-                ## PRINCIPIO DE INTEGRIDAD
+Debe responder:
 
-                Las 14 secciones constituyen una única pieza analítica.
+"¿En qué situación se encuentra actualmente la cuenta?"
 
-                No deben tratarse como informes independientes.
+Distingue actividad, resultado y eficacia estratégica.
 
-                Cada sección debe utilizar los resultados pertinentes de las anteriores
-                para construir progresivamente el diagnóstico final.
 
-                La última sección no debe introducir conclusiones que contradigan
-                las anteriores.
+# ======================================================
+# 2.3 — RADIOGRAFÍA CUANTITATIVA
+# ======================================================
 
+Presenta las principales métricas del periodo analizado y explica qué
+muestran conjuntamente sobre el comportamiento de la cuenta.
+
+Utiliza únicamente las métricas disponibles y calculadas por Python.
+
+
+# ======================================================
+# 2.4 — DISTRIBUCIÓN DEL RENDIMIENTO
+# ======================================================
+
+Explica cómo se distribuyen los resultados entre las publicaciones.
+
+Analiza, cuando los datos lo permitan:
+
+- concentración;
+- dispersión;
+- comportamiento habitual;
+- valores extremos;
+- estabilidad;
+- resultados excepcionales.
+
+Puede utilizarse la comparación entre grupos, extremos y medidas centrales.
+
+
+# ======================================================
+# 2.5 — FRECUENCIA Y ACTIVIDAD
+# ======================================================
+
+Describe el patrón de actividad durante el periodo analizado utilizando,
+cuando estén disponibles:
+
+- publicaciones;
+- frecuencia semanal y mensual;
+- intervalo entre publicaciones;
+- duración del periodo;
+- resultados observados.
+
+No conviertas la frecuencia en una recomendación automática.
+
+
+# ======================================================
+# 2.6 — ANÁLISIS DEL ALCANCE
+# ======================================================
+
+Analiza el comportamiento de las impresiones.
+
+Explica:
+
+- comportamiento habitual;
+- valores centrales y extremos;
+- concentración;
+- publicaciones que destacan por exposición.
+
+No interpretes las impresiones automáticamente como calidad, relevancia
+o éxito estratégico.
+
+
+# ======================================================
+# 2.7 — ANÁLISIS DEL ENGAGEMENT
+# ======================================================
+
+Analiza la eficiencia relativa de interacción y su relación con:
+
+- impresiones;
+- interacciones absolutas;
+- publicaciones con mayor engagement.
+
+Distingue siempre eficiencia, volumen de interacción y alcance.
+
+
+# ======================================================
+# 2.8 — TOP 5 PUBLICACIONES POR IMPRESIONES
+# ======================================================
+
+Presenta las cinco publicaciones con mayor número de impresiones,
+conservando los datos proporcionados por Python:
+
+- posición;
+- fecha;
+- impresiones;
+- interacciones;
+- engagement;
+- URL.
+
+Explica qué representan dentro de la distribución del alcance.
+
+
+# ======================================================
+# 2.9 — BOTTOM 5 PUBLICACIONES POR IMPRESIONES
+# ======================================================
+
+Presenta las cinco publicaciones con menor número de impresiones,
+conservando los mismos datos disponibles.
+
+Explica qué representan dentro de la distribución del alcance.
+
+No las clasifiques automáticamente como publicaciones deficientes.
+
+
+# ======================================================
+# 2.10 — TOP 5 PUBLICACIONES POR ENGAGEMENT
+# ======================================================
+
+Presenta las cinco publicaciones con mayor engagement y sus métricas
+disponibles.
+
+Analiza conjuntamente eficiencia de interacción y volumen de exposición.
+
+
+# ======================================================
+# 2.11 — CRUCE ENTRE ALCANCE Y ENGAGEMENT
+# ======================================================
+
+Integra las dimensiones de alcance y eficiencia.
+
+Compara los rankings anteriores e identifica, cuando existan:
+
+- coincidencias;
+- diferencias;
+- separación entre exposición y eficiencia;
+- casos excepcionales.
+
+No inventes combinaciones que no estén presentes en los datos.
+
+
+# ======================================================
+# 2.12 — DIAGNÓSTICO ESTRATÉGICO
+# ======================================================
+
+Integra los hallazgos anteriores para responder:
+
+"¿Qué comportamiento está demostrando realmente esta cuenta?"
+
+Cuando exista evidencia suficiente, identifica:
+
+- fortalezas;
+- limitaciones;
+- oportunidades;
+- anomalías;
+- incertidumbres;
+- prioridad estratégica.
+
+No repitas mecánicamente las secciones anteriores.
+
+
+# ======================================================
+# 2.13 — RECOMENDACIONES PRIORITARIAS
+# ======================================================
+
+Convierte los hallazgos del diagnóstico en acciones concretas y
+priorizadas.
+
+Cada recomendación debe estar vinculada a un hallazgo concreto.
+
+Utiliza, cuando corresponda:
+
+- MANTENER;
+- OPTIMIZAR;
+- INVESTIGAR;
+- EXPERIMENTAR;
+- CORREGIR.
+
+No introduzcas consejos genéricos.
+
+
+# ======================================================
+# 2.14 — EXPERIMENTOS Y PRÓXIMOS PASOS
+# ======================================================
+
+Convierte las hipótesis relevantes en pruebas destinadas a reducir
+incertidumbre.
+
+Cada experimento debe responder a una pregunta concreta y permitir
+comparar resultados y tomar una decisión posterior.
+
+Si los datos no permiten diseñar un experimento sólido, declara la
+limitación en lugar de inventar variables.
+
+
+# ======================================================
+# REGLA DE INTEGRACIÓN
+# ======================================================
+
+El BLOQUE 2 define QUÉ debe contener cada sección.
+
+Los BLOQUES 3–8 definen CÓMO debe analizarse, diagnosticarse, recomendarse,
+experimentarse y verificarse ese contenido.
+
+No dupliques en este bloque las reglas detalladas de interpretación.
+
+                DATOS → DISTRIBUCIÓN → ALCANCE → ENGAGEMENT →
+                CRUCE DE MÉTRICAS → DIAGNÓSTICO → RECOMENDACIONES → EXPERIMENTOS
+
+                No adelantes conclusiones propias de secciones posteriores.
+                Las recomendaciones siguen al diagnóstico y los experimentos siguen a
+                las recomendaciones.
 
                 # ======================================================
                 # BLOQUE 2 — CONTENIDO DE CADA SECCIÓN
                 # ======================================================
 
-                Cada sección tiene una función analítica específica.
+                Cada sección tiene una función específica dentro del informe.
 
-                No utilices una sección para repetir mecánicamente el contenido
-                de otra.
+                No repitas mecánicamente información entre secciones.
 
-                La información debe avanzar desde la descripción de los datos
-                hasta el diagnóstico y la toma de decisiones.
+                La información debe avanzar desde la descripción de los datos hasta
+                el diagnóstico y la toma de decisiones.
+
+                Las reglas detalladas de interpretación se encuentran en los BLOQUES 3–8.
+
 
                 # ======================================================
                 # 2.1 — RESUMEN EJECUTIVO
                 # ======================================================
 
-                Debe ofrecer una síntesis del diagnóstico completo.
-
-                Debe permitir comprender rápidamente:
+                Sintetiza el diagnóstico completo para permitir comprender rápidamente:
 
                 - situación actual;
-                - principal fortaleza demostrada;
+                - principal fortaleza;
                 - principal limitación, cuando exista;
                 - principal oportunidad;
                 - principal incertidumbre;
                 - prioridad estratégica.
 
-                Debe sintetizar los hallazgos más importantes.
+                No enumeres todas las métricas ni introduzcas recomendaciones que todavía
+                no hayan sido justificadas.
 
-                No debe convertirse en una enumeración de todas las métricas.
-
-                No debe desarrollar recomendaciones antes de que hayan sido justificadas
-                por el análisis.
-
-                No debe introducir conclusiones que contradigan el diagnóstico final.
 
                 # ======================================================
                 # 2.2 — ESTADO ACTUAL DEL PERFIL
                 # ======================================================
 
-                Describe la situación general de la cuenta a partir de los indicadores
-                disponibles.
-
-                Debe integrar:
+                Describe la situación general de la cuenta integrando:
 
                 - actividad;
                 - resultados observados;
                 - tracción;
                 - madurez estratégica, cuando Python la proporcione.
 
-                Su función es responder:
+                Debe responder:
 
                 "¿En qué situación se encuentra actualmente la cuenta?"
 
-                Distingue actividad de resultado y resultado de eficacia estratégica.
+                Distingue actividad, resultado y eficacia estratégica.
 
-                No conviertas esta sección en un análisis detallado de las publicaciones.
 
                 # ======================================================
                 # 2.3 — RADIOGRAFÍA CUANTITATIVA
                 # ======================================================
 
-                Presenta la fotografía estadística de la actividad analizada.
+                Presenta las principales métricas del periodo analizado y explica qué
+                muestran conjuntamente sobre el comportamiento de la cuenta.
 
-                Utiliza las métricas disponibles que sean relevantes para comprender
-                el conjunto de datos.
+                Utiliza únicamente las métricas disponibles y calculadas por Python.
 
-                Cuando estén disponibles, pueden incluirse:
-
-                - publicaciones;
-                - impresiones totales;
-                - media;
-                - mediana;
-                - mínimo;
-                - máximo;
-                - desviación estándar;
-                - publicaciones por encima o por debajo de la media;
-                - frecuencia;
-                - otras métricas calculadas por Python.
-
-                No te limites a enumerar valores.
-
-                Explica qué información proporciona la combinación de estas métricas
-                sobre el comportamiento general de la cuenta.
 
                 # ======================================================
                 # 2.4 — DISTRIBUCIÓN DEL RENDIMIENTO
                 # ======================================================
 
-                Explica cómo se reparten los resultados entre las publicaciones.
+                Explica cómo se distribuyen los resultados entre las publicaciones.
 
                 Analiza, cuando los datos lo permitan:
 
                 - concentración;
                 - dispersión;
-                - estabilidad;
-                - valores extremos;
                 - comportamiento habitual;
-                - comportamiento excepcional.
+                - valores extremos;
+                - estabilidad;
+                - resultados excepcionales.
 
-                Su función es responder:
+                Puede utilizarse la comparación entre grupos, extremos y medidas centrales.
 
-                "¿El rendimiento está distribuido de forma relativamente uniforme
-                o depende especialmente de determinados casos?"
-
-                Cuando Python proporcione datos suficientes, pueden utilizarse
-                comparaciones como:
-
-                - Top 5 frente al total;
-                - Bottom 5 frente al conjunto;
-                - máximo frente a mediana;
-                - proporción por encima de la media;
-                - otras medidas de concentración.
-
-                No atribuyas las características de la distribución a una causa
-                que los datos no permitan demostrar.
 
                 # ======================================================
                 # 2.5 — FRECUENCIA Y ACTIVIDAD
                 # ======================================================
 
-                Analiza la relación entre la actividad de publicación y el periodo
-                observado.
+                Describe el patrón de actividad durante el periodo analizado utilizando,
+                cuando estén disponibles:
 
-                Utiliza, cuando estén disponibles:
-
-                - número de publicaciones;
-                - publicaciones por semana;
-                - publicaciones por mes;
+                - publicaciones;
+                - frecuencia semanal y mensual;
                 - intervalo entre publicaciones;
-                - periodo analizado;
-                - resultados obtenidos.
+                - duración del periodo;
+                - resultados observados.
 
-                Su función es describir el patrón de actividad de la cuenta
-                y ponerlo en contexto con sus resultados.
+                No conviertas la frecuencia en una recomendación automática.
 
-                No conviertas una frecuencia determinada en una recomendación
-                automática.
-
-                No atribuyas causalidad entre frecuencia y rendimiento salvo
-                que los datos permitan demostrarla.
 
                 # ======================================================
                 # 2.6 — ANÁLISIS DEL ALCANCE
                 # ======================================================
 
-                Analiza específicamente la distribución y comportamiento
-                de las impresiones.
+                Analiza el comportamiento de las impresiones.
 
-                Debe explicar:
+                Explica:
 
-                - nivel de alcance observado;
                 - comportamiento habitual;
-                - valores excepcionales;
-                - diferencia entre valores centrales y extremos;
-                - concentración del alcance;
+                - valores centrales y extremos;
+                - concentración;
                 - publicaciones que destacan por exposición.
 
-                Su función es responder:
+                No interpretes las impresiones automáticamente como calidad, relevancia
+                o éxito estratégico.
 
-                "¿Cómo está funcionando la distribución de exposición de las
-                publicaciones?"
-
-                No interpretes las impresiones como una medida automática de
-                calidad, relevancia o éxito estratégico.
 
                 # ======================================================
                 # 2.7 — ANÁLISIS DEL ENGAGEMENT
                 # ======================================================
 
-                Analiza específicamente la eficiencia relativa de interacción.
+                Analiza la eficiencia relativa de interacción y su relación con:
 
-                Debe considerar, cuando estén disponibles:
-
-                - engagement;
-                - interacciones absolutas;
                 - impresiones;
-                - publicaciones con mayor eficiencia;
-                - relación entre eficiencia y volumen de exposición.
+                - interacciones absolutas;
+                - publicaciones con mayor engagement.
 
-                Su función es responder:
+                Distingue siempre eficiencia, volumen de interacción y alcance.
 
-                "¿Cómo convierte la exposición observada en interacción relativa?"
-
-                No confundas engagement con número absoluto de interacciones
-                ni con alcance.
-
-                No conviertas un engagement elevado en una afirmación automática
-                sobre calidad, interés o relevancia del contenido.
 
                 # ======================================================
                 # 2.8 — TOP 5 PUBLICACIONES POR IMPRESIONES
                 # ======================================================
 
                 Presenta las cinco publicaciones con mayor número de impresiones,
-                utilizando los datos proporcionados por Python.
-
-                Cuando estén disponibles, muestra:
+                conservando los datos proporcionados por Python:
 
                 - posición;
                 - fecha;
@@ -884,147 +1075,77 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - engagement;
                 - URL.
 
-                Analiza el papel de estas publicaciones dentro de la distribución
-                del alcance.
+                Explica qué representan dentro de la distribución del alcance.
 
-                La sección debe explicar qué las hace excepcionales desde el punto
-                de vista cuantitativo, sin inventar características cualitativas
-                de su contenido.
 
                 # ======================================================
                 # 2.9 — BOTTOM 5 PUBLICACIONES POR IMPRESIONES
                 # ======================================================
 
                 Presenta las cinco publicaciones con menor número de impresiones,
-                utilizando los datos proporcionados por Python.
+                conservando los mismos datos disponibles.
 
-                Cuando estén disponibles, muestra:
+                Explica qué representan dentro de la distribución del alcance.
 
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL.
+                No las clasifiques automáticamente como publicaciones deficientes.
 
-                Analiza qué representan estos casos dentro de la distribución
-                del alcance.
-
-                No las clasifiques automáticamente como publicaciones "malas".
-
-                Su función es mostrar el extremo inferior de la distribución
-                y facilitar su comparación con el resto de la actividad.
 
                 # ======================================================
                 # 2.10 — TOP 5 PUBLICACIONES POR ENGAGEMENT
                 # ======================================================
 
-                Presenta las cinco publicaciones con mayor engagement.
+                Presenta las cinco publicaciones con mayor engagement y sus métricas
+                disponibles.
 
-                Cuando estén disponibles, muestra:
+                Analiza conjuntamente eficiencia de interacción y volumen de exposición.
 
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL.
-
-                Analiza conjuntamente su eficiencia relativa y su volumen
-                de exposición.
-
-                Su función es identificar los casos que destacan por eficiencia
-                de interacción, independientemente de que también destaquen
-                por alcance.
 
                 # ======================================================
                 # 2.11 — CRUCE ENTRE ALCANCE Y ENGAGEMENT
                 # ======================================================
 
-                Integra las dos dimensiones analizadas anteriormente:
+                Integra las dimensiones de alcance y eficiencia.
 
-                ALCANCE
-                +
-                EFICIENCIA DE INTERACCIÓN
-
-                Cuando los datos lo permitan, identifica casos de:
-
-                - alto alcance + alto engagement;
-                - alto alcance + bajo engagement;
-                - bajo alcance + alto engagement;
-                - bajo alcance + bajo engagement.
-
-                Compara especialmente:
-
-                - Top 5 por impresiones;
-                - Bottom 5 por impresiones;
-                - Top 5 por engagement.
-
-                Busca:
+                Compara los rankings anteriores e identifica, cuando existan:
 
                 - coincidencias;
                 - diferencias;
-                - publicaciones presentes en varios rankings;
                 - separación entre exposición y eficiencia;
                 - casos excepcionales.
 
-                No es necesario que existan las cuatro combinaciones.
+                No inventes combinaciones que no estén presentes en los datos.
 
-                No inventes categorías para completar el análisis.
-
-                Esta sección debe aportar una interpretación conjunta que no
-                se limite a repetir los rankings anteriores.
 
                 # ======================================================
                 # 2.12 — DIAGNÓSTICO ESTRATÉGICO
                 # ======================================================
 
-                Integra los hallazgos obtenidos en las secciones anteriores.
-
-                Debe responder:
+                Integra los hallazgos anteriores para responder:
 
                 "¿Qué comportamiento está demostrando realmente esta cuenta?"
 
-                Cuando los datos lo permitan, identifica:
+                Cuando exista evidencia suficiente, identifica:
 
                 - fortalezas;
-                - debilidades;
+                - limitaciones;
                 - oportunidades;
                 - anomalías;
-                - incertidumbres.
+                - incertidumbres;
+                - prioridad estratégica.
 
-                Debe establecer las relaciones más importantes entre:
+                No repitas mecánicamente las secciones anteriores.
 
-                actividad;
-                distribución;
-                alcance;
-                engagement;
-                y comportamiento de las publicaciones.
-
-                No debe limitarse a copiar conclusiones anteriores.
-
-                Debe convertir los hallazgos en una explicación coherente
-                del estado actual de la cuenta.
-
-                No fuerces una debilidad, oportunidad o anomalía si los datos
-                no la respaldan.
 
                 # ======================================================
                 # 2.13 — RECOMENDACIONES PRIORITARIAS
                 # ======================================================
 
-                Convierte los hallazgos del diagnóstico en acciones concretas.
-
-                Prioriza las acciones según:
-
-                - evidencia disponible;
-                - relevancia estratégica;
-                - posibilidad de ejecución;
-                - capacidad de comprobación posterior.
+                Convierte los hallazgos del diagnóstico en acciones concretas y
+                priorizadas.
 
                 Cada recomendación debe estar vinculada a un hallazgo concreto.
 
-                Cuando corresponda, clasifícala como:
+                Utiliza, cuando corresponda:
 
                 - MANTENER;
                 - OPTIMIZAR;
@@ -1032,40 +1153,33 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - EXPERIMENTAR;
                 - CORREGIR.
 
-                No generes recomendaciones para completar un número predeterminado.
+                No introduzcas consejos genéricos.
 
-                No incluyas consejos genéricos desvinculados del diagnóstico.
 
                 # ======================================================
                 # 2.14 — EXPERIMENTOS Y PRÓXIMOS PASOS
                 # ======================================================
 
-                Convierte las hipótesis relevantes del diagnóstico en pruebas
-                que permitan reducir incertidumbre.
+                Convierte las hipótesis relevantes en pruebas destinadas a reducir
+                incertidumbre.
 
-                Cada experimento debe responder a una pregunta concreta.
+                Cada experimento debe responder a una pregunta concreta y permitir
+                comparar resultados y tomar una decisión posterior.
 
-                Cuando los datos permitan definirlo, especifica:
+                Si los datos no permiten diseñar un experimento sólido, declara la
+                limitación en lugar de inventar variables.
 
-                - hipótesis;
-                - variable a probar;
-                - modificación;
-                - elementos que se mantienen constantes;
-                - duración o número de publicaciones;
-                - métricas a observar;
-                - referencia de comparación;
-                - criterio de evaluación;
-                - decisión posterior.
 
-                Los experimentos deben permitir aprender algo y tomar una decisión
-                posterior.
+                # ======================================================
+                # REGLA DE INTEGRACIÓN
+                # ======================================================
 
-                No diseñes experimentos sobre variables que no puedan observarse
-                o medirse posteriormente.
+                El BLOQUE 2 define QUÉ debe contener cada sección.
 
-                Si los datos actuales no permiten definir un experimento sólido,
-                indica la limitación o formula una propuesta de investigación
-                en lugar de inventar variables.
+                Los BLOQUES 3–8 definen CÓMO debe analizarse, diagnosticarse, recomendarse,
+                experimentarse y verificarse ese contenido.
+
+                No dupliques en este bloque las reglas detalladas de interpretación.
 
                 
                 # ======================================================
@@ -1532,37 +1646,24 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 # BLOQUE 4 — ANÁLISIS DE LAS 15 PUBLICACIONES
                 # ======================================================
 
-                Las publicaciones seleccionadas constituyen una muestra de casos
-                para analizar el comportamiento real de la cuenta.
+                Las publicaciones seleccionadas constituyen una muestra de casos para
+                analizar el comportamiento observado de la cuenta.
 
-                Este bloque define únicamente cómo trabajar con esas publicaciones.
-
-                Las reglas generales de interpretación establecidas en el BLOQUE 3
-                son de aplicación también a estos casos.
-
-                ------------------------------------------------------
-                4.1 — COMPOSICIÓN DE LA MUESTRA
-                ------------------------------------------------------
-
-                La muestra está formada por tres grupos:
+                La muestra está formada por:
 
                 1. TOP 5 POR IMPRESIONES
                 2. BOTTOM 5 POR IMPRESIONES
                 3. TOP 5 POR ENGAGEMENT
 
-                Cada grupo debe utilizar exactamente los registros proporcionados
-                por Python.
+                Las reglas generales del BLOQUE 3 se aplican a todos los casos.
 
-                Una misma publicación puede aparecer en varios grupos.
+                Una misma publicación puede aparecer en varios rankings.
+                Por ello, la muestra puede contener menos de 15 publicaciones únicas.
 
-                Esto no constituye un error.
 
-                La muestra puede contener menos de 15 publicaciones únicas
-                si existen coincidencias entre rankings.
-
-                ------------------------------------------------------
-                4.2 — DATOS A CONSERVAR
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 4.1 — DATOS DE CADA PUBLICACIÓN
+                # ------------------------------------------------------
 
                 Para cada publicación utiliza, cuando estén disponibles:
 
@@ -1573,278 +1674,142 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - engagement;
                 - URL.
 
-                Conserva exactamente los valores proporcionados.
+                Conserva exactamente los valores proporcionados por Python.
 
-                No modifiques cifras, fechas, posiciones ni URLs.
+                No modifiques cifras, fechas, posiciones, métricas ni URLs.
+                No inventes datos ausentes.
 
-                Si algún dato no está disponible, no lo inventes.
 
-                ------------------------------------------------------
-                4.3 — ANÁLISIS INDIVIDUAL
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 4.2 — TOP 5 Y BOTTOM 5 POR IMPRESIONES
+                # ------------------------------------------------------
 
-                Cada publicación debe interpretarse a partir exclusivamente
-                de sus métricas disponibles.
+                El TOP 5 representa las publicaciones con mayor alcance dentro de
+                los datos proporcionados.
 
-                Cuando los datos lo permitan, explica:
+                El BOTTOM 5 representa las publicaciones con menor alcance.
 
-                - posición dentro de su ranking;
-                - nivel de exposición;
-                - volumen de interacción;
-                - eficiencia de interacción;
-                - relación entre impresiones y engagement;
-                - relación con las demás publicaciones de su grupo.
+                Analiza:
 
-                La interpretación debe ser proporcional a la evidencia disponible.
-
-                No es necesario forzar una explicación diferente para cada publicación
-                si varias presentan un comportamiento cuantitativamente similar.
-
-                Cuando varias publicaciones sean comparables, explica por qué.
-
-                ------------------------------------------------------
-                4.4 — FUNCIÓN DE CADA PUBLICACIÓN
-                ------------------------------------------------------
-
-                Determina qué representa cada publicación dentro de la muestra.
-
-                Puede destacar principalmente por:
-
-                - alcance;
-                - eficiencia de interacción;
-                - volumen de interacción;
-                - combinación de varias dimensiones;
-                - comportamiento excepcional;
-                - comportamiento próximo al de otras publicaciones.
-
-                No clasifiques automáticamente una publicación como:
-
-                "buena"
-
-                "mala"
-
-                "exitosa"
-
-                "deficiente"
-
-                sin explicar previamente qué dimensión justifica esa valoración.
-
-                ------------------------------------------------------
-                4.5 — TOP 5 POR IMPRESIONES
-                ------------------------------------------------------
-
-                Este grupo representa las publicaciones con mayor alcance
-                dentro de los datos proporcionados.
-
-                Para cada una conserva:
-
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL.
-
-                Analiza especialmente:
-
-                - diferencia de alcance entre posiciones;
-                - relación entre impresiones e interacciones;
+                - diferencias de impresiones entre posiciones;
+                - interacciones asociadas;
                 - engagement correspondiente;
-                - coincidencias con el TOP 5 por engagement.
-
-                No interpretes el ranking de impresiones como un ranking
-                general de calidad o éxito.
-
-                ------------------------------------------------------
-                4.6 — BOTTOM 5 POR IMPRESIONES
-                ------------------------------------------------------
-
-                Este grupo representa las publicaciones con menor alcance
-                dentro de los datos proporcionados.
-
-                Para cada una conserva:
-
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL.
-
-                Analiza especialmente:
-
-                - posición dentro de la distribución;
-                - distancia respecto a las publicaciones de mayor alcance;
-                - engagement correspondiente;
+                - distancia entre los extremos;
                 - posibles diferencias entre exposición y eficiencia.
 
-                No clasifiques automáticamente estas publicaciones
-                como publicaciones de bajo rendimiento global.
+                No interpretes el ranking de impresiones como un ranking general de
+                calidad, relevancia o éxito.
 
-                Un alcance reducido puede coexistir con una eficiencia
-                de interacción elevada.
+                Una publicación con pocas impresiones puede presentar engagement elevado,
+                y una publicación con muchas impresiones puede presentar engagement menor.
 
-                ------------------------------------------------------
-                4.7 — TOP 5 POR ENGAGEMENT
-                ------------------------------------------------------
 
-                Este grupo representa las publicaciones con mayor eficiencia
-                de interacción según la metodología proporcionada por Python.
+                # ------------------------------------------------------
+                # 4.3 — TOP 5 POR ENGAGEMENT
+                # ------------------------------------------------------
 
-                Para cada una conserva:
+                Representa las publicaciones con mayor eficiencia de interacción según
+                la metodología proporcionada por Python.
 
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL.
-
-                Analiza especialmente:
+                Analiza:
 
                 - engagement;
                 - impresiones asociadas;
                 - interacciones absolutas;
-                - relación entre eficiencia y volumen de exposición;
+                - relación entre eficiencia y exposición;
                 - coincidencias con el TOP 5 por impresiones.
 
-                No interpretes automáticamente un engagement elevado
-                como mayor interés, calidad o relevancia del contenido.
+                No interpretes automáticamente un engagement elevado como mayor calidad,
+                relevancia o éxito global.
 
-                ------------------------------------------------------
-                4.8 — COMPARACIÓN ENTRE LOS TRES GRUPOS
-                ------------------------------------------------------
 
-                Después del análisis individual, compara los tres rankings.
+                # ------------------------------------------------------
+                # 4.4 — ANÁLISIS INDIVIDUAL Y FUNCIÓN DE CADA CASO
+                # ------------------------------------------------------
 
-                Busca especialmente:
+                Interpreta cada publicación exclusivamente a partir de sus métricas.
 
-                - publicaciones presentes en más de un ranking;
+                Cuando los datos lo permitan, determina si destaca principalmente por:
+
+                - alcance;
+                - volumen de interacción;
+                - eficiencia;
+                - combinación de dimensiones;
+                - comportamiento excepcional;
+                - comportamiento próximo al de otros casos.
+
+                No es necesario crear una explicación artificialmente diferente para cada
+                publicación cuando varias presentan un comportamiento cuantitativamente
+                similar.
+
+
+                # ------------------------------------------------------
+                # 4.5 — CRUCE ENTRE RANKINGS
+                # ------------------------------------------------------
+
+                Después de analizar los grupos, compáralos entre sí.
+
+                Identifica:
+
+                - publicaciones presentes en varios rankings;
                 - publicaciones exclusivas de un ranking;
-                - diferencias entre alcance y eficiencia;
                 - coincidencias entre alto alcance y alto engagement;
                 - alto alcance con engagement relativamente inferior;
                 - bajo alcance con engagement elevado;
-                - bajo alcance con engagement reducido.
+                - bajo alcance con engagement reducido;
 
-                No es obligatorio que todas estas situaciones existan.
+                únicamente cuando los datos lo demuestren.
 
-                Solo deben señalarse cuando los datos las muestren.
+                Si una publicación aparece en varios rankings, utiliza siempre los mismos
+                valores para ella.
 
-                ------------------------------------------------------
-                4.9 — COINCIDENCIAS ENTRE RANKINGS
-                ------------------------------------------------------
+                La coincidencia entre rankings indica que una publicación destaca en más
+                de una dimensión, pero no demuestra por sí misma una causa ni una estrategia
+                reproducible.
 
-                Si una publicación aparece en varios rankings,
-                debe señalarse explícitamente.
+                Si existe poca o ninguna coincidencia relevante, puede señalarse como
+                hallazgo, sin considerarlo automáticamente un problema.
 
-                Cuando ocurra, utiliza sus mismos valores en todas las referencias.
 
-                No presentes una cifra diferente para una misma publicación.
+                # ------------------------------------------------------
+                # 4.6 — COMPARACIÓN Y REPRESENTATIVIDAD
+                # ------------------------------------------------------
 
-                Una coincidencia puede ser especialmente relevante porque
-                indica que una misma publicación destaca en más de una dimensión.
+                Utiliza valores concretos para comparar las publicaciones y los grupos
+                cuando aporten información relevante.
 
-                Sin embargo, no debe interpretarse automáticamente como
-                prueba de una causa o de una estrategia reproducible.
-
-                ------------------------------------------------------
-                4.10 — AUSENCIA DE COINCIDENCIAS
-                ------------------------------------------------------
-
-                Si los rankings no presentan coincidencias relevantes,
-                puede señalarse como hallazgo.
-
-                Esto puede indicar que:
-
-                - las publicaciones con mayor alcance no son necesariamente
-                las de mayor eficiencia;
-                - las publicaciones con mayor eficiencia no son necesariamente
-                las de mayor exposición.
-
-                La interpretación debe limitarse a lo que permitan demostrar
-                los datos disponibles.
-
-                No considerar automáticamente esta separación como un problema.
-
-                ------------------------------------------------------
-                4.11 — COMPARACIÓN CUANTITATIVA
-                ------------------------------------------------------
-
-                Cuando sea relevante, utiliza los valores concretos para comparar
-                los grupos.
-
-                Puedes comparar:
+                Prioriza:
 
                 - impresiones;
                 - interacciones;
                 - engagement;
                 - posiciones;
-                - diferencias entre publicaciones;
-                - relaciones entre dimensiones.
+                - diferencias entre dimensiones.
 
-                Prioriza las diferencias cuantificables sobre las descripciones
-                genéricas.
+                No utilices medias, promedios u otras referencias que no hayan sido
+                calculadas y proporcionadas por Python.
 
-                No utilices "promedio", "media", "engagement medio" o conceptos
-                similares salvo que el valor correspondiente haya sido calculado
-                y esté disponible.
+                Las 15 posiciones seleccionadas constituyen una muestra analítica.
+                No utilices sus resultados para afirmar automáticamente que un patrón
+                caracteriza a todas las publicaciones de la cuenta.
 
-                ------------------------------------------------------
-                4.12 — REPRESENTATIVIDAD
-                ------------------------------------------------------
 
-                Las 15 publicaciones constituyen una selección analítica.
+                # ------------------------------------------------------
+                # 4.7 — OBJETIVO DEL ANÁLISIS
+                # ------------------------------------------------------
 
-                No deben utilizarse automáticamente para afirmar que una característica
-                es propia de todas las publicaciones de la cuenta.
+                El objetivo no es describir repetitivamente 15 publicaciones.
 
-                Distingue entre:
-
-                - comportamiento observado en la muestra;
-                - comportamiento demostrado en el conjunto de publicaciones.
-
-                Una publicación excepcional no demuestra por sí sola
-                una pauta estable o reproducible.
-
-                ------------------------------------------------------
-                4.13 — LÍMITES DE INTERPRETACIÓN
-                ------------------------------------------------------
-
-                Las métricas de estas publicaciones no permiten determinar por sí solas:
-
-                - tema;
-                - formato;
-                - horario;
-                - hashtags;
-                - calidad del contenido;
-                - audiencia;
-                - intención;
-                - causa del resultado;
-                - comportamiento del algoritmo.
-
-                No inventes ninguna de estas variables.
-
-                Si una explicación requiere información que no está disponible,
-                debe formularse como cuestión pendiente o hipótesis,
-                no como conclusión.
-
-                ------------------------------------------------------
-                4.14 — OBJETIVO DEL BLOQUE
-                ------------------------------------------------------
-
-                El objetivo no es describir 15 publicaciones de forma repetitiva.
-
-                El objetivo es utilizar estos casos para descubrir diferencias
-                entre:
+                Utiliza los casos para identificar diferencias y relaciones entre:
 
                 ALCANCE
+                = impresiones.
 
                 VOLUMEN DE INTERACCIÓN
+                = interacciones absolutas.
 
                 EFICIENCIA DE INTERACCIÓN
-
-                y determinar qué relación existe entre ellas dentro de la muestra.
+                = engagement.
 
                 El análisis debe avanzar desde:
 
@@ -1854,342 +1819,166 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 → DIFERENCIAS
                 → HALLAZGOS
 
-                sin repetir mecánicamente los mismos datos en cada sección.
+                No atribuyas causas relacionadas con tema, formato, horario, hashtags,
+                contenido, audiencia o algoritmo si esas variables no están disponibles.
+
+                Si los datos no permiten explicar un comportamiento, conviértelo en
+                limitación o cuestión pendiente.
 
 
                 # ======================================================
                 # BLOQUE 5 — CONSTRUCCIÓN DEL DIAGNÓSTICO
                 # ======================================================
 
-                El diagnóstico integra los hallazgos obtenidos en los bloques anteriores
-                y determina qué comportamiento caracteriza realmente a la cuenta.
+                Integra los hallazgos obtenidos en los bloques anteriores para determinar
+                qué comportamiento caracteriza realmente a la cuenta.
 
-                Este bloque NO debe limitarse a repetir métricas o describir nuevamente
-                las publicaciones analizadas.
+                El diagnóstico no debe limitarse a repetir métricas, rankings o publicaciones.
+                Debe relacionar:
 
-                Su función es transformar los hallazgos en una interpretación estratégica
-                coherente y específica de esta cuenta.
+                ACTIVIDAD
+                → RENDIMIENTO
+                → RELACIONES ENTRE MÉTRICAS
+                → HALLAZGOS
+                → INTERPRETACIÓN GLOBAL
 
-                ------------------------------------------------------
-                5.1 — FUNCIÓN DEL DIAGNÓSTICO
-                ------------------------------------------------------
+                No introduzcas información que no haya aparecido previamente en el análisis.
 
-                El diagnóstico debe responder principalmente a la pregunta:
 
-                "¿Qué comportamiento está demostrando realmente esta cuenta?"
+                # ------------------------------------------------------
+                # 5.1 — SÍNTESIS
+                # ------------------------------------------------------
 
-                Debe integrar, cuando estén disponibles:
-
-                - actividad;
-                - distribución del rendimiento;
-                - alcance;
-                - interacciones;
-                - engagement;
-                - relaciones entre métricas;
-                - comportamiento de las publicaciones analizadas;
-                - anomalías;
-                - incertidumbres.
-
-                No debe introducir información que no haya aparecido previamente
-                en el análisis.
-
-                ------------------------------------------------------
-                5.2 — SÍNTESIS
-                ------------------------------------------------------
-
-                El diagnóstico debe convertir los hallazgos anteriores en una visión
-                global de la cuenta.
-
-                Debe explicar:
+                Explica, cuando los datos lo permitan:
 
                 - qué comportamiento caracteriza a la cuenta;
-                - qué dimensiones presentan un comportamiento favorable;
+                - qué dimensiones presentan resultados favorables;
                 - qué dimensiones presentan limitaciones;
                 - qué resultados son excepcionales;
-                - qué resultados parecen más estables;
+                - qué comportamientos parecen más estables;
                 - dónde existe concentración del rendimiento;
                 - qué relación existe entre alcance y eficiencia;
-                - qué cuestiones todavía permanecen abiertas.
+                - qué cuestiones permanecen abiertas.
 
-                No repitas simplemente las conclusiones de las secciones anteriores.
-
+                No repitas mecánicamente las conclusiones anteriores.
                 Explica cómo se relacionan entre sí.
 
-                ------------------------------------------------------
-                5.3 — FORTALEZAS
-                ------------------------------------------------------
 
-                Identifica capacidades favorables que estén respaldadas por los datos.
+                # ------------------------------------------------------
+                # 5.2 — FORTALEZAS Y LIMITACIONES
+                # ------------------------------------------------------
 
-                Una fortaleza debe representar un comportamiento observable
-                que pueda considerarse relevante para la situación actual de la cuenta.
+                Identifica únicamente fortalezas y limitaciones respaldadas por los datos.
 
-                Puede estar relacionada, por ejemplo, con:
+                Una fortaleza debe representar un comportamiento favorable observable
+                y relevante para la situación actual de la cuenta.
 
-                - alcance;
-                - eficiencia de interacción;
-                - volumen de actividad;
-                - estabilidad;
-                - capacidad de obtener resultados excepcionales;
-                - combinación favorable de varias dimensiones.
+                Una limitación debe incluir:
 
-                No es obligatorio identificar una fortaleza en cada dimensión.
+                1. comportamiento observado;
+                2. evidencia que lo respalda;
+                3. motivo por el que puede representar una limitación.
 
-                No fuerces fortalezas para completar una lista.
+                No conviertas automáticamente una diferencia estadística, una anomalía
+                o un resultado aislado en una debilidad estructural.
 
-                ------------------------------------------------------
-                5.4 — DEBILIDADES
-                ------------------------------------------------------
+                Si no existe evidencia suficiente para establecer una limitación clara,
+                indícalo.
 
-                Identifica comportamientos desfavorables que estén suficientemente
-                respaldados por los datos.
 
-                Una diferencia estadística no debe convertirse automáticamente
-                en una debilidad.
+                # ------------------------------------------------------
+                # 5.3 — OPORTUNIDADES Y ANOMALÍAS
+                # ------------------------------------------------------
 
-                Para considerar algo una debilidad debe explicarse:
+                Identifica oportunidades cuando los datos revelen:
 
-                1. qué comportamiento se observa;
-                2. qué evidencia lo respalda;
-                3. por qué puede representar una limitación relevante.
+                - una fortaleza que pueda desarrollarse;
+                - un comportamiento excepcional que merezca investigación;
+                - una diferencia relevante entre alcance y eficiencia;
+                - una concentración del rendimiento;
+                - una hipótesis que pueda comprobarse.
 
-                Si los datos no demuestran una debilidad clara,
-                indícalo explícitamente.
+                Identifica anomalías cuando un resultado se aleje claramente del
+                comportamiento observado.
 
-                No inventes problemas para equilibrar el diagnóstico.
+                Una anomalía describe una desviación; no implica por sí misma problema,
+                causa, debilidad ni éxito estratégico.
 
-                ------------------------------------------------------
-                5.5 — OPORTUNIDADES
-                ------------------------------------------------------
 
-                Identifica comportamientos que puedan ofrecer una oportunidad
-                de investigación, optimización o experimentación.
+                # ------------------------------------------------------
+                # 5.4 — INCERTIDUMBRES Y NIVEL DE EVIDENCIA
+                # ------------------------------------------------------
 
-                Una oportunidad puede surgir cuando:
+                Distingue entre:
 
-                - existe una fortaleza que podría desarrollarse;
-                - aparece un comportamiento excepcional que merece investigación;
-                - existe una diferencia relevante entre alcance y engagement;
-                - existe una concentración del rendimiento que puede estudiarse;
-                - existe una hipótesis razonable que puede comprobarse.
+                LO QUE LA CUENTA DEMUESTRA
 
-                Una oportunidad no implica que la causa esté demostrada.
-
-                Debe distinguirse entre:
-
-                OPORTUNIDAD OBSERVADA
-
-                y
-
-                EXPLICACIÓN TODAVÍA NO DEMOSTRADA.
-
-                ------------------------------------------------------
-                5.6 — ANOMALÍAS
-                ------------------------------------------------------
-
-                Identifica comportamientos que se alejen claramente
-                del comportamiento habitual observado.
-
-                Una anomalía puede ser:
-
-                - una publicación excepcionalmente elevada;
-                - una publicación excepcionalmente baja;
-                - una diferencia notable entre métricas;
-                - una concentración poco habitual;
-                - una separación llamativa entre alcance y engagement.
-
-                Una anomalía describe una desviación.
-
-                No implica automáticamente:
-
-                - problema;
-                - error;
-                - causa;
-                - debilidad;
-                - éxito estratégico.
-
-                Su posible explicación debe permanecer abierta cuando
-                los datos no permitan determinarla.
-
-                ------------------------------------------------------
-                5.7 — INCERTIDUMBRES
-                ------------------------------------------------------
-
-                Identifica las preguntas relevantes que los datos actuales
-                no permiten responder.
-
-                Por ejemplo:
-
-                - qué característica concreta explica una diferencia;
-                - si un comportamiento excepcional puede repetirse;
-                - si una relación observada es estable;
-                - qué variable cualitativa puede estar detrás de un resultado.
-
-                Las incertidumbres no deben ocultarse para producir un diagnóstico
-                aparentemente más concluyente.
-
-                Forman parte del resultado analítico.
-
-                ------------------------------------------------------
-                5.8 — MADUREZ DEL DIAGNÓSTICO
-                ------------------------------------------------------
-
-                El diagnóstico debe distinguir entre:
-
-                LO QUE LA CUENTA YA DEMUESTRA
-
-                LO QUE LA CUENTA PARECE ESTAR MOSTRANDO
+                LO QUE LOS DATOS SUGIEREN
 
                 LO QUE TODAVÍA NECESITA COMPROBACIÓN
 
-                No conviertas un resultado excepcional en una capacidad consolidada
-                sin evidencia suficiente de estabilidad o repetición.
+                No presentes una hipótesis como hecho ni atribuyas causalidad cuando
+                los datos solo muestran una asociación.
 
-                Del mismo modo, no conviertas un resultado aislado desfavorable
-                en una debilidad estructural.
+                Identifica las incertidumbres cuya resolución podría modificar de forma
+                relevante la interpretación o las decisiones posteriores.
 
-                ------------------------------------------------------
-                5.9 — PRIORIZACIÓN
-                ------------------------------------------------------
 
-                El diagnóstico debe establecer qué hallazgos tienen mayor relevancia
-                estratégica.
+                # ------------------------------------------------------
+                # 5.5 — PRIORIZACIÓN
+                # ------------------------------------------------------
 
                 Prioriza los hallazgos considerando:
 
                 1. fuerza de la evidencia;
-                2. magnitud o relevancia del comportamiento observado;
-                3. impacto potencial sobre la interpretación de la cuenta;
+                2. magnitud o relevancia del comportamiento;
+                3. impacto sobre la interpretación de la cuenta;
                 4. posibilidad de obtener aprendizaje mediante nuevas comprobaciones.
 
-                No priorices un hallazgo únicamente porque sea llamativo.
+                No priorices únicamente por lo llamativo de un resultado.
 
-                ------------------------------------------------------
-                5.10 — PRINCIPAL FORTALEZA
-                ------------------------------------------------------
 
-                Identifica la principal fortaleza demostrada por los datos,
-                cuando exista una suficientemente respaldada.
+                # ------------------------------------------------------
+                # 5.6 — CONCLUSIONES PRINCIPALES
+                # ------------------------------------------------------
 
-                Debe formularse de forma específica para esta cuenta.
+                Cuando exista evidencia suficiente, identifica:
 
-                Evita formulaciones genéricas como:
+                - PRINCIPAL FORTALEZA
+                - PRINCIPAL LIMITACIÓN
+                - PRINCIPAL OPORTUNIDAD
+                - PRINCIPAL ANOMALÍA
+                - PRINCIPAL INCERTIDUMBRE
 
-                "la cuenta tiene potencial"
+                No es obligatorio completar todos los elementos.
 
-                "hay buen engagement"
+                Si los datos no permiten establecer alguno de ellos, indícalo
+                explícitamente en lugar de forzarlo.
 
-                "existe una buena estrategia"
 
-                si los datos no permiten concretarlo.
+                # ------------------------------------------------------
+                # 5.7 — PRIORIDAD ESTRATÉGICA
+                # ------------------------------------------------------
 
-                ------------------------------------------------------
-                5.11 — PRINCIPAL LIMITACIÓN
-                ------------------------------------------------------
+                Finaliza el diagnóstico estableciendo la prioridad estratégica principal
+                de la cuenta.
 
-                Identifica la principal limitación o debilidad cuando exista.
-
-                No es obligatorio encontrar una.
-
-                Si los datos no permiten establecer una limitación clara,
-                puede indicarse que no existe evidencia suficiente para afirmar
-                una debilidad estructural.
-
-                ------------------------------------------------------
-                5.12 — PRINCIPAL OPORTUNIDAD
-                ------------------------------------------------------
-
-                Identifica la oportunidad que pueda generar mayor aprendizaje
-                o valor estratégico.
-
-                Debe derivarse de un comportamiento observado.
-
-                No debe convertirse en una recomendación todavía.
-
-                La recomendación corresponde al BLOQUE 6.
-
-                ------------------------------------------------------
-                5.13 — PRINCIPAL ANOMALÍA
-                ------------------------------------------------------
-
-                Cuando exista una anomalía especialmente relevante,
-                identifícala y explica por qué destaca respecto al comportamiento
-                observado.
-
-                No es necesario atribuirle una causa.
-
-                Si no existe una anomalía suficientemente relevante,
-                no fuerces su identificación.
-
-                ------------------------------------------------------
-                5.14 — PRINCIPAL INCERTIDUMBRE
-                ------------------------------------------------------
-
-                Identifica la cuestión cuya resolución podría modificar
-                de forma relevante la interpretación o las decisiones posteriores.
-
-                Debe tratarse de una incertidumbre real derivada
-                de los datos disponibles.
-
-                ------------------------------------------------------
-                5.15 — PRIORIDAD ESTRATÉGICA
-                ------------------------------------------------------
-
-                Finaliza el diagnóstico estableciendo la prioridad estratégica
-                principal de la cuenta.
-
-                La prioridad debe expresar qué debería comprenderse,
-                consolidarse o investigarse antes de tomar decisiones secundarias.
+                Debe expresar qué debería comprenderse, consolidarse o investigarse
+                antes de tomar decisiones secundarias.
 
                 No debe convertirse todavía en una lista de acciones.
+                Las acciones corresponden al BLOQUE 6.
 
-                Las acciones concretas corresponden al BLOQUE 6.
 
-                ------------------------------------------------------
-                5.16 — NO REPETICIÓN
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 5.8 — REGLA FINAL
+                # ------------------------------------------------------
 
-                El diagnóstico NO debe reproducir mecánicamente:
-
-                - las tablas de publicaciones;
-                - los rankings;
-                - las métricas completas;
-                - las explicaciones ya realizadas;
-                - las recomendaciones;
-                - los experimentos.
-
-                Puede utilizar cifras concretas cuando sean necesarias para
-                respaldar un hallazgo, pero debe avanzar desde los datos
-                hacia una interpretación global.
-
-                La información debe evolucionar:
-
-                DATOS
-                → HALLAZGOS
-                → RELACIONES
-                → DIAGNÓSTICO
-
-                ------------------------------------------------------
-                5.17 — ESPECIFICIDAD
-                ------------------------------------------------------
-
-                El diagnóstico debe ser reconociblemente propio de esta cuenta.
-
-                Si un diagnóstico pudiera copiarse literalmente en otro informe
-                sin modificar sus conclusiones, debe considerarse demasiado genérico.
-
-                Debe hacer referencia a los comportamientos realmente observados
-                en los datos analizados.
-
-                ------------------------------------------------------
-                5.18 — SALIDA CONCEPTUAL
-                ------------------------------------------------------
-
-                El diagnóstico debe permitir responder claramente:
+                El diagnóstico debe ser específico de esta cuenta y permitir responder:
 
                 ¿QUÉ ESTÁ FUNCIONANDO?
 
-                ¿QUÉ NO ESTÁ FUNCIONANDO O PRESENTA UNA LIMITACIÓN?
+                ¿QUÉ PRESENTA UNA LIMITACIÓN?
 
                 ¿QUÉ ES EXCEPCIONAL?
 
@@ -2197,39 +1986,31 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 ¿QUÉ RELACIÓN EXISTE ENTRE ALCANCE Y EFICIENCIA?
 
-                ¿QUÉ OPORTUNIDADES MERECEN INVESTIGACIÓN?
+                ¿QUÉ MERECE INVESTIGACIÓN?
 
                 ¿QUÉ NO PODEMOS SABER TODAVÍA?
 
                 ¿CUÁL ES LA PRIORIDAD ESTRATÉGICA?
 
-                No es necesario utilizar estas preguntas como subtítulos visibles.
-                Deben funcionar como guía para construir la síntesis.
+                Debe avanzar desde:
+
+                DATOS
+                → HALLAZGOS
+                → RELACIONES
+                → DIAGNÓSTICO
+
+                sin introducir recomendaciones ni experimentos.
 
 
                 # ======================================================
                 # BLOQUE 6 — RECOMENDACIONES PRIORITARIAS
                 # ======================================================
 
-                Este bloque convierte los hallazgos del DIAGNÓSTICO en acciones
-                concretas y priorizadas.
+                Convierte los hallazgos del DIAGNÓSTICO en acciones concretas y
+                priorizadas.
 
-                Las recomendaciones deben derivarse del diagnóstico construido
-                en el BLOQUE 5.
-
-                No deben introducir nuevos hallazgos ni reinterpretar los datos.
-
-                ------------------------------------------------------
-                6.1 — FUNCIÓN DE LAS RECOMENDACIONES
-                ------------------------------------------------------
-
-                Una recomendación debe responder a:
-
-                "¿Qué debería hacer el propietario de la cuenta a partir
-                de lo que hemos observado?"
-
-                La recomendación debe transformar un hallazgo analítico
-                en una decisión o acción concreta.
+                Las recomendaciones deben derivarse exclusivamente del diagnóstico.
+                No introduzcas nuevos hallazgos ni consejos generales de LinkedIn.
 
                 La cadena debe ser:
 
@@ -2238,12 +2019,10 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 → INTERPRETACIÓN
                 → ACCIÓN
 
-                Si esa cadena no puede establecerse con suficiente claridad,
-                la recomendación no debe formularse como una acción prioritaria.
 
-                ------------------------------------------------------
-                6.2 — DERIVACIÓN
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 6.1 — DERIVACIÓN Y PRIORIDAD
+                # ------------------------------------------------------
 
                 Cada recomendación debe estar vinculada a uno o varios elementos
                 del diagnóstico:
@@ -2254,76 +2033,50 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - anomalía;
                 - incertidumbre.
 
-                No generes recomendaciones independientes del diagnóstico.
-
-                No añadas consejos simplemente porque sean buenas prácticas
-                generales de LinkedIn.
-
-                ------------------------------------------------------
-                6.3 — PRIORIDAD
-                ------------------------------------------------------
-
-                Prioriza las recomendaciones según:
+                Prioriza según:
 
                 1. evidencia disponible;
                 2. relevancia estratégica;
                 3. relación con los hallazgos principales;
-                4. posibilidad real de ejecución;
+                4. viabilidad de ejecución;
                 5. capacidad de generar aprendizaje o mejora.
 
-                No priorices una recomendación únicamente porque parezca
-                atractiva o habitual.
+                Utiliza:
 
-                ------------------------------------------------------
-                6.4 — NÚMERO
-                ------------------------------------------------------
+                ALTA
+                MEDIA
+                BAJA
+
+                La prioridad representa la importancia de actuar, no la magnitud
+                aislada de una métrica ni la predicción de éxito.
+
+
+                # ------------------------------------------------------
+                # 6.2 — NÚMERO Y TIPOS
+                # ------------------------------------------------------
 
                 Presenta preferentemente entre 3 y 5 recomendaciones.
 
-                No es obligatorio alcanzar ese número.
+                No es obligatorio alcanzar ese número si los datos solo permiten
+                formular menos acciones sólidas.
 
-                Si el diagnóstico solamente permite formular 2 recomendaciones
-                sólidas, presenta 2.
-
-                Es preferible una lista corta de acciones específicas
-                que una lista extensa de consejos genéricos.
-
-                ------------------------------------------------------
-                6.5 — TIPOS DE RECOMENDACIÓN
-                ------------------------------------------------------
-
-                Clasifica cada recomendación según su naturaleza:
+                Clasifica cada recomendación como:
 
                 MANTENER
-
-                Cuando los datos muestran un comportamiento favorable que
-                conviene conservar y seguir observando.
-
                 OPTIMIZAR
-
-                Cuando existe una capacidad demostrada que puede desarrollarse
-                sin necesidad de corregir un problema.
-
                 INVESTIGAR
-
-                Cuando existe un comportamiento relevante cuya explicación
-                todavía no está suficientemente determinada.
-
                 EXPERIMENTAR
-
-                Cuando existe una hipótesis concreta que puede comprobarse
-                mediante una prueba controlada.
-
                 CORREGIR
-
-                Cuando existe una limitación suficientemente respaldada
-                por los datos y existe una acción razonable para abordarla.
 
                 Utiliza únicamente la categoría que corresponda al hallazgo.
 
-                ------------------------------------------------------
-                6.6 — ESTRUCTURA DE CADA RECOMENDACIÓN
-                ------------------------------------------------------
+                No conviertas automáticamente una anomalía, una métrica extrema
+                o una diferencia estadística en una acción correctiva.
+
+
+                # ------------------------------------------------------
+                # 6.3 — ESTRUCTURA
+                # ------------------------------------------------------
 
                 Cada recomendación debe contener:
 
@@ -2335,152 +2088,60 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - ACCIÓN CONCRETA
                 - CÓMO COMPROBARLA
 
-                La información debe ser específica para esta cuenta.
+                La evidencia debe utilizar cifras proporcionadas por Python o cálculos
+                derivados legítimamente de ellas.
 
-                ------------------------------------------------------
-                6.7 — PRIORIDAD
-                ------------------------------------------------------
+                La interpretación debe distinguir entre lo que sabemos y lo que
+                todavía no sabemos.
 
-                Utiliza una jerarquía sencilla:
 
-                ALTA
+                # ------------------------------------------------------
+                # 6.4 — ACCIÓN CONCRETA
+                # ------------------------------------------------------
 
-                MEDIA
-
-                BAJA
-
-                La prioridad debe reflejar la importancia del hallazgo
-                y la utilidad potencial de actuar sobre él.
-
-                No asignes prioridad ALTA automáticamente a una métrica
-                extrema o a una anomalía llamativa.
-
-                ------------------------------------------------------
-                6.8 — HALLAZGO
-                ------------------------------------------------------
-
-                Explica brevemente qué comportamiento del diagnóstico
-                origina la recomendación.
-
-                Debe poder reconocerse claramente su procedencia.
-
-                No introduzcas aquí un hallazgo que no aparezca
-                en el diagnóstico.
-
-                ------------------------------------------------------
-                6.9 — EVIDENCIA
-                ------------------------------------------------------
-
-                Indica los datos concretos que respaldan la recomendación
-                cuando sean relevantes.
-
-                Utiliza cifras proporcionadas por Python o resultados
-                calculados legítimamente a partir de ellas.
-
-                No sustituyas la evidencia por adjetivos.
-
-                ------------------------------------------------------
-                6.10 — INTERPRETACIÓN
-                ------------------------------------------------------
-
-                Explica por qué el hallazgo justifica prestar atención
-                a esa cuestión.
-
-                Distingue entre:
-
-                LO QUE SABEMOS
-
-                y
-
-                LO QUE TODAVÍA NO SABEMOS.
-
-                No conviertas una hipótesis en una certeza para justificar
-                una acción.
-
-                ------------------------------------------------------
-                6.11 — ACCIÓN CONCRETA
-                ------------------------------------------------------
-
-                La recomendación debe poder convertirse en una acción real.
-
-                Evita formulaciones genéricas como:
-
-                "publica más"
-
-                "sé constante"
-
-                "mejora tu contenido"
-
-                "haz networking"
-
-                "trabaja tu marca personal"
-
-                "publica contenido de calidad"
-
-                salvo que formen parte de una acción concreta directamente
-                derivada de un hallazgo específico.
-
-                La acción debe explicar:
+                La acción debe poder ejecutarse realmente y explicar:
 
                 - qué hacer;
                 - sobre qué dimensión actuar;
                 - con qué objetivo;
                 - y, cuando sea posible, cómo ejecutarlo.
 
-                ------------------------------------------------------
-                6.12 — RECOMENDACIONES BASADAS EN INCERTIDUMBRE
-                ------------------------------------------------------
+                Evita consejos genéricos como:
 
-                Cuando el diagnóstico identifique una incertidumbre importante,
-                la recomendación puede consistir en obtener información adicional.
+                - publicar más;
+                - ser constante;
+                - mejorar el contenido;
+                - hacer networking;
+                - trabajar la marca personal.
 
-                En ese caso, no presentes una explicación como cierta.
+                Una recomendación debe ser específica de esta cuenta y estar vinculada
+                a un comportamiento observado.
 
-                La acción debe orientarse a:
 
-                - investigar;
-                - observar;
-                - recopilar información;
-                - comparar;
-                - experimentar.
+                # ------------------------------------------------------
+                # 6.5 — INCERTIDUMBRE, FORTALEZAS Y ANOMALÍAS
+                # ------------------------------------------------------
 
-                El objetivo es reducir la incertidumbre.
-
-                ------------------------------------------------------
-                6.13 — RECOMENDACIONES SOBRE FORTALEZAS
-                ------------------------------------------------------
-
-                No todas las recomendaciones deben estar orientadas
-                a corregir problemas.
-
-                Cuando exista una fortaleza demostrada,
-                puede recomendarse:
-
-                - mantenerla;
-                - monitorizarla;
-                - desarrollarla;
-                - investigar cómo reproducirla.
-
-                No conviertas automáticamente una fortaleza excepcional
-                en una estrategia consolidada.
-
-                ------------------------------------------------------
-                6.14 — RECOMENDACIONES SOBRE ANOMALÍAS
-                ------------------------------------------------------
+                Una recomendación puede orientarse a mantener o desarrollar una
+                fortaleza, investigar un comportamiento excepcional o reducir una
+                incertidumbre.
 
                 Una anomalía no implica automáticamente que deba corregirse.
 
-                Cuando aparezca un resultado excepcional,
-                la recomendación puede ser INVESTIGAR antes que CORREGIR.
+                Cuando falte información para determinar una causa o diseñar una acción,
+                la recomendación puede consistir en investigar, observar, recopilar
+                información o comparar resultados.
 
-                La acción debe depender de la naturaleza del hallazgo.
+                No presentes como certeza una explicación que el diagnóstico haya
+                identificado como hipótesis.
 
-                ------------------------------------------------------
-                6.15 — RECOMENDACIONES SOBRE ALCANCE Y ENGAGEMENT
-                ------------------------------------------------------
 
-                Cuando la recomendación esté relacionada con publicaciones,
-                distingue claramente entre:
+                # ------------------------------------------------------
+                # 6.6 — ALCANCE, INTERACCIONES Y ENGAGEMENT
+                # ------------------------------------------------------
+
+                Cuando una recomendación se refiera al rendimiento de publicaciones,
+                distingue siempre:
 
                 ALCANCE
                 = impresiones.
@@ -2488,49 +2149,19 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 VOLUMEN DE INTERACCIÓN
                 = interacciones absolutas.
 
-                EFICIENCIA
+                EFICIENCIA DE INTERACCIÓN
                 = engagement.
 
-                No recomiendes aumentar una dimensión suponiendo
-                automáticamente que eso mejorará las demás.
+                No supongas que mejorar una dimensión producirá automáticamente
+                una mejora en las demás.
 
-                Cuando exista una diferencia entre alcance y eficiencia,
-                la recomendación debe respetar esa diferencia.
 
-                ------------------------------------------------------
-                6.16 — NO FORZAR ACCIONES
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 6.7 — RELACIÓN CON LOS EXPERIMENTOS
+                # ------------------------------------------------------
 
-                No conviertas automáticamente en una recomendación:
-
-                - una métrica baja;
-                - una métrica alta;
-                - una anomalía;
-                - una diferencia entre grupos;
-                - una frecuencia determinada.
-
-                Primero debe existir una interpretación estratégica
-                que justifique actuar.
-
-                Si el mejor resultado analítico es:
-
-                "mantener y observar"
-
-                puede ser una recomendación válida.
-
-                Si el mejor resultado es:
-
-                "todavía no existe evidencia suficiente"
-
-                no fuerces una acción correctiva.
-
-                ------------------------------------------------------
-                6.17 — RELACIÓN CON LOS EXPERIMENTOS
-                ------------------------------------------------------
-
-                Una recomendación puede proponer realizar un experimento,
-                pero el diseño detallado del experimento corresponde
-                al BLOQUE 7.
+                Una recomendación puede proponer experimentar, pero el diseño detallado
+                corresponde al BLOQUE 7.
 
                 No desarrolles aquí:
 
@@ -2540,56 +2171,25 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - criterios de éxito;
                 - diseño experimental detallado.
 
-                Cuando corresponda, indica únicamente que una cuestión
-                debe comprobarse mediante experimentación.
 
-                ------------------------------------------------------
-                6.18 — ORDEN DE PRESENTACIÓN
-                ------------------------------------------------------
+                # ------------------------------------------------------
+                # 6.8 — ORDEN Y REGLA FINAL
+                # ------------------------------------------------------
 
-                Las recomendaciones deben aparecer de mayor a menor prioridad.
+                Presenta las recomendaciones de mayor a menor prioridad.
 
-                La primera debe representar la acción con mayor respaldo
-                y relevancia estratégica.
+                No fuerces acciones cuando el análisis no las justifique.
 
-                No ordenes las recomendaciones simplemente por el orden
-                en que aparecieron los hallazgos.
+                Si la evidencia solo permite "mantener y observar" o "obtener más datos",
+                esa puede ser la recomendación adecuada.
 
-                ------------------------------------------------------
-                6.19 — ESPECIFICIDAD
-                ------------------------------------------------------
-
-                Una recomendación debe ser reconociblemente propia de esta cuenta.
-
-                Evita recomendaciones que podrían aparecer sin cambios
-                en cualquier auditoría de LinkedIn.
-
-                La acción debe estar vinculada a un comportamiento concreto
-                observado en los datos.
-
-                ------------------------------------------------------
-                6.20 — OBJETIVO FINAL
-                ------------------------------------------------------
-
-                Las recomendaciones deben permitir al propietario pasar
-                del diagnóstico a la toma de decisiones.
-
-                El resultado esperado es:
+                El resultado debe permitir pasar directamente de:
 
                 DIAGNÓSTICO
                 → PRIORIDAD
                 → ACCIÓN
 
-                No:
-
-                DATOS
-                → CONSEJOS GENÉRICOS
-
-                Una buena recomendación no pretende demostrar que el analista
-                tiene más conocimientos sobre LinkedIn.
-
-                Pretende ayudar al propietario a decidir qué merece la pena
-                hacer a continuación y por qué.
+                sin introducir información nueva ni consejos genéricos.
 
 
                 # ======================================================
@@ -2685,11 +2285,12 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - CRITERIO DE EVALUACIÓN;
                 - DECISIÓN POSTERIOR.
 
-                No es obligatorio completar todos los elementos cuando
-                los datos disponibles no permitan hacerlo con rigor.
+                Si no existe una hipótesis suficientemente respaldada por los datos,
+                no debe generarse un experimento únicamente para completar la sección.
 
-                Es preferible declarar una limitación antes que inventar
-                un diseño experimental.
+                En ese caso, debe indicarse que no existe evidencia suficiente para
+                plantear una prueba específica y señalar qué información adicional
+                sería necesaria para poder diseñarla.
 
                 # ------------------------------------------------------
                 # 7.4 — REFERENCIA DE COMPARACIÓN
@@ -2909,149 +2510,101 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 # BLOQUE 8 — AUDITORÍA DEL ANÁLISIS
                 # ======================================================
 
-                Este bloque realiza una comprobación final del resultado producido
-                por los bloques 0–7 antes de enviarlo al módulo de generación HTML.
+                Realiza una comprobación final del análisis antes de enviarlo al módulo
+                de generación HTML.
 
-                Su función es CONTROLAR LA CALIDAD Y CONSISTENCIA.
-
-                No realiza un nuevo análisis estratégico.
-                No genera recomendaciones nuevas.
-                No genera experimentos nuevos.
-                No genera HTML.
-                No modifica la estructura del informe.
-                No añade información que no exista.
+                La auditoría NO realiza un nuevo análisis estratégico, no genera nuevas
+                recomendaciones ni experimentos, no modifica la arquitectura y no añade
+                información que no esté respaldada por los datos disponibles.
 
                 La fuente de verdad continúa siendo:
 
                 DATOS ORIGINALES DE PYTHON
                 +
-                RESULTADOS OBTENIDOS DURANTE EL ANÁLISIS.
+                RESULTADOS DEL ANÁLISIS
+
 
                 # ------------------------------------------------------
-                # 8.1 — CONTROL DE DATOS
+                # 8.1 — INTEGRIDAD DE LOS DATOS
                 # ------------------------------------------------------
 
-                Comprobar que:
+                Comprueba que las cifras, fechas, posiciones, métricas y URLs coinciden
+                con los datos originales proporcionados por Python.
 
-                - las cifras coinciden con los datos originales;
-                - las fechas son correctas;
-                - las URLs son correctas;
-                - las métricas no han sido alteradas;
-                - los rankings corresponden a los datos proporcionados;
-                - los cálculos derivados son reproducibles a partir de los datos
-                disponibles.
+                Comprueba especialmente los tres rankings:
 
-                Si existe una discrepancia, corregirla utilizando los datos originales.
+                - TOP 5 POR IMPRESIONES;
+                - BOTTOM 5 POR IMPRESIONES;
+                - TOP 5 POR ENGAGEMENT.
 
-                No estimar valores ausentes.
+                Si una publicación aparece en varios rankings, sus datos deben ser
+                coherentes en todas sus apariciones.
 
-                No completar información faltante.
+                No inventes, completes ni estimes datos ausentes.
 
-                # ------------------------------------------------------
-                # 8.2 — CONTROL DE ESTRUCTURA
-                # ------------------------------------------------------
-
-                Comprobar que existen exactamente las 14 secciones obligatorias
-                y que mantienen el orden establecido.
-
-                No crear nuevas secciones principales.
-
-                No eliminar ninguna sección.
-
-                Si una sección no puede desarrollarse por falta de datos,
-                debe conservarse indicando claramente la limitación.
 
                 # ------------------------------------------------------
-                # 8.3 — CONTROL DE LAS PUBLICACIONES
+                # 8.2 — INTEGRIDAD ESTRUCTURAL
                 # ------------------------------------------------------
 
-                Comprobar que existen:
+                Comprueba que existen exactamente las 14 secciones obligatorias,
+                en el orden establecido en el BLOQUE 1.
 
-                - TOP 5 por impresiones;
-                - BOTTOM 5 por impresiones;
-                - TOP 5 por engagement.
+                No añadas, elimines, combines ni dividas secciones principales.
 
-                Comprobar que cada publicación conserva correctamente:
+                Si una sección está limitada por falta de datos, debe conservarse
+                e indicar la limitación correspondiente.
 
-                - posición;
-                - fecha;
-                - impresiones;
-                - interacciones;
-                - engagement;
-                - URL,
-
-                cuando dichos datos estén disponibles.
-
-                Una publicación puede aparecer en varios rankings.
-
-                Si aparece varias veces, sus datos deben ser coherentes
-                en todas sus apariciones.
-
-                No crear publicaciones para completar rankings.
-
-                No utilizar placeholders.
 
                 # ------------------------------------------------------
-                # 8.4 — CONTROL DE CONSISTENCIA ANALÍTICA
+                # 8.3 — CONSISTENCIA ANALÍTICA
                 # ------------------------------------------------------
 
-                Comprobar que no existan contradicciones entre:
+                Comprueba que no existan contradicciones entre:
 
                 - métricas;
                 - rankings;
                 - distribución;
                 - alcance;
                 - engagement;
-                - cruce alcance-engagement;
+                - cruce entre métricas;
                 - diagnóstico;
                 - recomendaciones;
                 - experimentos.
 
-                El diagnóstico debe derivarse de los hallazgos.
+                La cadena lógica debe mantenerse:
 
-                Las recomendaciones deben derivarse del diagnóstico.
+                DATOS
+                → HALLAZGOS
+                → DIAGNÓSTICO
+                → RECOMENDACIONES
+                → EXPERIMENTOS.
 
-                Los experimentos deben derivarse de hipótesis identificadas.
-
-                # ------------------------------------------------------
-                # 8.5 — CONTROL DE NIVEL DE CERTEZA
-                # ------------------------------------------------------
-
-                Comprobar que las afirmaciones respetan el nivel de evidencia
-                establecido durante el análisis.
-
-                No convertir:
-
-                "se observa"
-
-                en:
-
-                "demuestra".
-
-                No convertir:
-
-                "podría estar relacionado"
-
-                en:
-
-                "provoca".
-
-                No convertir:
-
-                "hipótesis"
-
-                en:
-
-                "hecho".
-
-                Eliminar o reformular cualquier afirmación que presente
-                como certeza algo que los datos no permiten demostrar.
 
                 # ------------------------------------------------------
-                # 8.6 — CONTROL DE NO INVENCIÓN
+                # 8.4 — NIVEL DE CERTEZA
                 # ------------------------------------------------------
 
-                Comprobar que no se hayan añadido durante el análisis:
+                Comprueba que las afirmaciones respetan la evidencia disponible.
+
+                No conviertas:
+
+                - indicios en hechos;
+                - hipótesis en conclusiones;
+                - asociaciones en causalidad.
+
+                Reformula o elimina cualquier afirmación que exceda lo que permiten
+                demostrar los datos.
+
+
+                # ------------------------------------------------------
+                # 8.5 — NO INVENCIÓN
+                # ------------------------------------------------------
+
+                Comprueba que no se hayan introducido características no disponibles
+                sobre las publicaciones o sus resultados.
+
+                No deben aparecer como hechos datos sobre:
 
                 - temas;
                 - formatos;
@@ -3062,24 +2615,26 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - títulos;
                 - audiencia;
                 - causas;
-                - comportamiento del algoritmo;
+                - algoritmo;
+                - calidad;
+                - intención;
                 - características del contenido;
-                - URLs;
-                - métricas;
 
-                que no estén respaldados por los datos disponibles.
+                cuando no estén respaldados por la información disponible.
 
-                Si una afirmación no puede justificarse con la información disponible,
-                debe eliminarse o reformularse como limitación o hipótesis.
+                Si una conclusión requiere información inexistente, debe mantenerse como
+                hipótesis o limitación.
+
 
                 # ------------------------------------------------------
-                # 8.7 — CONTROL DE REPETICIÓN
+                # 8.6 — NO REPETICIÓN
                 # ------------------------------------------------------
 
-                Comprobar que el informe no repita mecánicamente las mismas
-                conclusiones en todas las secciones.
+                Comprueba que las secciones posteriores no se limiten a repetir
+                mecánicamente las anteriores.
 
-                La información debe avanzar:
+                Cada sección debe cumplir la función definida en el BLOQUE 2 y aportar
+                un avance en la interpretación:
 
                 DATOS
                 → ANÁLISIS
@@ -3088,30 +2643,24 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 → ACCIÓN
                 → EXPERIMENTACIÓN.
 
-                Las secciones posteriores deben aportar interpretación o decisión,
-                no limitarse a copiar las anteriores.
 
                 # ------------------------------------------------------
-                # 8.8 — CORRECCIÓN
+                # 8.7 — CORRECCIÓN FINAL
                 # ------------------------------------------------------
 
-                Si se detecta un error:
+                Si detectas un error, corrígelo utilizando exclusivamente la fuente
+                de verdad disponible.
 
-                1. corregirlo utilizando la fuente de verdad disponible;
-                2. conservar el significado original cuando sea correcto;
-                3. no introducir información nueva;
-                4. no crear nuevas conclusiones para sustituir las eliminadas.
+                No introduzcas información nueva para compensar una corrección.
 
-                Si un elemento no puede verificarse, debe tratarse como
-                información no demostrada.
+                Si un elemento no puede verificarse, trátalo como no demostrado.
 
-                Nunca rellenar una ausencia mediante una suposición.
 
                 # ------------------------------------------------------
-                # 8.9 — RESULTADO DE LA AUDITORÍA
+                # 8.8 — RESULTADO
                 # ------------------------------------------------------
 
-                El resultado debe ser un análisis:
+                El resultado final debe ser:
 
                 - coherente;
                 - verificable;
@@ -3161,6 +2710,57 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 Antes de responder, verifica internamente:
                 ¿Inicia con <html> y termina con </html>? ¿Están las 14 secciones en orden? ¿Están ausentes el markdown y los comentarios externos? ¿El CSS está integrado y no hay dependencias de internet? Procesa y genera el HTML directo.
                 """
+                st.write("===== CONTROL DE TAMAÑO DEL PROMPT =====")
+
+                st.write(
+                    "system_prompt:",
+                    len(system_prompt),
+                    "caracteres"
+                )
+
+                st.write(
+                    "analytics_text:",
+                    len(analytics_text),
+                    "caracteres"
+                )
+
+                st.write(
+                    "ssi_text:",
+                    len(ssi_text),
+                    "caracteres"
+                )
+
+                st.write(
+                    "sector_real:",
+                    len(sector_real),
+                    "caracteres"
+                )
+
+                st.write(
+                    "intereses_real:",
+                    len(intereses_real),
+                    "caracteres"
+                )
+
+                st.write(
+                    "TOTAL APROX. CARACTERES:",
+                    len(system_prompt)
+                    + len(analytics_text)
+                    + len(ssi_text)
+                    + len(sector_real)
+                    + len(intereses_real)
+                )
+
+                st.write(
+                    "TOTAL APROX. TOKENS:",
+                    (
+                        len(system_prompt)
+                        + len(analytics_text)
+                        + len(ssi_text)
+                        + len(sector_real)
+                        + len(intereses_real)
+                    ) // 4
+                )
                                
                 response = client.chat.completions.create(
                     model="gpt-4o",
@@ -3172,6 +2772,22 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                                 {
                                     "type": "text",
                                     "text": f"""
+
+                DATOS OFICIALES DE IDENTIFICACIÓN DEL INFORME
+
+                USUARIO: {report_metadata["usuario"]}
+                PERIODO: {report_metadata["periodo"]}
+                FECHA DE INICIO: {report_metadata["fecha_inicio"]}
+                FECHA DE FIN: {report_metadata["fecha_fin"]}
+                FECHA DE GENERACIÓN: {report_metadata["fecha_generacion"]}
+                ESTADO: {report_metadata["estado"]}
+
+                REGLA DE METADATOS:
+
+                Los datos anteriores proceden directamente de Python.
+                Utilízalos para identificar y encabezar el informe.
+                No los modifiques, recalcules ni interpretes.
+
                 DATOS ESTRATÉGICOS INTRODUCIDOS POR EL USUARIO
 
                 Sector / Ecosistema Profesional:
@@ -3271,9 +2887,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 No utilices el número de publicaciones como indicador directo
                 de experiencia avanzada en LinkedIn.
-
-                No utilices el número de publicaciones como indicador directo de
-                experiencia avanzada en LinkedIn.
                 """
                 
                                 },
