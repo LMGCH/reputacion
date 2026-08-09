@@ -238,10 +238,10 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 NO deben ser interpretados ni modificados.
 
                 USUARIO ANALIZADO:
-                {{username}}
+                {__name__}
 
                 PERIODO ANALIZADO:
-                {{analysis_period}}
+                {df}
 
                 FECHA DE GENERACIÓN:
                 {report_generated_at}
@@ -572,7 +572,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 El objetivo final es producir conocimiento útil y verificable
                 sobre el comportamiento de esta cuenta.
 
-                                # ======================================================
+                
+                # ======================================================
                 # BLOQUE 1 — ARQUITECTURA DEL INFORME
                 # ======================================================
 
@@ -660,7 +661,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 La última sección no debe introducir conclusiones que contradigan
                 las anteriores.
 
-                                # ======================================================
+
+                # ======================================================
                 # BLOQUE 2 — CONTENIDO DE CADA SECCIÓN
                 # ======================================================
 
@@ -1049,7 +1051,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 indica la limitación o formula una propuesta de investigación
                 en lugar de inventar variables.
 
-                                # ======================================================
+                
+                # ======================================================
                 # BLOQUE 3 — REGLAS DE ANÁLISIS
                 # ======================================================
 
@@ -1508,11 +1511,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 sin exceder la evidencia disponible y dejar claramente
                 identificadas las cuestiones que todavía deben comprobarse.
 
-                # ======================================================
-                # FIN DEL BLOQUE 3
-                # ======================================================
 
-                                # ======================================================
+                # ======================================================
                 # BLOQUE 4 — ANÁLISIS DE LAS 15 PUBLICACIONES
                 # ======================================================
 
@@ -1840,11 +1840,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 sin repetir mecánicamente los mismos datos en cada sección.
 
-                # ======================================================
-                # FIN DEL BLOQUE 4
-                # ======================================================
 
-                                # ======================================================
+                # ======================================================
                 # BLOQUE 5 — CONSTRUCCIÓN DEL DIAGNÓSTICO
                 # ======================================================
 
@@ -2193,11 +2190,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 No es necesario utilizar estas preguntas como subtítulos visibles.
                 Deben funcionar como guía para construir la síntesis.
 
-                # ======================================================
-                # FIN DEL BLOQUE 5
-                # ======================================================
 
-                                # ======================================================
+                # ======================================================
                 # BLOQUE 6 — RECOMENDACIONES PRIORITARIAS
                 # ======================================================
 
@@ -2581,11 +2575,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 Pretende ayudar al propietario a decidir qué merece la pena
                 hacer a continuación y por qué.
 
-                # ======================================================
-                # FIN DEL BLOQUE 6
-                # ======================================================
 
-                                # ======================================================
+                # ======================================================
                 # BLOQUE 7 — EXPERIMENTOS Y PRÓXIMOS PASOS
                 # ======================================================
 
@@ -2899,10 +2890,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 en oportunidades concretas de aprendizaje.
 
                 # ======================================================
-                # FIN DEL BLOQUE 7
-                # ======================================================
-
-                                # ======================================================
                 # BLOQUE 8 — AUDITORÍA DEL ANÁLISIS
                 # ======================================================
 
@@ -3122,11 +3109,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 Una vez superada esta comprobación, el contenido queda preparado
                 para el Módulo 9.
 
-                # ======================================================
-                # FIN DEL BLOQUE 8
-                # ======================================================
 
-                                # ======================================================
+                # ======================================================
                 # MÓDULO 9 — GENERACIÓN DEL INFORME HTML
                 # ======================================================
 
@@ -3797,14 +3781,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 No añadir bloques de código.
 
-                # ======================================================
-                # FIN DEL MÓDULO 9
-                # ======================================================
                             """
-                print("\n===== VARIABLES DISPONIBLES =====")
-                print([k for k in locals().keys()])
-                print("=================================\n")
-                
+               
                 response = client.chat.completions.create(
                     model="gpt-4o",
                     messages=[
@@ -3818,9 +3796,11 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 DATOS ESTRATÉGICOS INTRODUCIDOS POR EL USUARIO
 
                 Sector / Ecosistema Profesional:
+
                 {sector_real}
 
                 Núcleos de Contenido Target:
+
                 {intereses_real}
 
 
@@ -3932,13 +3912,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 st.success("¡Auditoría corporativa ejecutada con éxito!")
 
                 st.markdown("### Vista Previa del Informe Ejecutivo")
-
-                st.write("¿Empieza por <html>?:", html_content.strip().startswith("<html>"))
-                st.write("INICIO DEL HTML:", html_content.strip()[:100])
-                st.write("Longitud HTML:", len(html_content))
-                st.write("¿Contiene CSS?:", "background" in html_content.lower() or "color:" in html_content.lower()) 
-                st.write("¿Contiene </style>?:", "</style>" in html_content.lower()) 
-                st.write("¿Contiene <body>?:", "<body>" in html_content.lower()) 
 
                 st.code(html_content[:5000])
 
