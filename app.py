@@ -218,8 +218,20 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 ssi_text = extraer_datos_ssi(client, ssi_image)
 
                 st.subheader("Datos SSI extraídos")
-
                 st.code(ssi_text)
+
+                st.write("===== FECHA ALTA =====")
+                st.write(fecha_alta)
+
+                st.write("===== HOY =====")
+                st.write(hoy)
+
+                st.write("===== REPORT METADATA =====")
+                st.write(report_metadata)
+
+                st.write("===== REPORT GENERATED AT =====")
+                st.write(report_generated_at)
+                
                 sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
 
