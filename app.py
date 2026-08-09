@@ -2611,7 +2611,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 Paleta sobria:
 
-                * azul oscuro para estructura y títulos;
+                * verde palido para estructura y títulos;
                 * azul medio para destacados;
                 * gris oscuro para texto;
                 * gris claro para fondos secundarios;
