@@ -3590,25 +3590,13 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 st.success(
                     "✅ JSON recibido y validado correctamente: "
                     "metadata + 14 secciones + tipos de contenido válidos."
-)
-                css = CSS_INFORME
+                )
 
                 # ======================================================
                 # GENERACIÓN DEL HTML
                 # ======================================================
 
                 html_content = generar_html(analysis_json)
-
-                # ======================================================
-                # DIAGNÓSTICO DEFINITIVO — CSS DENTRO DEL HTML
-                # ======================================================
-
-                inicio_style = html_content.find("<style>")
-                fin_style = html_content.find("</style>")
-
-                css_html = html_content[inicio_style:fin_style]
-
-
 
                 st.success(
                     "✅ HTML generado correctamente."
@@ -3618,10 +3606,9 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "### Vista Previa del Informe Ejecutivo"
                 )
 
-               st.html(
+                st.html(
                     html_content
                 )
-
                 # ------------------------------------------------------
                 # HTML GENERADO — INSPECCIÓN
                 # ------------------------------------------------------
