@@ -4,4 +4,4 @@ pandas
 openpyxl
 pypdf
 fpdf2
-xhtml2pdf
+selenium
