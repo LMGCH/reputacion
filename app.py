@@ -1,5 +1,5 @@
-from xhtml2pdf import pisa
 import io
+import json
 import streamlit as st
 import pandas as pd
 import openai
@@ -7,6 +7,9 @@ import base64
 import requests
 from pypdf import PdfReader
 from datetime import date
+import tempfile
+import os
+import subprocess
 
 # Configuración visual premium
 st.set_page_config(page_title="Auditoría de Reputación LinkedIn AI", layout="centered", page_icon="🧲")
@@ -71,8 +74,9 @@ def encode_image(uploaded_file):
 def extraer_datos_ssi(client, uploaded_file):
     base64_image = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
 
-    response_ssi = client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
+        response_format={"type": "json_object"},
         messages=[
             {
                 "role": "system",
@@ -118,13 +122,20 @@ IMPORTANTE:
 
 Para esta captura, los cuatro factores están expresados con valores numéricos que pueden contener decimales.
 
-Devuelve ÚNICAMENTE este formato de texto, sin explicaciones adicionales:
+Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura:
 
-SSI TOTAL: [valor]
-MARCA PROFESIONAL: [valor]
-ENCONTRAR PERSONAS ADECUADAS: [valor]
-INTERACTUAR CON INFORMACIÓN: [valor]
-CONSTRUIR RELACIONES: [valor]
+{
+  "ssi_total": "[valor]",
+  "marca_profesional": "[valor]",
+  "encontrar_personas_adecuadas": "[valor]",
+  "interactuar_con_informacion": "[valor]",
+  "construir_relaciones": "[valor]"
+}
+
+Si un dato no aparece claramente o no puede leerse, utiliza exactamente:
+"NO DISPONIBLE"
+
+No añadas ninguna explicación fuera del JSON.
 """
             },
             {
@@ -146,7 +157,1464 @@ CONSTRUIR RELACIONES: [valor]
         max_tokens=500
     )
 
-    return response_ssi.choices[0].message.content
+    return response.choices[0].message.content
+
+# ======================================================
+# CSS MAESTRO DEL INFORME
+# ======================================================
+
+# ======================================================
+# CSS MAESTRO DEL INFORME — CHROME / CHROMIUM
+# ======================================================
+
+CSS_INFORME = """
+
+/* ======================================================
+   BASE
+   ====================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    background: #F5F7FA;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #F5F7FA;
+    color: #1F2937;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.report {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 28px 50px;
+}
+
+
+/* ======================================================
+   CABECERA PRINCIPAL
+   ====================================================== */
+
+.report-header {
+    background: linear-gradient(
+        135deg,
+        #123B5D 0%,
+        #0A66C2 100%
+    );
+    color: #FFFFFF;
+    padding: 36px 38px 32px;
+    border-radius: 18px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 24px rgba(18, 59, 93, 0.14);
+    position: relative;
+    overflow: hidden;
+}
+
+.report-header::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    top: -120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+}
+
+.report-header-main {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 24px;
+}
+
+.report-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.80;
+    margin-bottom: 8px;
+}
+
+.report-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.report-user {
+    font-size: 17px;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+
+/* ======================================================
+   METADATOS
+   ====================================================== */
+
+.metadata {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.metadata-credit span {
+    font-weight: 500;
+}
+
+.metadata-item {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 10px;
+    padding: 11px 13px;
+    min-height: 62px;
+}
+
+.metadata-item strong {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    opacity: 0.70;
+    margin-bottom: 4px;
+}
+
+.metadata-item span {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #FFFFFF;
+}
+
+.metadata-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 5px;
+}
+
+.metadata-value {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ======================================================
+   SECCIONES
+   ====================================================== */
+
+.report-sections {
+    width: 100%;
+}
+
+.section {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.035);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.section-number {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 9px;
+    background: #EAF3FB;
+    color: #0A66C2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.section h2,
+.section-title {
+    margin: 0 0 18px 0;
+    color: #123B5D;
+    font-size: 19px;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.section p {
+    margin: 0 0 12px;
+    color: #4B5563;
+}
+
+.section p:last-child {
+    margin-bottom: 0;
+}
+
+.section-content {
+    width: 100%;
+}
+
+
+/* ======================================================
+   MÉTRICAS
+   ====================================================== */
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 20px;
+}
+
+.metric-card {
+    background: #FAFBFC;
+    border: 1px solid #E5E7EB;
+    border-radius: 11px;
+    padding: 15px 16px;
+    min-height: 100px;
+    position: relative;
+}
+
+.metric-card::before {
+    content: "";
+    display: block;
+    width: 28px;
+    height: 3px;
+    border-radius: 3px;
+    background: #0A66C2;
+    margin-bottom: 10px;
+}
+
+.metric-label {
+    color: #6B7280;
+    font-size: 10px;
+    line-height: 1.35;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    color: #123B5D;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+
+/* ======================================================
+   TEXTO
+   ====================================================== */
+
+.content-text {
+    color: #4B5563;
+    margin: 0 0 14px;
+}
+
+.content-text:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ======================================================
+   INSIGHTS / HALLAZGOS
+   ====================================================== */
+
+.insight {
+    background: #EAF3FB;
+    border-left: 4px solid #0A66C2;
+    border-radius: 0 10px 10px 0;
+    padding: 16px 19px;
+    margin: 13px 0;
+}
+
+.insight-label {
+    color: #0A66C2;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+}
+
+.insight-text {
+    color: #374151;
+}
+
+
+/* ======================================================
+   DIAGNÓSTICO
+   ====================================================== */
+
+.diagnosis {
+    background: #FFF3E8;
+    border-left: 4px solid #E67E22;
+    border-radius: 0 10px 10px 0;
+    padding: 18px 20px;
+    margin: 14px 0;
+}
+
+.diagnosis-label {
+    color: #A95400;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+}
+
+.diagnosis-text {
+    color: #4B5563;
+}
+
+
+/* ======================================================
+   BLOQUES DE ANÁLISIS / LIMITACIONES
+   ====================================================== */
+
+.analysis-block {
+    margin: 14px 0;
+}
+
+.limitation {
+    background: #F8F9FA;
+    border: 1px dashed #D1D5DB;
+    border-radius: 10px;
+    padding: 15px 17px;
+    color: #4B5563;
+}
+
+.limitation-label,
+.block-label {
+    color: #4B5563;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+}
+
+.block-text {
+    color: #4B5563;
+}
+
+
+/* ======================================================
+   RECOMENDACIONES
+   ====================================================== */
+
+.recommendation {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px 0;
+    background: #FFFFFF;
+}
+
+.recommendation-header {
+    background: #F8FAFC;
+    padding: 13px 17px;
+    border-bottom: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.recommendation-title {
+    font-weight: 700;
+    color: #123B5D;
+}
+
+.priority {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.priority-alta {
+    background: #FDEDEC;
+    color: #C0392B;
+}
+
+.priority-media {
+    background: #FFF3E8;
+    color: #A95400;
+}
+
+.priority-baja {
+    background: #EAF7F0;
+    color: #198754;
+}
+
+.recommendation-body {
+    padding: 17px 18px;
+}
+
+.rec-row {
+    margin-bottom: 14px;
+}
+
+.rec-row:last-child {
+    margin-bottom: 0;
+}
+
+.rec-label {
+    color: #6B7280;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 3px;
+}
+
+.rec-value {
+    color: #4B5563;
+}
+
+
+/* ======================================================
+   EXPERIMENTOS
+   ====================================================== */
+
+.experiment {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px 0;
+    background: #FFFFFF;
+}
+
+.experiment-header {
+    background: #EAF3FB;
+    padding: 13px 17px;
+    color: #123B5D;
+    font-weight: 700;
+}
+
+.experiment-body {
+    padding: 17px 18px;
+    background: #FFFFFF;
+}
+
+.experiment-row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.experiment-row:last-child {
+    border-bottom: none;
+}
+
+.experiment-label {
+    color: #6B7280;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.experiment-value {
+    color: #4B5563;
+}
+
+
+/* ======================================================
+   TABLAS
+   ====================================================== */
+
+.table-wrapper {
+    width: 100%;
+    margin: 15px 0 4px;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    background: #FFFFFF;
+    table-layout: auto;
+}
+
+.data-table th {
+    background: #123B5D;
+    color: #FFFFFF;
+    padding: 10px 9px;
+    text-align: left;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+}
+
+.data-table td {
+    padding: 9px;
+    border-bottom: 1px solid #E5E7EB;
+    color: #4B5563;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.data-table tbody tr:nth-child(even) td {
+    background: #FAFBFC;
+}
+
+.data-table tbody tr:hover td {
+    background: #EAF3FB;
+}
+
+.data-table a {
+    color: #0A66C2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.data-table a:hover {
+    text-decoration: underline;
+}
+
+
+/* ======================================================
+   BOTONES DE PUBLICACIONES
+   ====================================================== */
+
+.publication-link {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: #EAF3FB;
+    color: #0A66C2 !important;
+    text-decoration: none !important;
+    font-size: 10px;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    border: 1px solid #D7EAF8;
+}
+
+.publication-link:hover {
+    background: #DCECF9;
+    text-decoration: none !important;
+}
+
+
+/* ======================================================
+   FOOTER
+   ====================================================== */
+
+.report-footer {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid #E5E7EB;
+    text-align: center;
+    color: #6B7280;
+    font-size: 10px;
+}
+
+
+/* ======================================================
+   CONTROL DE PÁGINAS — CHROME PDF
+   ====================================================== */
+
+.report-header {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.metric-card,
+.insight,
+.diagnosis,
+.recommendation,
+.experiment,
+.limitation {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.data-table {
+    break-inside: auto;
+    page-break-inside: auto;
+}
+
+.data-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+
+/* ======================================================
+   IMPRESIÓN
+   ====================================================== */
+
+@media print {
+
+    html,
+    body {
+        background: #FFFFFF;
+    }
+
+    body {
+        font-size: 12px;
+    }
+
+    .report {
+        max-width: none;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .report-header {
+        box-shadow: none;
+    }
+
+    .section {
+        box-shadow: none;
+    }
+
+    .data-table tbody tr:hover td {
+        background: inherit;
+    }
+
+}
+
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+
+@media (max-width: 800px) {
+
+    .report {
+        padding: 18px 12px 40px;
+    }
+
+    .report-header {
+        padding: 27px 23px;
+    }
+
+    .metadata {
+        grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .section {
+        padding: 22px 20px;
+    }
+
+    .experiment-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .report-header h1 {
+        font-size: 24px;
+    }
+
+    .section h2,
+    .section-title {
+        font-size: 17px;
+    }
+
+    .recommendation-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+"""
+
+# ======================================================
+# FUNCIÓN — GENERACIÓN DEL HTML DESDE EL JSON AUDITADO
+# ======================================================
+
+def generar_html(analysis_json):
+
+    metadata = analysis_json.get("metadata", {})
+    sections = analysis_json.get("sections", [])
+
+    def escapar(valor):
+        """Escapa texto para HTML."""
+        if valor is None:
+            return ""
+
+        from html import escape
+
+        return escape(str(valor))
+
+#-------------------------------------------
+    def es_url(valor):
+
+        if not isinstance(valor, str):
+            return False
+
+        return (
+            valor.startswith("http://")
+            or valor.startswith("https://")
+        )
+
+    # ==================================================
+    # RENDERIZADO DE CONTENIDOS
+    # ==================================================
+
+    def render_content(item):
+
+        item_type = item.get("type")
+
+        # --------------------------------------------------
+        # TEXTO
+        # --------------------------------------------------
+
+        if item_type == "text":
+
+            return f"""
+            <div class="content-text">
+                {escapar(item.get("text", ""))}
+            </div>
+            """
+
+        # --------------------------------------------------
+        # MÉTRICA
+        # --------------------------------------------------
+
+        elif item_type == "metric":
+
+            return f"""
+            <div class="metric-card">
+
+                <div class="metric-label">
+                    {escapar(item.get("label", ""))}
+                </div>
+
+                <div class="metric-value">
+                    {escapar(item.get("value", ""))}
+                </div>
+
+            </div>
+            """
+
+        # --------------------------------------------------
+        # INSIGHT
+        # --------------------------------------------------
+
+        elif item_type == "insight":
+
+            return f"""
+            <div class="insight">
+
+                <div class="insight-label">
+                    {escapar(item.get("label", "HALLAZGO"))}
+                </div>
+
+                <div class="insight-text">
+                    {escapar(item.get("text", ""))}
+                </div>
+
+            </div>
+            """
+
+        # --------------------------------------------------
+        # LIMITACIÓN
+        # --------------------------------------------------
+
+        elif item_type == "limitation":
+
+            return f"""
+            <div class="analysis-block limitation">
+
+                <div class="block-label">
+                    LIMITACIÓN
+                </div>
+
+                <div class="block-text">
+                    {escapar(item.get("text", ""))}
+                </div>
+
+            </div>
+            """
+
+        # --------------------------------------------------
+        # DIAGNÓSTICO
+        # --------------------------------------------------
+
+        elif item_type == "diagnosis":
+
+            print("ENTRANDO EN RENDER DIAGNOSIS")
+            print("ITEM TYPE:", repr(item_type))
+            print("ITEM:", item)
+
+            html = ""
+
+            # ----------------------------------------------
+            # FORTALEZA
+            # ----------------------------------------------
+
+            fortalezas = (
+                item.get("primary_strength")
+                or item.get("fortalezas")
+                or item.get("fortaleza")
+            )
+
+            if fortalezas:
+
+                html += f"""
+                <div class="diagnosis">
+
+                    <div class="diagnosis-label">
+                        FORTALEZA
+                    </div>
+
+                    <div class="diagnosis-text">
+                        {escapar(fortalezas)}
+                    </div>
+
+                </div>
+                """
+
+            # ----------------------------------------------
+            # LIMITACIÓN
+            # ----------------------------------------------
+
+            limitaciones = (
+                item.get("primary_limitation")
+                or item.get("limitaciones")
+                or item.get("limitacion")
+            )
+
+            if limitaciones:
+
+                html += f"""
+                <div class="diagnosis">
+
+                    <div class="diagnosis-label">
+                        LIMITACIÓN
+                    </div>
+
+                    <div class="diagnosis-text">
+                        {escapar(limitaciones)}
+                    </div>
+
+                </div>
+                """
+
+            # ----------------------------------------------
+            # OPORTUNIDAD
+            # ----------------------------------------------
+
+            oportunidades = (
+                item.get("primary_opportunity")
+                or item.get("oportunidades")
+                or item.get("oportunidad")
+            )
+
+            if oportunidades:
+
+                html += f"""
+                <div class="diagnosis">
+
+                    <div class="diagnosis-label">
+                        OPORTUNIDAD
+                    </div>
+
+                    <div class="diagnosis-text">
+                        {escapar(oportunidades)}
+                    </div>
+
+                </div>
+                """
+
+            # ----------------------------------------------
+            # ANOMALÍA
+            # ----------------------------------------------
+
+            anomalias = (
+                item.get("primary_anomaly")
+                or item.get("anomalías")
+                or item.get("anomalias")
+                or item.get("anomalía")
+                or item.get("anomalia")
+            )
+
+            if anomalias:
+
+                html += f"""
+                <div class="diagnosis">
+
+                    <div class="diagnosis-label">
+                        ANOMALÍA
+                    </div>
+
+                    <div class="diagnosis-text">
+                        {escapar(anomalias)}
+                    </div>
+
+                </div>
+                """
+
+            # ----------------------------------------------
+            # INCERTIDUMBRE
+            # ----------------------------------------------
+
+            incertidumbres = (
+                item.get("primary_uncertainty")
+                or item.get("incertidumbres")
+                or item.get("incertidumbre")
+            )
+
+            if incertidumbres:
+
+                html += f"""
+                <div class="diagnosis">
+
+                    <div class="diagnosis-label">
+                        INCERTIDUMBRE
+                    </div>
+
+                    <div class="diagnosis-text">
+                        {escapar(incertidumbres)}
+                    </div>
+
+                </div>
+                """
+
+            return html
+
+        # --------------------------------------------------
+        # RECOMENDACIÓN
+        # --------------------------------------------------
+
+        elif item_type == "recommendation":
+
+            prioridad = item.get("priority", "")
+
+            prioridad_class = ""
+
+            if str(prioridad).lower() == "alta":
+                prioridad_class = "priority-alta"
+
+            elif str(prioridad).lower() == "media":
+                prioridad_class = "priority-media"
+
+            elif str(prioridad).lower() == "baja":
+                prioridad_class = "priority-baja"
+
+            html = f"""
+            <div class="recommendation">
+
+                <div class="recommendation-header">
+
+                    <div class="recommendation-title">
+                        Recomendación estratégica
+                    </div>
+
+                    <span class="priority {prioridad_class}">
+                        {escapar(prioridad)}
+                    </span>
+
+                </div>
+
+                <div class="recommendation-body">
+            """
+
+            campos = [
+                ("HALLAZGO", "finding"),
+                ("EVIDENCIA", "evidence"),
+                ("INTERPRETACIÓN", "interpretation"),
+                ("ACCIÓN", "action"),
+                ("CÓMO COMPROBARLA", "verification")
+            ]
+
+            for etiqueta, campo in campos:
+
+                valor = item.get(campo)
+
+                if valor not in [None, ""]:
+
+                    html += f"""
+                    <div class="rec-row">
+
+                        <div class="rec-label">
+                            {etiqueta}
+                        </div>
+
+                        <div class="rec-value">
+                            {escapar(valor)}
+                        </div>
+
+                    </div>
+                    """
+
+            html += """
+                </div>
+            </div>
+            """
+
+            return html
+
+
+        # --------------------------------------------------
+        # EXPERIMENTO
+        # --------------------------------------------------
+
+        elif item_type == "experiment":
+
+            html = """
+            <div class="experiment">
+
+                <div class="experiment-header">
+                    Experimento estratégico
+                </div>
+
+                <div class="experiment-body">
+            """
+
+            campos = [
+                ("HIPÓTESIS", "hypothesis"),
+                ("VARIABLE", "variable"),
+                ("CAMBIO", "change"),
+                ("MÉTRICA", "metric"),
+                ("REFERENCIA", "reference"),
+                ("CRITERIO DE ÉXITO", "success_criterion"),
+                ("DECISIÓN POSTERIOR", "subsequent_decision")
+            ]
+
+            for etiqueta, campo in campos:
+
+                valor = item.get(campo)
+
+                if valor not in [None, ""]:
+
+                    html += f"""
+                    <div class="experiment-row">
+
+                        <div class="experiment-label">
+                            {escapar(etiqueta)}
+                        </div>
+
+                        <div class="experiment-value">
+                            {escapar(valor)}
+                        </div>
+
+                    </div>
+                    """
+
+            html += """
+                </div>
+
+            </div>
+            """
+
+            return html
+
+        # --------------------------------------------------
+        # TABLA
+        # --------------------------------------------------
+
+        elif item_type == "table":
+
+            columns = item.get("columns", [])
+            rows = item.get("rows", [])
+
+            html = """
+            <div class="table-wrapper">
+
+                <table class="data-table">
+
+                    <thead>
+                        <tr>
+            """
+
+            for column in columns:
+
+                html += f"""
+                            <th>
+                                {escapar(column)}
+                            </th>
+                """
+
+            html += """
+                        </tr>
+                    </thead>
+
+                    <tbody>
+            """
+
+            for row in rows:
+
+                html += """
+                        <tr>
+                """
+
+                if isinstance(row, dict):
+
+                    for column in columns:
+
+                        valor = row.get(column, "")
+
+                        if es_url(valor):
+
+                            html += f"""
+                                <td>
+                                    <a
+                                        class="publication-link"
+                                        href="{escapar(valor)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        🔗 Ver publicación
+                                    </a>
+                                </td>
+                            """
+
+                        else:
+
+                            html += f"""
+                                <td>
+                                    {escapar(valor)}
+                                </td>
+                            """
+
+                elif isinstance(row, list):
+
+                    for valor in row:
+
+                        if es_url(valor):
+
+                            html += f"""
+                                <td>
+                                    <a
+                                        class="publication-link"
+                                        href="{escapar(valor)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Ver publicación
+                                    </a>
+                                </td>
+                            """
+
+                        else:
+
+                            html += f"""
+                                <td>
+                                    {escapar(valor)}
+                                </td>
+                            """
+
+                html += """
+                        </tr>
+                """
+
+            html += """
+                    </tbody>
+
+                </table>
+
+            </div>
+            """
+
+            return html
+
+        # --------------------------------------------------
+        # TIPO DESCONOCIDO
+        # --------------------------------------------------
+
+        return ""
+
+    # ======================================================
+    # METADATOS
+    # ======================================================
+
+    usuario = escapar(metadata.get("usuario", ""))
+    periodo = escapar(metadata.get("periodo", ""))
+    fecha_inicio = escapar(metadata.get("fecha_de_inicio", ""))
+    fecha_fin = escapar(metadata.get("fecha_de_fin", ""))
+    fecha_generacion = escapar(metadata.get("fecha_de_generacion", ""))
+    estado = escapar(metadata.get("estado", ""))
+    version = escapar(metadata.get("version", ""))
+
+    # ======================================================
+    # DOCUMENTO HTML
+    # ======================================================
+
+    print("LONGITUD CSS:", len(CSS_INFORME))
+    print("CONTIENE ASTERISCO:", "* {" in CSS_INFORME)
+    print("CONTIENE REPORT:", ".report {" in CSS_INFORME)
+    print("CONTIENE METADATA:", ".metadata {" in CSS_INFORME)
+    print("CONTIENE METRIC:", ".metric-card {" in CSS_INFORME)
+    print("CONTIENE TABLE:", ".data-table {" in CSS_INFORME)
+
+    # ======================================================
+    # INICIO DEL DOCUMENTO
+    # ======================================================
+
+    html = f"""
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Auditoría Estratégica de LinkedIn
+    </title>
+
+    <style>
+
+        {CSS_INFORME}
+
+    </style>
+
+</head>
+
+<body>
+
+    <main class="report">
+
+        <!-- ==========================================
+            CABECERA
+            ========================================== -->
+
+        <header class="report-header">
+
+            <div class="report-header-main">
+
+                <div class="report-kicker">
+                    AUDITORÍA ESTRATÉGICA DE LINKEDIN
+                </div>
+
+                <h1>
+                    Informe Ejecutivo
+                </h1>
+
+                <div class="report-user">
+                    {usuario}
+                </div>
+
+            </div>
+
+            <!-- ======================================
+                INFORMACIÓN DEL INFORME
+                ====================================== -->
+
+            <div class="metadata">
+
+                <div class="metadata-item">
+
+                    <strong>Periodo analizado</strong>
+
+                    <span>
+                        {periodo}
+                    </span>
+
+                </div>
+
+                <div class="metadata-item">
+
+                    <strong>Actividad analizada</strong>
+
+                    <span>
+                        {len(analizador.df)} publicaciones
+                    </span>
+
+                </div>
+
+                <div class="metadata-item">
+
+                    <strong>Elaborado por</strong>
+
+                    <span>
+                        Ruta TI
+                    </span>
+
+                </div>
+
+                <div class="metadata-item metadata-credit">
+
+                    <strong>Asistencia</strong>
+
+                    <span>
+                        Análisis asistido por ChatGPT
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        
+        <div class="report-sections">
+
+"""
+
+    # ======================================================
+    # SECCIONES
+    # ======================================================
+
+    for section in sections:
+
+        numero = section.get("number", "")
+        titulo = section.get("title", "")
+        contenido = section.get("content", [])
+
+        html += f"""
+
+            <section class="section">
+
+                <div class="section-number">
+
+                    {escapar(numero)}
+
+                </div>
+
+                <h2>
+
+                    {escapar(titulo)}
+
+                </h2>
+
+                <div class="section-content">
+
+"""
+
+        # --------------------------------------------------
+        # MÉTRICAS
+        # --------------------------------------------------
+
+        metricas = [
+
+            item
+            for item in contenido
+            if item.get("type") == "metric"
+
+        ]
+
+        if metricas:
+
+            html += """
+
+                    <div class="metrics-grid">
+
+"""
+
+            for item in metricas:
+
+                html += render_content(item)
+
+            html += """
+
+                    </div>
+
+"""
+
+        # --------------------------------------------------
+        # RESTO DEL CONTENIDO
+        # --------------------------------------------------
+
+        for item in contenido:
+
+            if item.get("type") == "metric":
+                continue
+
+            if item.get("type") == "diagnosis":
+
+                print("DEBUG DIAGNOSIS:", item)
+
+                resultado_diagnosis = render_content(item)
+
+                print("DEBUG HTML DIAGNOSIS:", repr(resultado_diagnosis))
+
+                html += resultado_diagnosis
+
+            else:
+
+                html += render_content(item)
+
+        html += """
+
+                </div>
+
+            </section>
+
+"""
+
+    # ======================================================
+    # CIERRE DEL DOCUMENTO
+    # ======================================================
+
+    html += """
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
+
+"""
+
+    return html
 
 # 3. Procesamiento y Renderizado del Informe Ejecutivo
 if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
@@ -682,7 +2150,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 - Mantén exactamente estos nombres, orden y número de secciones.
                 - No añadas, elimines, combines ni dividas secciones principales.
                 - Si faltan datos, conserva la sección e indica la limitación.
-                - Personaliza mediante la aportaciones de python y el análisis de los datos, no modificando la arquitectura.
+                - Personaliza mediante el contenido y el análisis de los datos proporcionados, sin modificar la arquitectura.
                 - Cada sección debe aportar una función analítica diferente; evita repetir
                 conclusiones ya desarrolladas.
                 - Las secciones forman una única pieza analítica y deben mantener coherencia
@@ -2432,100 +3900,73 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 Una vez superada esta comprobación, el contenido queda preparado
                 para el Módulo 9.
 
-
                 # ======================================================
-                # MÓDULO 9 — GENERACIÓN DEL HTML FINAL
+                # MÓDULO 9 — PREPARACIÓN DEL CONTENIDO PARA MAQUETACIÓN
                 # ======================================================
-
 
                 ## 9.1 — FUNCIÓN Y FUENTE DE VERDAD
 
-                Este módulo recibe EXCLUSIVAMENTE el análisis auditado y validado por el Módulo 8.
+                Este módulo recibe el análisis auditado y validado por el Módulo 8.
 
-                Su única función es transformar ese resultado en un informe HTML profesional, preparado para visualización y exportación a PDF.
+                Su función es preparar el contenido final del informe para que Python
+                pueda encargarse posteriormente de su maquetación visual.
 
                 Flujo:
 
                 MÓDULOS 0–7 → ANÁLISIS
                 MÓDULO 8 → AUDITORÍA
-                MÓDULO 9 → PRESENTACIÓN HTML
+                MÓDULO 9 → CONTENIDO ESTRUCTURADO
+                PYTHON → MAQUETACIÓN HTML + CSS → PDF
 
-                El Módulo 9 NO analiza, recalcula, corrige, interpreta, diagnostica ni genera nuevas recomendaciones, hipótesis o experimentos.
+                El Módulo 9 NO debe diseñar el informe.
 
-                El contenido auditado por el Módulo 8 es la FUENTE DE VERDAD.
+                El Módulo 9 NO debe generar CSS.
+
+                El Módulo 9 NO debe decidir colores, tipografías, tamaños, márgenes,
+                espaciados, tarjetas, bordes, fondos ni composición visual.
+
+                La presentación visual será responsabilidad exclusiva de Python.
+
+                El contenido auditado por el Módulo 8 continúa siendo la FUENTE DE VERDAD.
 
                 ---
 
                 ## 9.2 — INTEGRIDAD DEL CONTENIDO
 
-                NO inventar ni completar información ausente.
+                No inventar, completar, estimar ni modificar información.
 
-                Esto incluye, entre otros:
+                Conservar exactamente:
 
-                * métricas o estadísticas;
-                * publicaciones, fechas, títulos o temas;
-                * URLs, hashtags o formatos;
-                * audiencia, imágenes o archivos;
-                * causas, conclusiones o recomendaciones;
-                * hipótesis o experimentos.
+                - cifras;
+                - fechas;
+                - posiciones;
+                - impresiones;
+                - interacciones;
+                - engagement;
+                - URLs;
+                - conclusiones;
+                - diagnóstico;
+                - recomendaciones;
+                - hipótesis;
+                - experimentos;
+                - nivel de certeza.
 
-                Si un dato no existe en el análisis auditado, simplemente no se muestra.
+                No introducir nuevas interpretaciones.
 
-                NO sustituir datos ausentes por estimaciones, placeholders, ejemplos o contenido inventado.
+                No introducir nuevas recomendaciones.
 
-                NO modificar URLs ni crear rutas de archivos inexistentes.
+                No introducir nuevos experimentos.
 
-                Conservar exactamente el nivel de certeza del Módulo 8:
-
-                "se observa" no puede convertirse en "demuestra".
-
-                "podría estar relacionado" no puede convertirse en "provoca".
-
-                "hipótesis" no puede convertirse en "conclusión".
-
-                El HTML no puede introducir causalidad ni interpretaciones nuevas.
-
-                ---
-
-                ## 9.3 — SALIDA HTML
-
-                La salida debe ser ÚNICAMENTE HTML.
-
-                Primera línea:
-
-                <html>
-
-                Última línea:
-
-                </html>
-
-                Estructura mínima obligatoria:
-
-                <html>
-                <head>
-                <meta charset="UTF-8">
-                <title>...</title>
-                <style>...</style>
-                </head>
-                <body>
-                ...
-                </body>
-                </html>
-
-                No incluir:
-
-                * Markdown;
-                * bloques ```html;
-                * explicaciones antes o después;
-                * comentarios fuera del documento.
-
-                El resultado se copiará directamente a la aplicación.
+                No introducir causalidad que no esté presente en el análisis auditado.
 
                 ---
 
-                ## 9.4 — ESTRUCTURA OBLIGATORIA
+                ## 9.3 — ESTRUCTURA OBLIGATORIA
 
-                Conservar EXACTAMENTE estas 14 secciones, en este orden:
+                El contenido debe conservar exactamente las 14 secciones establecidas
+                en el BLOQUE 1 y en el mismo orden.
+
+                Las 14 secciones son:
 
                 1. RESUMEN EJECUTIVO
                 2. ESTADO ACTUAL DEL PERFIL
@@ -2542,368 +3983,239 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 13. RECOMENDACIONES PRIORITARIAS
                 14. EXPERIMENTOS Y PRÓXIMOS PASOS
 
-                NO añadir, eliminar ni reordenar secciones principales.
+                No añadir, eliminar, combinar ni dividir secciones.
+
+                Si una sección está limitada por falta de datos, debe conservarse y
+                registrar la limitación correspondiente.
 
                 ---
 
-                ## 9.5 — CABECERA
+                ## 9.4 — FORMATO DE SALIDA
 
-                Crear una cabecera editorial profesional y diferenciada del contenido.
+                La respuesta debe ser exclusivamente un objeto JSON válido.
 
-                Mostrar, cuando estén disponibles:
+                No utilizar:
 
-                * nombre del informe;
-                * usuario/cuenta analizada;
-                * periodo;
-                * fecha de generación;
-                * estado;
-                * versión.
+                - Markdown;
+                - bloques de código;
+                - explicaciones antes del JSON;
+                - explicaciones después del JSON;
+                - HTML;
+                - CSS.
 
-                Si el análisis indica estado BETA, mostrar visualmente "BETA".
+                El JSON debe contener exactamente estas claves principales:
 
-                NO inventar información ausente.
+                metadata
+                sections
 
-                La cabecera debe ser discreta y no contener análisis estratégico extenso.
+                La estructura conceptual será:
 
-                ---
+                metadata → objeto
+                sections → lista de exactamente 14 elementos
 
-                ## 9.6 — DISEÑO EDITORIAL
+                La clave "metadata" debe conservar únicamente los datos oficiales
+                proporcionados por Python.
 
-                El resultado debe parecer un INFORME PROFESIONAL DE AUDITORÍA Y ANALÍTICA, no un dashboard ni una página web.
-
-                Prioridades visuales:
-
-                LEGIBILIDAD → JERARQUÍA → COMPRENSIÓN → ESTÉTICA → DENSIDAD
-
-                Debe ser:
-
-                * profesional;
-                * elegante;
-                * limpio;
-                * jerárquico;
-                * fácil de escanear;
-                * apto para impresión/PDF;
-                * visualmente coherente.
-
-                Utilizar CSS para crear una composición editorial, no una sucesión de párrafos y tablas.
-
-                Debe existir una jerarquía clara entre:
-
-                CABECERA → SECCIONES → SUBTÍTULOS → MÉTRICAS → DATOS → EVIDENCIA → INTERPRETACIÓN → DIAGNÓSTICO → RECOMENDACIONES → EXPERIMENTOS.
-
-                Los títulos de las 14 secciones deben destacar visualmente.
+                La clave "sections" debe contener exactamente 14 elementos,
+                uno por cada sección obligatoria y en el orden establecido.
 
                 ---
 
-                ## 9.7 — LENGUAJE VISUAL
+                ## 9.5 — ESTRUCTURA DE CADA SECCIÓN
+                
 
-                Mantener un sistema visual único en todo el documento:
+                Cada elemento de "sections" debe contener:
 
-                * tipografía sans-serif moderna;
-                * títulos claramente jerarquizados;
-                * texto legible;
-                * espacios verticales suficientes;
-                * márgenes coherentes;
-                * tablas consistentes;
-                * bloques visuales reutilizables.
+                number → número de sección
+                title → nombre exacto de la sección
+                content → lista de elementos analíticos
 
-                Usar espacio en blanco. No saturar el documento.
+                "number" debe corresponder al número real de la sección.
 
-                Paleta sobria:
+                "title" debe conservar exactamente el nombre establecido.
 
-                * verde palido para estructura y títulos;
-                * azul medio para destacados;
-                * gris oscuro para texto;
-                * gris claro para fondos secundarios;
-                * blanco como fondo principal;
-                * un color de acento moderado.
+                "content" debe contener los elementos analíticos necesarios para
+                presentar esa sección.
 
-                Los colores deben crear jerarquía, no decorar.
-
-                NO utilizar fondos saturados, degradados excesivos ni colores fluorescentes.
-
-                NO utilizar automáticamente rojo = malo o verde = bueno.
-
-                Una anomalía no implica necesariamente algo negativo y una oportunidad no implica necesariamente algo positivo.
+                No crear elementos visuales dentro del JSON.
 
                 ---
 
-                ## 9.8 — MÉTRICAS Y BLOQUES
+                ## 9.6 — TIPOS DE CONTENIDO
 
-                Cuando existan varias métricas relevantes, pueden presentarse mediante bloques destacados.
+                Cuando sea necesario, utilizar únicamente estructuras de contenido
+                claras y reutilizables.
 
-                Utilizar tarjetas solo cuando mejoren la comprensión. NO convertir todo el informe en tarjetas.
+                Tipos permitidos:
 
-                Los bloques pueden diferenciar:
+                "text"
+                "metric"
+                "table"
+                "insight"
+                "diagnosis"
+                "recommendation"
+                "experiment"
+                "limitation"
 
-                * DATOS;
-                * EVIDENCIA;
-                * INTERPRETACIÓN;
-                * DIAGNÓSTICO;
-                * RECOMENDACIÓN;
-                * HIPÓTESIS;
-                * LIMITACIÓN;
-                * EXPERIMENTO.
+                Cada elemento debe indicar su tipo.
 
-                La diferenciación debe realizarse mediante tipografía, espaciado, bordes, fondos y etiquetas.
+                Para elementos de tipo "text":
 
-                No es obligatorio utilizar un color diferente para cada categoría.
+                Campos:
+                - type
+                - text
 
-                ---
+                Para elementos de tipo "metric":
 
-                ## 9.9 — TABLAS
+                Campos:
+                - type
+                - label
+                - value
 
-                Utilizar tablas cuando faciliten la comparación.
+                Para elementos de tipo "table":
 
-                Deben tener:
+                Campos:
+                - type
+                - columns
+                - rows
 
-                * encabezados diferenciados;
-                * alineación coherente;
-                * bordes discretos;
-                * separación visual entre filas;
-                * números correctamente alineados;
-                * tamaño legible en PDF.
+                Para elementos de tipo "insight":
 
-                Las tablas de publicaciones deben utilizar, cuando estén disponibles:
+                Campos:
+                - type
+                - label
+                - text
 
-                * posición;
-                * fecha;
-                * impresiones;
-                * interacciones;
-                * engagement;
-                * URL.
+                Para elementos de tipo "diagnosis":
 
-                Mostrar todas las filas existentes.
+                Campos:
+                - type
+                - categoría correspondiente
+                - contenido del diagnóstico
 
-                NO utilizar:
+                Para elementos de tipo "recommendation":
 
-                "etc."
+                Campos disponibles:
+                - type
+                - priority
+                - finding
+                - evidence
+                - interpretation
+                - action
+                - verification
 
-                "más publicaciones"
+                Para elementos de tipo "experiment":
 
-                "Additional rows as per data"
+                Campos disponibles:
+                - type
+                - hypothesis
+                - variable
+                - change
+                - metric
+                - reference
+                - success_criterion
+                - subsequent_decision
 
-                ni ningún placeholder similar.
+                Para elementos de tipo "limitation":
 
-                Las tablas de las secciones 8, 9 y 10 deben ir acompañadas de una breve interpretación basada exclusivamente en el análisis auditado.
+                Campos:
+                - type
+                - text
 
-                ---
+                Utilizar únicamente los campos que correspondan al contenido
+                realmente existente.
 
-                ## 9.10 — PUBLICACIONES TOP/BOTTOM
+                No crear campos vacíos únicamente para completar una estructura.
 
-                Las secciones 8, 9 y 10 deben tratarse como bloques analíticos relevantes.
-
-                Después de cada tabla, resumir brevemente los patrones que estén respaldados por el análisis.
-
-                Cuando exista evidencia suficiente, destacar:
-
-                * mayor alcance;
-                * mayor engagement;
-                * coincidencias entre rankings;
-                * diferencias entre alcance e interacción.
-
-                No añadir conclusiones que no estén presentes en el análisis auditado.
-
-                ---
-
-                ## 9.11 — DIAGNÓSTICO
-
-                La sección 12 debe tener una jerarquía visual superior a las secciones descriptivas.
-
-                Presentar, únicamente cuando existan en el análisis:
-
-                * FORTALEZAS;
-                * DEBILIDADES;
-                * OPORTUNIDADES;
-                * ANOMALÍAS;
-                * INCERTIDUMBRES;
-                * PRIORIDAD ESTRATÉGICA.
-
-                NO crear categorías vacías para completar el diseño.
-
-                El diagnóstico debe reflejar exactamente el contenido y nivel de certeza del Módulo 8.
+                No introducir estructuras visuales, HTML, CSS ni instrucciones
+                de diseño dentro del JSON.
 
                 ---
 
-                ## 9.12 — RECOMENDACIONES
+                ## 9.7 — PUBLICACIONES Y TABLAS
 
-                La sección 13 debe ser claramente accionable y fácil de escanear.
+                Las secciones 8, 9 y 10 deben conservar todos los registros proporcionados
+                por Python.
 
-                Cuando la información esté disponible, presentar cada recomendación mediante:
+                Las columnas deben conservar los datos reales disponibles.
 
-                PRIORIDAD
-                HALLAZGO
-                EVIDENCIA
-                INTERPRETACIÓN
-                ACCIÓN
-                CÓMO COMPROBARLA
+                No eliminar publicaciones.
 
-                No convertir las recomendaciones en párrafos innecesariamente largos.
+                No resumir una tabla utilizando "etc.", "más publicaciones" ni
+                ningún placeholder.
 
-                No generar recomendaciones nuevas.
+                No modificar, redondear ni sustituir los valores.
 
-                ---
-
-                ## 9.13 — EXPERIMENTOS
-
-                La sección 14 debe diferenciarse visualmente del diagnóstico y las recomendaciones.
-
-                Cuando existan experimentos auditados, presentar:
-
-                HIPÓTESIS
-                VARIABLE
-                CAMBIO
-                MÉTRICA
-                REFERENCIA
-                CRITERIO DE ÉXITO
-                DECISIÓN POSTERIOR
-
-                NO crear experimentos inexistentes.
+                Las URLs deben conservarse exactamente.
 
                 ---
 
-                ## 9.14 — URLs, IMÁGENES Y GRÁFICOS
+                ## 9.8 — METADATOS
 
-                ### URLs
+                Los metadatos procedentes de Python deben conservarse sin modificación.
 
-                Solo utilizar URLs presentes en el análisis auditado.
+                Cuando estén disponibles pueden incluir:
 
-                Presentarlas como enlaces HTML reales:
+                - usuario;
+                - periodo;
+                - fecha de inicio;
+                - fecha de fin;
+                - fecha de generación;
+                - estado;
+                - versión.
 
-                <a href="URL_REAL">Ver publicación</a>
-
-                NO modificar ni inventar URLs.
-
-                NO utilizar Markdown dentro de href.
-
-                ### Imágenes
-
-                Solo utilizar <img> cuando la aplicación haya proporcionado realmente el recurso.
-
-                NO inventar nombres ni rutas de imágenes.
-
-                Si no existe una imagen, utilizar HTML/CSS cuando sea útil.
-
-                ### Gráficos
-
-                Solo crear gráficos con datos existentes en el análisis auditado.
-
-                Se permite utilizar:
-
-                * HTML;
-                * CSS;
-                * SVG interno.
-
-                No crear gráficos únicamente como decoración.
-
-                Prioridad:
-
-                PRECISIÓN → CLARIDAD → LEGIBILIDAD → COMPARACIÓN → ESTÉTICA
+                No inventar metadatos ausentes.
 
                 ---
 
-                ## 9.15 — AUTONOMÍA TÉCNICA
+                ## 9.9 — RESPONSABILIDAD DE PYTHON
 
-                Todo el CSS debe estar dentro de <style>.
+                Python será responsable exclusivamente de la presentación visual posterior.
 
-                NO utilizar:
+                Python determinará:
 
-                * Bootstrap;
-                * Tailwind;
-                * frameworks;
-                * CDN;
-                * hojas CSS externas;
-                * fuentes externas;
-                * librerías externas.
+                - CSS;
+                - colores;
+                - tipografías;
+                - tamaños;
+                - márgenes;
+                - espaciados;
+                - tablas;
+                - bloques;
+                - jerarquía visual;
+                - saltos de página;
+                - adaptación a PDF.
 
-                El documento debe funcionar de forma autónoma.
-
-                JavaScript no debe ser necesario para comprender ninguna información esencial.
-
-                No utilizar JavaScript externo ni depender de interactividad para mostrar contenido.
-
-                ---
-
-                ## 9.16 — PREPARACIÓN PARA PDF
-
-                El HTML debe estar preparado para impresión y PDF.
-
-                Evitar:
-
-                * desbordamiento horizontal;
-                * tablas ilegibles;
-                * texto demasiado pequeño;
-                * columnas innecesarias;
-                * elementos flotantes problemáticos.
-
-                Puede utilizarse @media print y reglas de salto de página cuando mejoren el resultado.
-
-                Evitar separar encabezados, tablas o bloques analíticos de forma que pierdan sentido.
+                La IA no debe incluir ninguna instrucción visual dentro del contenido.
 
                 ---
 
-                ## 9.17 — CONSISTENCIA
+                ## 9.10 — COMPROBACIÓN FINAL
 
-                Todas las secciones deben compartir:
+                Antes de devolver la respuesta, comprobar:
 
-                * tipografía;
-                * márgenes;
-                * jerarquía;
-                * paleta;
-                * estilos de tabla;
-                * bloques;
-                * lenguaje visual.
-
-                El documento debe parecer una única pieza editorial.
-
-                El diseño debe conservar la separación conceptual:
-
-                DATOS → EVIDENCIA → INTERPRETACIÓN → DIAGNÓSTICO → RECOMENDACIÓN → EXPERIMENTO
-
-                La presentación visual nunca puede alterar el nivel de certeza del análisis.
-
-                ---
-
-                ## 9.18 — COMPROBACIÓN FINAL
-
-                Antes de devolver el resultado, verificar internamente:
-
-                1. La salida comienza exactamente con <html>.
-                2. Termina exactamente con </html>.
-                3. Existe <head>, charset UTF-8, <title> y <style>.
-                4. Existe <body>.
-                5. No existe Markdown ni texto fuera del HTML.
-                6. CSS integrado y sin dependencias externas innecesarias.
-                7. Existen exactamente las 14 secciones y están en orden.
-                8. Las cifras coinciden con el análisis auditado.
-                9. Las URLs coinciden con el análisis auditado.
-                10. Las publicaciones TOP/BOTTOM contienen todos los registros disponibles.
-                11. No existen placeholders ni datos inventados.
-                12. No existen imágenes o archivos inventados.
-                13. Diagnóstico, recomendaciones y experimentos coinciden con el Módulo 8.
-                14. No se ha añadido interpretación ni causalidad nueva.
-                15. El documento es legible y adecuado para PDF.
-
-                ---
-
-                ## 9.19 — REGLA ABSOLUTA
-
-                DEVOLVER ÚNICAMENTE EL DOCUMENTO HTML.
-
-                Primera línea:
-
-                <html>
-
-                Última línea:
-
-                </html>
-
-                Sin explicaciones, Markdown, bloques de código ni contenido externo al HTML.
+                1. El resultado es JSON válido.
+                2. Existen exactamente las claves principales "metadata" y "sections".
+                3. Existen exactamente 14 secciones.
+                4. Las 14 secciones están en el orden establecido.
+                5. Los nombres de las secciones son exactos.
+                6. Los datos coinciden con la información auditada.
+                7. Las tablas contienen todos los registros disponibles.
+                8. Las URLs no han sido modificadas.
+                9. No existen datos inventados.
+                10. No existe causalidad nueva.
+                11. No existen recomendaciones nuevas.
+                12. No existen experimentos nuevos.
+                13. No existe HTML.
+                14. No existe CSS.
+                15. No existe información visual o de diseño.
 
                 # ======================================================
                 # FIN DEL MÓDULO 9
-                # ====================================================== 
+                # ======================================================
+
                 """
+                    
                 st.write("===== CONTROL DE TAMAÑO DEL PROMPT =====")
 
                 st.write(
@@ -3084,58 +4396,344 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 """
                 
                                 },
-                                #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                             ]
                         }
                     ],
+                    response_format={"type": "json_object"},
                     max_tokens=6000
                 )
-                html_content = response.choices[0].message.content
+                
+                # --------------------------------------------------
+                # RECEPCIÓN DEL JSON DEL MÓDULO 9
+                # --------------------------------------------------
+
+                analysis_json_text = response.choices[0].message.content
+
+                try:
+
+                    report_data = json.loads(analysis_json_text)
+
+                except json.JSONDecodeError as e:
+
+                    st.error(
+                        f"El Módulo 9 no devolvió un JSON válido: {e}"
+                    )
+
+                    st.code(
+                        analysis_json_text[:5000]
+                    )
+
+                    st.stop()
+
 
                 # --------------------------------------------------
-                # VISTA PREVIA DEL INFORME
+                # VALIDACIÓN DEL JSON DEL MÓDULO 9
                 # --------------------------------------------------
 
-                st.success("¡Auditoría corporativa ejecutada con éxito!")
+                try:
 
-                st.markdown("### Vista Previa del Informe Ejecutivo")
+                    analysis_json = json.loads(analysis_json_text)
 
-                st.code(html_content[:5000])
+                    # Comprobar estructura principal
+                    if not isinstance(analysis_json, dict):
 
-                st.components.v1.html(
-                    html_content,
-                    height=600,
-                    scrolling=True
+                        st.error(
+                            "El Módulo 9 no ha devuelto un objeto JSON."
+                        )
+
+                        st.stop()
+
+                    if "metadata" not in analysis_json:
+
+                        st.error(
+                            "El JSON no contiene la clave 'metadata'."
+                        )
+
+                        st.stop()
+
+                    if "sections" not in analysis_json:
+
+                        st.error(
+                            "El JSON no contiene la clave 'sections'."
+                        )
+
+                        st.stop()
+
+                    # --------------------------------------------------
+                    # COMPROBAR LAS 14 SECCIONES
+                    # --------------------------------------------------
+
+                    sections = analysis_json["sections"]
+
+                    if not isinstance(sections, list):
+
+                        st.error(
+                            "La clave 'sections' no contiene una lista."
+                        )
+
+                        st.stop()
+
+                    if len(sections) != 14:
+
+                        st.error(
+                            f"El Módulo 9 ha devuelto {len(sections)} "
+                            f"secciones en lugar de 14."
+                        )
+
+                        st.stop()
+
+                    st.success(
+                        "✅ JSON recibido correctamente: metadata + 14 secciones."
+                    )
+
+                except json.JSONDecodeError as e:
+
+                    st.error(
+                        f"❌ El Módulo 9 no devolvió un JSON válido: {e}"
+                    )
+
+                    st.code(
+                        analysis_json_text
+                    )
+
+                    st.stop()
+
+                print("\n===== CSS JUSTO ANTES DE generar_html =====")
+
+                print("Longitud:", len(CSS_INFORME))
+                print("Barras invertidas:", CSS_INFORME.count("\\"))
+
+                print(repr(CSS_INFORME[:500]))
+
+                print("===== FIN CSS JUSTO ANTES =====")
+
+                print("===== PRUEBA REAL DE CARACTERES =====")
+
+                print("Primeros caracteres:")
+                print([ord(c) for c in CSS_INFORME[:30]])
+
+                print("Texto real:")
+                print(CSS_INFORME[:100])
+
+                print("Número real de \\:")
+                print(CSS_INFORME.count("\\"))
+
+                print("Número de :")
+                print(CSS_INFORME.count(":"))
+
+                print("Número de /:")
+                print(CSS_INFORME.count("/"))
+
+                print("Número de *:")
+                print(CSS_INFORME.count("*"))
+
+                print("===== FIN PRUEBA =====")
+
+                print(
+                    "¿Empieza realmente por :root?",
+                    CSS_INFORME.lstrip().startswith(":root")
                 )
 
-                # --------------------------------------------------
-                # CONVERSIÓN PDF
-                # --------------------------------------------------
+                print(
+                    "¿Contiene realmente /* ?",
+                    "/*" in CSS_INFORME
+                )
+
+                print(
+                    "¿Contiene realmente * { ?",
+                    "* {" in CSS_INFORME
+                )
+
+                print("===== PRUEBA REAL =====")
+
+                css = CSS_INFORME
+
+                print("BACKSLASH:", css.count("\\"))
+                print("ASTERISCO:", css.count("*"))
+                print("DOS PUNTOS:", css.count(":"))
+                print("BARRA:", css.count("/"))
+
+                print("START ROOT:", css.lstrip().startswith(":root"))
+                print("HAS COMMENT:", "/*" in css)
+                print("HAS UNIVERSAL:", "* {" in css)
+
+                print("===== FIN =====")
+
+                # ======================================================
+                # GENERACIÓN DEL HTML
+                # ======================================================
+
+                html_content = generar_html(analysis_json)
+
+                # ======================================================
+                # DIAGNÓSTICO DEFINITIVO — CSS DENTRO DEL HTML
+                # ======================================================
+
+                inicio_style = html_content.find("<style>")
+                fin_style = html_content.find("</style>")
+
+                css_html = html_content[inicio_style:fin_style]
+
+                print("===== CSS DENTRO DE HTML =====")
+                print(repr(css_html[:1500]))
+                print("===== FIN CSS DENTRO DE HTML =====")
+
+                print("¿HTML contiene \\\\* ?", "\\*" in css_html)
+                print("¿HTML contiene \\\\-- ?", "\\--" in css_html)
+                print("¿HTML contiene \\\\: ?", "\\:" in css_html)
+                print("¿HTML contiene \\\\/ ?", "\\/" in css_html)
+
+                print("===== COMPARACIÓN CSS / HTML =====")
+
+                print("CSS_INFORME:")
+                print(repr(CSS_INFORME[:500]))
+
+                print("\nHTML:")
+                print(repr(css_html[:500]))
+
+                print("\n¿CSS exactamente igual?")
+                print(CSS_INFORME.strip() in css_html)
+
+                st.success(
+                    "✅ HTML generado correctamente."
+                )
+
+                st.markdown(
+                    "### Vista Previa del Informe Ejecutivo"
+                )
+
+                st.write("ANCHO DEL CONTENEDOR DE PREVISUALIZACIÓN:")
+
+                #st.components.v1.html(
+                    #html_content,
+                    #height=900,
+                    #scrolling=True
+                #)
+                st.html(
+                    html_content
+                )
+
+                # ------------------------------------------------------
+                # HTML GENERADO — INSPECCIÓN
+                # ------------------------------------------------------
+
+                with st.expander(
+                    "🔎 Ver HTML generado"
+                ):
+
+                    st.code(
+                        html_content,
+                        language="html"
+                    )
+
+
+                # ------------------------------------------------------
+                # DESCARGAR HTML
+                # ------------------------------------------------------
+
+                st.download_button(
+                    label="📄 Descargar HTML generado",
+                    data=html_content,
+                    file_name="Auditoria_LinkedIn_Preview.html",
+                    mime="text/html",
+                    key="descargar_html_generado"
+                )
+
+
+                # ------------------------------------------------------
+                # CONTROL DEL JSON
+                # ------------------------------------------------------
+
+                with st.expander(
+                    "🧠 Ver JSON estructurado recibido"
+                ):
+
+                    st.json(
+                        analysis_json
+                    )
+
+
+                # ======================================================
+                # GENERACIÓN DEL PDF — GOOGLE CHROME
+                # ======================================================
 
                 pdf_buffer = io.BytesIO()
 
-                resultado = pisa.CreatePDF(
-                    src=html_content,
-                    dest=pdf_buffer
-                )
+                try:
 
-                if resultado.err:
+                    chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
-                    st.error(
-                        "No se ha podido generar el PDF."
-                    )
+                    # Crear archivos temporales
+                    with tempfile.TemporaryDirectory() as temp_dir:
 
-                else:
+                        html_path = os.path.join(
+                            temp_dir,
+                            "auditoria.html"
+                        )
+
+                        pdf_path = os.path.join(
+                            temp_dir,
+                            "auditoria.pdf"
+                        )
+
+                        # Guardar el HTML generado
+                        with open(
+                            html_path,
+                            "w",
+                            encoding="utf-8"
+                        ) as f:
+
+                            f.write(html_content)
+
+                        # Ejecutar Chrome en modo headless
+                        subprocess.run(
+                            [
+                                chrome_path,
+                                "--headless",
+                                "--disable-gpu",
+                                "--no-sandbox",
+                                "--disable-dev-shm-usage",
+                                "--print-to-pdf=" + pdf_path,
+                                "--print-to-pdf-no-header",
+                                "--run-all-compositor-stages-before-draw",
+                                "file:///" + html_path.replace("\\", "/")
+                            ],
+                            check=True,
+                            capture_output=True,
+                            text=True
+                        )
+
+                        # Leer PDF generado por Chrome
+                        with open(
+                            pdf_path,
+                            "rb"
+                        ) as f:
+
+                            pdf_buffer.write(
+                                f.read()
+                            )
 
                     pdf_buffer.seek(0)
 
+                    st.success(
+                        "✅ PDF generado correctamente con Google Chrome."
+                    )
+
                     st.download_button(
-                        label="📥 Descargar Auditoría Estratégica en PDF Profesional",
+                        label="📥 Descargar Auditoría Estratégica en PDF",
                         data=pdf_buffer,
                         file_name="Auditoria_LinkedIn_Premium.pdf",
                         mime="application/pdf",
                         key="descargar_auditoria_pdf"
                     )
+
+                except Exception as e:
+
+                    st.error(
+                        f"❌ Error al generar el PDF con Google Chrome: {e}"
+                    )
+
+
             except Exception as e:
 
                 st.error(
