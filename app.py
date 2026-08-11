@@ -250,71 +250,71 @@ body {
 }
 
 
-.report-user {
-    font-size: 17px;
-    font-weight: 500;
-    opacity: 0.94;
-}
-
-
 /* ======================================================
-   METADATOS — 3 TARJETAS
+   METADATOS
    ====================================================== */
 
 .metadata {
     position: relative;
     z-index: 1;
+
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 18px;
+    gap: 10px;
+
+    margin-top: 20px;
 }
 
 
 .metadata-item {
     background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.20);
+
     border-radius: 10px;
-    padding: 13px 15px;
-    min-height: 68px;
+
+    padding: 11px 13px;
+    min-height: 62px;
 }
 
 
 .metadata-item strong {
     display: block;
+
     font-size: 9px;
     font-weight: 700;
+
     text-transform: uppercase;
     letter-spacing: 0.7px;
-    opacity: 0.68;
+
+    opacity: 0.70;
+
     margin-bottom: 5px;
 }
 
 
 .metadata-item span {
     display: block;
+
     font-size: 12px;
     font-weight: 600;
-    line-height: 1.4;
+
+    line-height: 1.45;
+
     color: #FFFFFF;
 }
 
 
-/* ======================================================
-   TARJETA 3 — RUTA TI / CHATGPT
-   ====================================================== */
+/* Asistencia de ChatGPT:
+   ligeramente más discreta que Ruta TI */
 
-.metadata-item.metadata-credit {
-    background: rgba(255,255,255,0.055);
-    border-color: rgba(255,255,255,0.13);
-}
-
-
-.metadata-credit span {
+.metadata-item .metadata-assistance {
+    font-size: 10px;
     font-weight: 500;
-    opacity: 0.78;
-}
 
+    opacity: 0.70;
+
+    margin-top: 3px;
+}
 
 /* ======================================================
    RESPONSIVE
@@ -1365,13 +1365,64 @@ def generar_html(analysis_json):
 
                 </div>
 
+                <!-- ==========================================
+    CABECERA
+    ========================================== -->
+
+<header class="report-header">
+
+    <div class="report-header-main">
+
+        <div class="report-kicker">
+            AUDITORÍA ESTRATÉGICA DE LINKEDIN
+        </div>
+
+        <h1>
+            Informe Ejecutivo
+        </h1>
+
+    </div>
+
+    <!-- ======================================
+        INFORMACIÓN DEL INFORME
+        ====================================== -->
+
+    <div class="metadata">
+
+        <div class="metadata-item">
+
+            <strong>Perfil analizado</strong>
+
+            <span>
+                {usuario}
+            </span>
+
+        </div>
+
+        <div class="metadata-item">
+
+            <strong>Informe</strong>
+
+            <span>
+                Generado: {fecha_generacion}
+            </span>
+
+            <span>
+                Periodo: {periodo}
+            </span>
+
+        </div>
+
                 <div class="metadata-item metadata-credit">
 
                     <strong>Elaborado por</strong>
 
                     <span>
-                        Ruta TI<br>
-                        <small>Análisis asistido por ChatGPT</small>
+                        Ruta TI
+                    </span>
+
+                    <span class="metadata-assistance">
+                        Análisis asistido por ChatGPT
                     </span>
 
                 </div>
@@ -1380,7 +1431,6 @@ def generar_html(analysis_json):
 
         </header>
 
-        
         <div class="report-sections">
 
 """
