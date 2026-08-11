@@ -187,8 +187,6 @@ class LinkedInAnalyzer:
 
             publicaciones.append(publicacion)
 
-        print("PUBLICACIONES NORMALIZADAS:", len(publicaciones))
-
         return publicaciones
 
     # ======================================================
@@ -910,7 +908,6 @@ class LinkedInAnalyzer:
                 f"URL: {publicacion.get('URL', 'N/D')}"
             )
 
-        # CIERRE CORRECTO DEL MÉTODO RESUMEN
         return "\n".join(texto)
 
     # ======================================================

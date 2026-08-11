@@ -34,7 +34,7 @@ with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded
     ### 🚀 Requisitos para la ejecución:
     
     1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Requiere saldo mínimo cargado en OpenAI)*.
-    2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** o **PDF** de tus analíticas de creador de LinkedIn. 
+    2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** de tus analíticas de creador de LinkedIn. 
        - Haz clic en el primer botón de abajo: (Elige 365 días en esa página y expórtatelo)
     3. **🎯 Captura de SSI (¡MUY IMPORTANTE!)**:
        - Haz clic en el segundo botón de abajo. 
@@ -212,39 +212,35 @@ body {
         #0A66C2 100%
     );
     color: #FFFFFF;
-    padding: 36px 38px 32px;
-    border-radius: 18px;
+    padding: 34px 38px 30px;
+    border-radius: 16px;
     margin-bottom: 26px;
-    box-shadow: 0 8px 24px rgba(18, 59, 93, 0.14);
+    box-shadow: 0 6px 18px rgba(18, 59, 93, 0.12);
     position: relative;
     overflow: hidden;
 }
 
-.report-header::after {
-    content: "";
-    position: absolute;
-    width: 260px;
-    height: 260px;
-    right: -90px;
-    top: -120px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-}
+
+/* ======================================================
+   CABECERA — TÍTULO
+   ====================================================== */
 
 .report-header-main {
     position: relative;
     z-index: 1;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 }
+
 
 .report-kicker {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    opacity: 0.80;
+    opacity: 0.78;
     margin-bottom: 8px;
 }
+
 
 .report-header h1 {
     margin: 0 0 8px 0;
@@ -253,15 +249,16 @@ body {
     font-weight: 700;
 }
 
+
 .report-user {
     font-size: 17px;
     font-weight: 500;
-    opacity: 0.95;
+    opacity: 0.94;
 }
 
 
 /* ======================================================
-   METADATOS
+   METADATOS — 3 TARJETAS
    ====================================================== */
 
 .metadata {
@@ -269,21 +266,19 @@ body {
     z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 18px;
 }
 
-.metadata-credit span {
-    font-weight: 500;
-}
 
 .metadata-item {
     background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.20);
+    border: 1px solid rgba(255,255,255,0.18);
     border-radius: 10px;
-    padding: 11px 13px;
-    min-height: 62px;
+    padding: 13px 15px;
+    min-height: 68px;
 }
+
 
 .metadata-item strong {
     display: block;
@@ -291,9 +286,10 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.7px;
-    opacity: 0.70;
-    margin-bottom: 4px;
+    opacity: 0.68;
+    margin-bottom: 5px;
 }
+
 
 .metadata-item span {
     display: block;
@@ -303,22 +299,34 @@ body {
     color: #FFFFFF;
 }
 
-.metadata-label {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    opacity: 0.75;
-    margin-bottom: 5px;
+
+/* ======================================================
+   TARJETA 3 — RUTA TI / CHATGPT
+   ====================================================== */
+
+.metadata-item.metadata-credit {
+    background: rgba(255,255,255,0.055);
+    border-color: rgba(255,255,255,0.13);
 }
 
-.metadata-value {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
+
+.metadata-credit span {
+    font-weight: 500;
+    opacity: 0.78;
 }
 
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+
+@media (max-width: 800px) {
+
+    .metadata {
+        grid-template-columns: 1fr;
+    }
+
+}
 
 /* ======================================================
    SECCIONES
@@ -1276,13 +1284,6 @@ def generar_html(analysis_json):
     # DOCUMENTO HTML
     # ======================================================
 
-    print("LONGITUD CSS:", len(CSS_INFORME))
-    print("CONTIENE ASTERISCO:", "* {" in CSS_INFORME)
-    print("CONTIENE REPORT:", ".report {" in CSS_INFORME)
-    print("CONTIENE METADATA:", ".metadata {" in CSS_INFORME)
-    print("CONTIENE METRIC:", ".metric-card {" in CSS_INFORME)
-    print("CONTIENE TABLE:", ".data-table {" in CSS_INFORME)
-
     # ======================================================
     # INICIO DEL DOCUMENTO
     # ======================================================
@@ -1340,45 +1341,37 @@ def generar_html(analysis_json):
             <!-- ======================================
                 INFORMACIÓN DEL INFORME
                 ====================================== -->
-
+           
             <div class="metadata">
 
                 <div class="metadata-item">
 
-                    <strong>Periodo analizado</strong>
+                    <strong>Perfil analizado</strong>
 
                     <span>
-                        {periodo}
+                        {usuario}
                     </span>
 
                 </div>
 
                 <div class="metadata-item">
 
-                    <strong>Actividad analizada</strong>
+                    <strong>Informe</strong>
 
                     <span>
-                        {len(analizador.df)} publicaciones
-                    </span>
-
-                </div>
-
-                <div class="metadata-item">
-
-                    <strong>Elaborado por</strong>
-
-                    <span>
-                        Ruta TI
+                        Generado el {fecha_generacion}<br>
+                        Periodo: {periodo}
                     </span>
 
                 </div>
 
                 <div class="metadata-item metadata-credit">
 
-                    <strong>Asistencia</strong>
+                    <strong>Elaborado por</strong>
 
                     <span>
-                        Análisis asistido por ChatGPT
+                        Ruta TI<br>
+                        <small>Análisis asistido por ChatGPT</small>
                     </span>
 
                 </div>
@@ -1463,11 +1456,9 @@ def generar_html(analysis_json):
 
             if item.get("type") == "diagnosis":
 
-                print("DEBUG DIAGNOSIS:", item)
 
                 resultado_diagnosis = render_content(item)
 
-                print("DEBUG HTML DIAGNOSIS:", repr(resultado_diagnosis))
 
                 html += resultado_diagnosis
 
@@ -1522,8 +1513,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                     excel = pd.ExcelFile(analytics_file)
 
-                    st.write("Hojas encontradas:")
-                    st.write(excel.sheet_names)
 
                     df = pd.read_excel(
                         analytics_file,
@@ -1542,13 +1531,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     wb = load_workbook(analytics_file, read_only=True)
 
                     props = wb.properties
-
-                    st.write("===== PROPIEDADES EXCEL =====")
-                    st.write("title:", props.title)
-                    st.write("subject:", props.subject)
-                    st.write("creator:", props.creator)
-                    st.write("description:", props.description)
-                    st.write("keywords:", props.keywords)
 
                     wb.close()
 
@@ -1589,39 +1571,15 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     # Limpiar espacios sobrantes
                     linkedin_name = re.sub(r"\s+", " ", linkedin_name).strip()
 
-                    st.write("===== USUARIO IDENTIFICADO =====")
-                    st.write(linkedin_name)
-
                     analizador = LinkedInAnalyzer(df)
 
                     destacadas = analizador.publicaciones_destacadas()
 
-                    st.write("TOP 5:", destacadas["Top 5"])
-                    st.write("BOTTOM 5:", destacadas["Bottom 5"])
-                    st.write("TOP 5 ENGAGEMENT:", destacadas["Top 5 Engagement"])
-
-                    st.write(
-                        "MÉTRICAS PYTHON:",
-                        analizador.metricas()
-                    )
-
                     rendimiento = analizador.analisis_rendimiento()
 
-                    st.write(
-                        "ANÁLISIS DE RENDIMIENTO:",
-                        rendimiento
-                    )
-                    st.write(
-                        "NIVEL DE MADUREZ:",
-                        analizador.nivel_madurez()
-                    )
                     analytics_text = analizador.resumen_para_ia()
 
                     madurez = analizador.nivel_madurez()
-
-                    st.subheader("Resumen procesado por Python")
-
-                    st.code(analytics_text)
 
                 base64_image = encode_image(ssi_image)
                 st.info(f"SSI cargado correctamente: {ssi_image.name}")
@@ -1629,10 +1587,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 client = openai.OpenAI(api_key=api_key)
 
                 ssi_text = extraer_datos_ssi(client, ssi_image)
-
-                st.subheader("Datos SSI extraídos")
-                st.code(ssi_text)
-
                 
                 sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
                 intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
@@ -1674,19 +1628,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "fecha_generacion": report_generated_at,
                     "estado": report_status
                 }
-
-                # ======================================================
-                # PRUEBA DE METADATOS
-                # ======================================================
-
-                st.write("===== METADATOS DEL INFORME =====")
-                st.write("USUARIO:", linkedin_name)
-                st.write("PERIODO:", analysis_period)
-                st.write("FECHA DE INICIO:", fecha_alta_display)
-                st.write("FECHA DE FIN:", hoy_display)
-                st.write("GENERADO:", report_generated_at)
-                st.write("ESTADO:", report_status)
-
 
                 system_prompt = f"""
 
@@ -3293,40 +3234,11 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 """
                     
-                st.write("===== CONTROL DE TAMAÑO DEL PROMPT =====")
+                # ======================================================
+                # CONTROL DE TAMAÑO DEL PROMPT
+                # ======================================================
 
-                st.write(
-                    "system_prompt:",
-                    len(system_prompt),
-                    "caracteres"
-                )
-
-                st.write(
-                    "analytics_text:",
-                    len(analytics_text),
-                    "caracteres"
-                )
-
-                st.write(
-                    "ssi_text:",
-                    len(ssi_text),
-                    "caracteres"
-                )
-
-                st.write(
-                    "sector_real:",
-                    len(sector_real),
-                    "caracteres"
-                )
-
-                st.write(
-                    "intereses_real:",
-                    len(intereses_real),
-                    "caracteres"
-                )
-
-                st.write(
-                    "TOTAL APROX. CARACTERES:",
+                total_caracteres_prompt = (
                     len(system_prompt)
                     + len(analytics_text)
                     + len(ssi_text)
@@ -3334,16 +3246,12 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     + len(intereses_real)
                 )
 
-                st.write(
-                    "TOTAL APROX. TOKENS:",
-                    (
-                        len(system_prompt)
-                        + len(analytics_text)
-                        + len(ssi_text)
-                        + len(sector_real)
-                        + len(intereses_real)
-                    ) // 4
-                )
+                total_tokens_aprox = total_caracteres_prompt // 4
+
+                print("===== CONTROL DE TAMAÑO DEL PROMPT =====")
+                print("Caracteres aproximados:", total_caracteres_prompt)
+                print("Tokens aproximados:", total_tokens_aprox)
+                print("===== FIN CONTROL =====")
                                
                 response = client.chat.completions.create(
                     model="gpt-4o",
@@ -3656,21 +3564,21 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                 if diagnosis_problemas:
 
-                    st.warning(
-                        "⚠️ El Módulo 9 ha generado diagnosis "
-                        "con una estructura diferente a la especificada."
-                    )
+                    print("===== PROBLEMAS DE SCHEMA EN DIAGNOSIS =====")
 
                     for problema in diagnosis_problemas:
-
-                        st.write(
-                            f"**{problema['category']}** — "
+                        print(
+                            f"{problema['category']} — "
                             f"{problema['problema']}"
                         )
+                        print("ITEM:", problema["item"])
 
-                        st.json(
-                            problema["item"]
-                        )
+                    print("===== FIN PROBLEMAS DE SCHEMA =====")
+
+                    st.error(
+                        "No se ha podido generar el informe correctamente "
+                        "porque la respuesta de análisis no cumple la estructura esperada."
+                    )
 
                     st.stop()
 
@@ -3683,66 +3591,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "✅ JSON recibido y validado correctamente: "
                     "metadata + 14 secciones + tipos de contenido válidos."
 )
-                print("\n===== CSS JUSTO ANTES DE generar_html =====")
-
-                print("Longitud:", len(CSS_INFORME))
-                print("Barras invertidas:", CSS_INFORME.count("\\"))
-
-                print(repr(CSS_INFORME[:500]))
-
-                print("===== FIN CSS JUSTO ANTES =====")
-
-                print("===== PRUEBA REAL DE CARACTERES =====")
-
-                print("Primeros caracteres:")
-                print([ord(c) for c in CSS_INFORME[:30]])
-
-                print("Texto real:")
-                print(CSS_INFORME[:100])
-
-                print("Número real de \\:")
-                print(CSS_INFORME.count("\\"))
-
-                print("Número de :")
-                print(CSS_INFORME.count(":"))
-
-                print("Número de /:")
-                print(CSS_INFORME.count("/"))
-
-                print("Número de *:")
-                print(CSS_INFORME.count("*"))
-
-                print("===== FIN PRUEBA =====")
-
-                print(
-                    "¿Empieza realmente por :root?",
-                    CSS_INFORME.lstrip().startswith(":root")
-                )
-
-                print(
-                    "¿Contiene realmente /* ?",
-                    "/*" in CSS_INFORME
-                )
-
-                print(
-                    "¿Contiene realmente * { ?",
-                    "* {" in CSS_INFORME
-                )
-
-                print("===== PRUEBA REAL =====")
-
                 css = CSS_INFORME
-
-                print("BACKSLASH:", css.count("\\"))
-                print("ASTERISCO:", css.count("*"))
-                print("DOS PUNTOS:", css.count(":"))
-                print("BARRA:", css.count("/"))
-
-                print("START ROOT:", css.lstrip().startswith(":root"))
-                print("HAS COMMENT:", "/*" in css)
-                print("HAS UNIVERSAL:", "* {" in css)
-
-                print("===== FIN =====")
 
                 # ======================================================
                 # GENERACIÓN DEL HTML
@@ -3769,14 +3618,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "### Vista Previa del Informe Ejecutivo"
                 )
 
-                st.write("ANCHO DEL CONTENEDOR DE PREVISUALIZACIÓN:")
-
-                #st.components.v1.html(
-                    #html_content,
-                    #height=900,
-                    #scrolling=True
-                #)
-                st.html(
+               st.html(
                     html_content
                 )
 
