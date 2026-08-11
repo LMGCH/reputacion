@@ -3821,16 +3821,45 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
 
                 # ======================================================
-                # GENERACIÓN DEL PDF — GOOGLE CHROME
+                # GENERACIÓN DEL PDF — GOOGLE CHROME / CHROMIUM
                 # ======================================================
 
                 pdf_buffer = io.BytesIO()
 
                 try:
 
-                    chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+                    # --------------------------------------------------
+                    # LOCAL WINDOWS / STREAMLIT CLOUD LINUX
+                    # --------------------------------------------------
 
-                    # Crear archivos temporales
+                    chrome_candidates = [
+                        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                        "/usr/bin/chromium",
+                        "/usr/bin/chromium-browser",
+                        "/usr/bin/google-chrome",
+                    ]
+
+                    chrome_path = next(
+                        (
+                            path
+                            for path in chrome_candidates
+                            if os.path.exists(path)
+                        ),
+                        None
+                    )
+
+                    if not chrome_path:
+
+                        raise FileNotFoundError(
+                            "No se encontró Google Chrome/Chromium "
+                            "en el entorno de ejecución."
+                        )
+
+                    # --------------------------------------------------
+                    # ARCHIVOS TEMPORALES
+                    # --------------------------------------------------
+
                     with tempfile.TemporaryDirectory() as temp_dir:
 
                         html_path = os.path.join(
@@ -3843,7 +3872,10 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                             "auditoria.pdf"
                         )
 
-                        # Guardar el HTML generado
+                        # --------------------------------------------------
+                        # GUARDAR HTML
+                        # --------------------------------------------------
+
                         with open(
                             html_path,
                             "w",
@@ -3852,7 +3884,10 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                             f.write(html_content)
 
-                        # Ejecutar Chrome en modo headless
+                        # --------------------------------------------------
+                        # EJECUTAR CHROME / CHROMIUM HEADLESS
+                        # --------------------------------------------------
+
                         subprocess.run(
                             [
                                 chrome_path,
@@ -3870,7 +3905,10 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                             text=True
                         )
 
-                        # Leer PDF generado por Chrome
+                        # --------------------------------------------------
+                        # LEER PDF
+                        # --------------------------------------------------
+
                         with open(
                             pdf_path,
                             "rb"
@@ -3883,7 +3921,7 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     pdf_buffer.seek(0)
 
                     st.success(
-                        "✅ PDF generado correctamente con Google Chrome."
+                        "✅ PDF generado correctamente con Chrome/Chromium."
                     )
 
                     st.download_button(
@@ -3897,9 +3935,8 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                 except Exception as e:
 
                     st.error(
-                        f"❌ Error al generar el PDF con Google Chrome: {e}"
+                        f"❌ Error al generar el PDF con Chrome/Chromium: {e}"
                     )
-
 
             except Exception as e:
 

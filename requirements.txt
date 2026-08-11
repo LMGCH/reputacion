@@ -3,5 +3,5 @@ openai
 pandas
 openpyxl
 pypdf
-fpdf2
-selenium
+
+
