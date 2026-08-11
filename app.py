@@ -159,9 +159,6 @@ No añadas ninguna explicación fuera del JSON.
 
     return response.choices[0].message.content
 
-# ======================================================
-# CSS MAESTRO DEL INFORME
-# ======================================================
 
 # ======================================================
 # CSS MAESTRO DEL INFORME — CHROME / CHROMIUM
@@ -248,7 +245,6 @@ body {
     line-height: 1.2;
     font-weight: 700;
 }
-
 
 /* ======================================================
    METADATOS
@@ -1320,120 +1316,65 @@ def generar_html(analysis_json):
             CABECERA
             ========================================== -->
 
-        <header class="report-header">
+    <header class="report-header">
 
-            <div class="report-header-main">
+        <div class="report-header-main">
 
-                <div class="report-kicker">
-                    AUDITORÍA ESTRATÉGICA DE LINKEDIN
-                </div>
+            <div class="report-kicker">
+                AUDITORÍA ESTRATÉGICA DE LINKEDIN
+            </div>
 
-                <h1>
-                    Informe Ejecutivo
-                </h1>
+            <h1>
+                Informe Ejecutivo
+            </h1>
 
-                <div class="report-user">
-                    {usuario}
-                </div>
+        </div>
+
+        <div class="metadata">
+
+            <div class="metadata-item">
+
+                <strong>Perfil analizado</strong>
+
+                <span>
+                    Luis Miguel
+                </span>
 
             </div>
 
-            <!-- ======================================
-                INFORMACIÓN DEL INFORME
-                ====================================== -->
-           
-            <div class="metadata">
+            <div class="metadata-item">
 
-                <div class="metadata-item">
+                <strong>Informe</strong>
 
-                    <strong>Perfil analizado</strong>
+                <span>
+                    Generado:
+                </span>
 
-                    <span>
-                        {usuario}
-                    </span>
-
-                </div>
-
-                <div class="metadata-item">
-
-                    <strong>Informe</strong>
-
-                    <span>
-                        Generado el {fecha_generacion}<br>
-                        Periodo: {periodo}
-                    </span>
-
-                </div>
-
-                <!-- ==========================================
-    CABECERA
-    ========================================== -->
-
-<header class="report-header">
-
-    <div class="report-header-main">
-
-        <div class="report-kicker">
-            AUDITORÍA ESTRATÉGICA DE LINKEDIN
-        </div>
-
-        <h1>
-            Informe Ejecutivo
-        </h1>
-
-    </div>
-
-    <!-- ======================================
-        INFORMACIÓN DEL INFORME
-        ====================================== -->
-
-    <div class="metadata">
-
-        <div class="metadata-item">
-
-            <strong>Perfil analizado</strong>
-
-            <span>
-                {usuario}
-            </span>
-
-        </div>
-
-        <div class="metadata-item">
-
-            <strong>Informe</strong>
-
-            <span>
-                Generado: {fecha_generacion}
-            </span>
-
-            <span>
-                Periodo: {periodo}
-            </span>
-
-        </div>
-
-                <div class="metadata-item metadata-credit">
-
-                    <strong>Elaborado por</strong>
-
-                    <span>
-                        Ruta TI
-                    </span>
-
-                    <span class="metadata-assistance">
-                        Análisis asistido por ChatGPT
-                    </span>
-
-                </div>
+                <span>
+                    Periodo: 01/03/2026 — 11/08/2026
+                </span>
 
             </div>
 
-        </header>
+            <div class="metadata-item metadata-credit">
 
-        <div class="report-sections">
+                <strong>Elaborado por</strong>
 
-"""
+                <span>
+                    Ruta TI
+                </span>
+
+                <span class="metadata-assistance">
+                    Análisis asistido por ChatGPT
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+                """
 
     # ======================================================
     # SECCIONES
