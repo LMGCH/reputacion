@@ -11,45 +11,174 @@ import tempfile
 import os
 import subprocess
 
-# Configuración visual premium
-st.set_page_config(page_title="Auditoría de Reputación LinkedIn AI", layout="centered", page_icon="🧲")
+# ======================================================
+# CABECERA DE LA APLICACIÓN
+# ======================================================
+
+# Configuración visual
+st.set_page_config(
+    page_title="LinkedIn Analytical Audit",
+    layout="centered",
+    page_icon="🧭"
+)
 
 st.markdown("""
-    <style>
-    .report-title { font-size:28px !important; font-weight: bold; color: #1e3d59; text-align: center; margin-bottom: 20px; }
-    </style>
+<style>
+
+.app-header {
+    background: linear-gradient(
+        135deg,
+        #123B5D 0%,
+        #0A66C2 100%
+    );
+
+    color: white;
+    padding: 28px 32px 25px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 16px rgba(18, 59, 93, 0.12);
+}
+
+.app-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.78;
+    margin-bottom: 7px;
+}
+
+.app-title {
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.app-subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.88;
+    margin: 0;
+}
+
+.app-badge {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.20);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
-st.title("🧭 LinkedIn Analytical Audit")
-st.write("Transforma tus datos crudos en una auditoría de marca de alto impacto en PDF.")
 
-# --- SECCIÓN DE GUÍA DE USO ---
-with st.expander("📖 Manual de Operación y Transparencia de Costes", expanded=True):
+st.html("""
+<div class="app-header">
+
+    <div class="app-kicker">
+        RUTA TI · HERRAMIENTA DE ANÁLISIS
+    </div>
+
+    <div class="app-title">
+        🧭 LinkedIn Analytical Audit
+    </div>
+
+    <p class="app-subtitle">
+        Convierte tus datos de LinkedIn en una auditoría estratégica
+        basada en evidencia y genera un informe profesional en PDF.
+    </p>
+
+    <div class="app-badge">
+        Análisis cuantitativo + interpretación estratégica asistida por IA
+    </div>
+
+</div>
+""",)
+
+# ======================================================
+# GUÍA DE USO
+# ======================================================
+
+with st.expander(
+    "📖 Manual de operación y transparencia de costes",
+    expanded=True
+):
+
     st.markdown("""
-    ### 🛡️ Privacidad Absoluta y Costes de Operación
-    Esta aplicación funciona bajo una arquitectura de código abierto. Tus datos se procesan en tiempo real en la memoria del servidor y se transmiten mediante cifrado SSL directo a la API de OpenAI. Nada se almacena en servidores externos. Cada auditoría consume unos **0,06€** del saldo de tu OpenAI API Key.
-    
-    ---
-    
-    ### 🚀 Requisitos para la ejecución:
-    
-    1. **🔑 OpenAI API Key**: Introduce tu clave `sk-...` en el menú lateral izquierdo. *(Requiere saldo mínimo cargado en OpenAI)*.
-    2. **📊 Histórico de Contenido**: Sube el archivo **Excel (.xlsx)** de tus analíticas de creador de LinkedIn. 
-       - Haz clic en el primer botón de abajo: (Elige 365 días en esa página y expórtatelo)
-    3. **🎯 Captura de SSI (¡MUY IMPORTANTE!)**:
-       - Haz clic en el segundo botón de abajo. 
-       - Usa la herramienta de recortes (`Win + Shift + S`).
-       - **⚠️ ATENCIÓN:** Al hacer la captura de pantalla, **recorta solo la zona de los gráficos y las puntuaciones numéricas. Deja fuera de la imagen tu foto de perfil (avatar)**. Esto evita que los sistemas de censura biométrica de OpenAI bloqueen el análisis por motivos de privacidad facial. Guárdala en tu ordenador como **PNG o JPG** y súbela al casillero inferior.
-    4. **📅 Fecha de Alta**: Indica el día real en que activaste tu perfil para ajustar los promedios temporales con precisión.
-    """)
-    
-    # Botón directo para el usuario
-    
-    st.link_button("📊 Importa tu datos en bruto de LinkedIN", "https://www.linkedin.com/analytics/creator/content/")
+### 🛡️ Privacidad y funcionamiento
 
-    st.link_button("🎯 Ir a mi LinkedIn SSI Oficial", "https://www.linkedin.com/sales/ssi/")
+Esta aplicación procesa los datos necesarios para realizar la auditoría
+y utiliza la API de OpenAI para la interpretación estratégica.
 
-# 1. Credenciales de Seguridad
+Los datos se procesan en memoria durante la ejecución de la auditoría
+y se transmiten mediante conexión cifrada a la API utilizada.
+
+> **Importante:** la aplicación utiliza la API Key introducida por el
+> usuario para realizar el análisis y generar el informe.
+
+---
+
+### 🚀 Requisitos para la ejecución
+
+**1. 🔑 OpenAI API Key**
+
+Introduce tu clave `sk-...` en el menú lateral izquierdo.
+
+La clave debe disponer de saldo suficiente para realizar la auditoría.
+
+**2. 📊 Histórico de contenido**
+
+Exporta desde LinkedIn el archivo **Excel (.xlsx)** de tus analíticas
+de creador.
+
+Para obtener un histórico amplio, selecciona **365 días** cuando LinkedIn
+permita elegir el periodo.
+
+**3. 🎯 Captura de SSI**
+
+Accede a tu SSI de LinkedIn y realiza una captura de los gráficos y
+puntuaciones necesarias para el análisis.
+
+Utiliza:
+
+`Win + Shift + S`
+
+Procura que la captura incluya únicamente la información necesaria para
+el análisis y evita incluir elementos personales que no sean relevantes.
+
+**4. 📅 Fecha de activación estratégica**
+
+Indica la fecha desde la que comenzaste a trabajar estratégicamente
+tu presencia en LinkedIn.
+
+Esta fecha sirve únicamente como **contexto temporal**.
+
+No sustituye al periodo real disponible en los datos ni determina
+automáticamente el inicio de la auditoría.
+""")
+
+    st.link_button(
+        "📊 Importar datos brutos de LinkedIn",
+        "https://www.linkedin.com/analytics/creator/content/"
+    )
+
+    st.link_button(
+        "🎯 Consultar mi LinkedIn SSI",
+        "https://www.linkedin.com/sales/ssi/"
+    )
+
+
+# ======================================================
+# 1. CREDENCIALES DE SEGURIDAD
+# ======================================================
+
 with st.sidebar:
     st.header("⚙️ Seguridad de la API")
     api_key = st.text_input("OpenAI API Key", type="default", placeholder="Pega tu clave sk-...")
@@ -1484,26 +1613,53 @@ def generar_html(analysis_json):
     return html
 
 # 3. Procesamiento y Renderizado del Informe Ejecutivo
+
 if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
+
     if not api_key:
-        st.error("Error de autenticación: Introduce tu OpenAI API Key del menú lateral.")
+        st.error(
+            "Error de autenticación: Introduce tu OpenAI API Key del menú lateral."
+        )
+
     elif not ssi_image or not analytics_file:
-        st.error("Error de datos: Es obligatorio adjuntar tanto la captura visual del SSI como el registro analítico.")
+        st.error(
+            "Error de datos: Es obligatorio adjuntar tanto la captura visual "
+            "del SSI como el registro analítico."
+        )
+
     else:
-        with st.spinner("Generando auditoría corporativa y maquetando PDF ejecutivo... Por favor, espera."):
+
+        with st.spinner(
+            "Generando auditoría corporativa y maquetando PDF ejecutivo... "
+            "Por favor, espera."
+        ):
+
             try:
+
                 hoy = date.today()
                 dias_activos = (hoy - fecha_alta).days
                 meses_activos = max(1, round(dias_activos / 30.4))
-                
-                if analytics_file.name.endswith('.pdf'):
+
+                # ======================================================
+                # CARGA DEL ARCHIVO ANALÍTICO
+                # ======================================================
+
+                if analytics_file.name.endswith(".pdf"):
+
                     reader = PdfReader(analytics_file)
-                    analytics_text = "".join([page.extract_text() + "\n" for page in reader.pages])
+
+                    analytics_text = "".join(
+                        [
+                            (page.extract_text() or "") + "\n"
+                            for page in reader.pages
+                        ]
+                    )
+
                 else:
+
                     from linkedin_analyzer import LinkedInAnalyzer
 
                     excel = pd.ExcelFile(analytics_file)
-
 
                     df = pd.read_excel(
                         analytics_file,
@@ -1511,23 +1667,40 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                         header=2
                     )
 
+                    df_interaccion = pd.read_excel(
+                        analytics_file,
+                        sheet_name="INTERACCIÓN"
+                    )
+
+                    # ==================================================
+                    # ANALIZADOR
+                    # ==================================================
+
+                    analizador = LinkedInAnalyzer(
+                        df,
+                        df_interaccion
+                    )
+
                     st.dataframe(df.head())
 
-                    # ======================================================
+                    # ==================================================
                     # PROPIEDADES DEL EXCEL
-                    # ======================================================
+                    # ==================================================
 
                     from openpyxl import load_workbook
 
-                    wb = load_workbook(analytics_file, read_only=True)
+                    wb = load_workbook(
+                        analytics_file,
+                        read_only=True
+                    )
 
                     props = wb.properties
 
                     wb.close()
 
-                    # ======================================================
+                    # ==================================================
                     # IDENTIFICACIÓN DEL USUARIO
-                    # ======================================================
+                    # ==================================================
 
                     import re
 
@@ -1537,7 +1710,9 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                     # Eliminar prefijo generado por LinkedIn
                     if linkedin_name.startswith("AnalisisConjunto_"):
-                        linkedin_name = linkedin_name[len("AnalisisConjunto_"):]
+                        linkedin_name = linkedin_name[
+                            len("AnalisisConjunto_"):
+                        ]
 
                     # Eliminar extensión
                     if linkedin_name.lower().endswith(".xlsx"):
@@ -1560,9 +1735,15 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     )
 
                     # Limpiar espacios sobrantes
-                    linkedin_name = re.sub(r"\s+", " ", linkedin_name).strip()
-
-                    analizador = LinkedInAnalyzer(df)
+                    linkedin_name = re.sub(
+                        r"\s+",
+                        " ",
+                        linkedin_name
+                    ).strip()
+ 
+                    # ==================================================
+                    # DATOS DERIVADOS DEL ANALIZADOR
+                    # ==================================================
 
                     destacadas = analizador.publicaciones_destacadas()
 
@@ -1572,53 +1753,76 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
                     madurez = analizador.nivel_madurez()
 
-                base64_image = encode_image(ssi_image)
-                st.info(f"SSI cargado correctamente: {ssi_image.name}")
+                    # ======================================================
+                    # PROCESAMIENTO DEL SSI
+                    # ======================================================
 
-                client = openai.OpenAI(api_key=api_key)
+                    base64_image = encode_image(ssi_image)
 
-                ssi_text = extraer_datos_ssi(client, ssi_image)
-                
-                sector_real = sector if sector else "Ciberseguridad y Formación Profesional"
-                intereses_real = intereses if intereses else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
+                    st.info(
+                        f"SSI cargado correctamente: {ssi_image.name}"
+                    )
 
-                # ======================================================
-                # METADATOS OFICIALES DEL INFORME
-                # ======================================================
+                    client = openai.OpenAI(
+                        api_key=api_key
+                    )
 
-                from datetime import datetime
+                    ssi_text = extraer_datos_ssi(
+                        client,
+                        ssi_image
+                    )
 
-                # Fecha de generación
-                report_generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+                    sector_real = (
+                        sector
+                        if sector
+                        else "Ciberseguridad y Formación Profesional"
+                    )
 
-                # Fechas para presentación
-                fecha_alta_display = (
-                    fecha_alta.strftime("%d/%m/%Y")
-                    if hasattr(fecha_alta, "strftime")
-                    else str(fecha_alta)
-                )
+                    intereses_real = (
+                        intereses
+                        if intereses
+                        else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
+                    )
 
-                hoy_display = (
-                    hoy.strftime("%d/%m/%Y")
-                    if hasattr(hoy, "strftime")
-                    else str(hoy)
-                )
+                    # ======================================================
+                    # METADATOS OFICIALES DEL INFORME
+                    # ======================================================
 
-                # Periodo REAL del análisis
-                analysis_period = f"{fecha_alta_display} — {hoy_display}"
+                    from datetime import datetime
 
-                # Estado del informe
-                report_status = "BETA · FASE PRELIMINAR"
+                    report_generated_at = datetime.now().strftime(
+                        "%d/%m/%Y %H:%M"
+                    )
 
-                # Metadatos oficiales
-                report_metadata = {
-                    "usuario": linkedin_name,
-                    "periodo": analysis_period,
-                    "fecha_inicio": fecha_alta_display,
-                    "fecha_fin": hoy_display,
-                    "fecha_generacion": report_generated_at,
-                    "estado": report_status
-                }
+                    fecha_alta_display = (
+                        fecha_alta.strftime("%d/%m/%Y")
+                        if hasattr(fecha_alta, "strftime")
+                        else str(fecha_alta)
+                    )
+
+                    hoy_display = (
+                        hoy.strftime("%d/%m/%Y")
+                        if hasattr(hoy, "strftime")
+                        else str(hoy)
+                    )
+
+                    # Periodo REAL del análisis
+                    analysis_period = (
+                        f"{fecha_alta_display} — {hoy_display}"
+                    )
+
+                    # Estado del informe
+                    report_status = "BETA · FASE PRELIMINAR"
+
+                    # Metadatos oficiales
+                    report_metadata = {
+                        "usuario": linkedin_name,
+                        "periodo": analysis_period,
+                        "fecha_inicio": fecha_alta_display,
+                        "fecha_fin": hoy_display,
+                        "fecha_generacion": report_generated_at,
+                        "estado": report_status
+                    }
 
                 system_prompt = f"""
 
@@ -3477,8 +3681,6 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "experiment",
                     "limitation"
                 }
-
-
                 # --------------------------------------------------
                 # VALIDACIÓN ESPECÍFICA DE DIAGNOSIS
                 # --------------------------------------------------
@@ -3492,95 +3694,356 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     "PRIORIDAD ESTRATÉGICA"
                 }
 
+                # ==================================================
+                # VALIDACIÓN ESTRUCTURAL DE CADA ELEMENTO
+                # ==================================================
 
-                diagnosis_problemas = []
+                def validar_item_contenido(item):
+
+                    if not isinstance(item, dict):
+                        return False, "El elemento no es un objeto JSON."
+
+                    item_type = item.get("type")
+
+                    if item_type not in TIPOS_PERMITIDOS:
+                        return False, (
+                            f"Tipo de contenido no permitido: {item_type}"
+                        )
 
 
-                for section in sections:
+                    # --------------------------------------------------
+                    # TEXT
+                    # --------------------------------------------------
+
+                    if item_type == "text":
+
+                        if "text" not in item:
+                            return False, (
+                                "Un elemento text debe contener 'text'."
+                            )
+
+                        if not isinstance(item["text"], str):
+                            return False, (
+                                "El campo 'text' debe ser texto."
+                            )
+
+
+                    # --------------------------------------------------
+                    # METRIC
+                    # --------------------------------------------------
+
+                    elif item_type == "metric":
+
+                        campos = {
+                            "type",
+                            "label",
+                            "value"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento metric está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+                        if not isinstance(item["label"], str):
+                            return False, (
+                                "El campo 'label' de metric debe ser texto."
+                            )
+
+                        if item["value"] is None:
+                            return False, (
+                                "El campo 'value' de metric "
+                                "no puede ser None."
+                            )
+
+
+                    # --------------------------------------------------
+                    # INSIGHT
+                    # --------------------------------------------------
+
+                    elif item_type == "insight":
+
+                        campos = {
+                            "type",
+                            "label",
+                            "text"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento insight está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+                        if not isinstance(item["label"], str):
+                            return False, (
+                                "El campo 'label' de insight debe ser texto."
+                            )
+
+                        if not isinstance(item["text"], str):
+                            return False, (
+                                "El campo 'text' de insight debe ser texto."
+                            )
+
+
+                    # --------------------------------------------------
+                    # DIAGNOSIS
+                    # --------------------------------------------------
+
+                    elif item_type == "diagnosis":
+
+                        campos = {
+                            "type",
+                            "category",
+                            "content"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento diagnosis está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+                        if item["category"] not in CATEGORIAS_DIAGNOSIS:
+                            return False, (
+                                f"Categoría diagnosis no válida: "
+                                f"{item['category']}"
+                            )
+
+                        if not isinstance(item["content"], str):
+                            return False, (
+                                "El campo 'content' de diagnosis "
+                                "debe ser texto."
+                            )
+
+
+                    # --------------------------------------------------
+                    # LIMITATION
+                    # --------------------------------------------------
+
+                    elif item_type == "limitation":
+
+                        campos = {
+                            "type",
+                            "text"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento limitation está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+                        if not isinstance(item["text"], str):
+                            return False, (
+                                "El campo 'text' de limitation "
+                                "debe ser texto."
+                            )
+
+
+                    # --------------------------------------------------
+                    # RECOMMENDATION
+                    # --------------------------------------------------
+
+                    elif item_type == "recommendation":
+
+                        campos = {
+                            "type",
+                            "priority",
+                            "finding",
+                            "evidence",
+                            "interpretation",
+                            "action",
+                            "verification"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento recommendation está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+
+                    # --------------------------------------------------
+                    # EXPERIMENT
+                    # --------------------------------------------------
+
+                    elif item_type == "experiment":
+
+                        campos = {
+                            "type",
+                            "hypothesis",
+                            "variable",
+                            "change",
+                            "metric",
+                            "reference",
+                            "success_criterion",
+                            "subsequent_decision"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento experiment está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+
+                    # --------------------------------------------------
+                    # TABLE
+                    # --------------------------------------------------
+
+                    elif item_type == "table":
+
+                        campos = {
+                            "type",
+                            "columns",
+                            "rows"
+                        }
+
+                        faltantes = campos - set(item.keys())
+
+                        if faltantes:
+                            return False, (
+                                f"Un elemento table está incompleto. "
+                                f"Faltan: {sorted(faltantes)}"
+                            )
+
+                        if not isinstance(item["columns"], list):
+                            return False, (
+                                "'columns' de table debe ser una lista."
+                            )
+
+                        if not isinstance(item["rows"], list):
+                            return False, (
+                                "'rows' de table debe ser una lista."
+                            )
+
+
+                    return True, None
+
+
+                # ==================================================
+                # EJECUTAR VALIDACIÓN ESTRUCTURAL
+                # ==================================================
+
+                errores_estructura = []
+
+
+                for section_index, section in enumerate(sections):
+
+                    # --------------------------------------------------
+                    # VALIDAR SECCIÓN
+                    # --------------------------------------------------
+
+                    if not isinstance(section, dict):
+
+                        errores_estructura.append(
+                            f"Sección {section_index + 1}: "
+                            "no es un objeto JSON."
+                        )
+
+                        continue
+
+
+                    # --------------------------------------------------
+                    # VALIDAR CONTENT
+                    # --------------------------------------------------
 
                     contenido = section.get("content", [])
 
+
                     if not isinstance(contenido, list):
+
+                        errores_estructura.append(
+                            f"Sección {section_index + 1}: "
+                            "'content' no contiene una lista."
+                        )
+
                         continue
 
-                    for item in contenido:
 
-                        if not isinstance(item, dict):
-                            continue
+                    # --------------------------------------------------
+                    # VALIDAR CADA ELEMENTO
+                    # --------------------------------------------------
 
-                        item_type = item.get("type")
+                    for item_index, item in enumerate(contenido):
 
-                        # ------------------------------------------
-                        # Comprobar tipo permitido
-                        # ------------------------------------------
+                        valido, error = validar_item_contenido(item)
 
-                        if item_type not in TIPOS_PERMITIDOS:
 
-                            st.error(
-                                f"❌ Tipo de contenido no permitido: "
-                                f"{item_type}"
+                        if not valido:
+
+                            errores_estructura.append(
+                                f"Sección {section_index + 1}, "
+                                f"elemento {item_index + 1}: "
+                                f"{error}"
                             )
 
-                            st.json(item)
 
-                            st.stop()
+                # ==================================================
+                # DETENER SI EXISTEN ERRORES ESTRUCTURALES
+                # ==================================================
 
-
-                        # ------------------------------------------
-                        # Comprobar diagnosis
-                        # ------------------------------------------
-
-                        if item_type == "diagnosis":
-
-                            category = item.get("category")
-                            content = item.get("content")
-
-                            if content is None:
-                                diagnosis_problemas.append({
-                                    "category": category,
-                                    "problema": "Falta el campo 'content'",
-                                    "item": item
-                                })
-
-                            if category not in CATEGORIAS_DIAGNOSIS:
-                                diagnosis_problemas.append({
-                                    "category": category,
-                                    "problema": "Categoría de diagnosis no válida",
-                                    "item": item
-                                })
-
-                # --------------------------------------------------
-                # INFORMAR DE LOS PROBLEMAS DE SCHEMA
-                # --------------------------------------------------
-
-                if diagnosis_problemas:
-
-                    print("===== PROBLEMAS DE SCHEMA EN DIAGNOSIS =====")
-
-                    for problema in diagnosis_problemas:
-                        print(
-                            f"{problema['category']} — "
-                            f"{problema['problema']}"
-                        )
-                        print("ITEM:", problema["item"])
-
-                    print("===== FIN PROBLEMAS DE SCHEMA =====")
+                if errores_estructura:
 
                     st.error(
-                        "No se ha podido generar el informe correctamente "
-                        "porque la respuesta de análisis no cumple la estructura esperada."
+                        "❌ La respuesta de la IA presenta "
+                        "anomalías estructurales y no puede "
+                        "continuar hacia la maquetación."
                     )
+
+
+                    st.error(
+                        f"Se han detectado "
+                        f"{len(errores_estructura)} "
+                        "errores estructurales."
+                    )
+
+
+                    with st.expander(
+                        "🔎 Ver errores estructurales detectados"
+                    ):
+
+                        for error in errores_estructura:
+
+                            st.write(
+                                f"• {error}"
+                            )
+
+
+                    with st.expander(
+                        "🧠 Ver JSON recibido"
+                    ):
+
+                        st.json(
+                            analysis_json
+                        )
+
 
                     st.stop()
 
 
-                # --------------------------------------------------
+                # ==================================================
                 # JSON VALIDADO
-                # --------------------------------------------------
+                # ==================================================
 
                 st.success(
                     "✅ JSON recibido y validado correctamente: "
-                    "metadata + 14 secciones + tipos de contenido válidos."
+                    "metadata + 14 secciones + estructura "
+                    "de contenidos válida."
                 )
 
                 # ======================================================
@@ -3753,13 +4216,34 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
                     )
 
                 except Exception as e:
+                
+                    import traceback
 
                     st.error(
-                        f"❌ Error al generar el PDF con Chrome/Chromium: {e}"
+                        f"Error crítico en el motor de análisis: {e}"
                     )
 
+                    st.code(
+                        traceback.format_exc(),
+                        language="text"
+                    )
+
+                    st.stop()
+        # ======================================================
+        # FIN DEL TRY PRINCIPAL DE LA AUDITORÍA
+        # ======================================================
+
             except Exception as e:
+
+                import traceback
 
                 st.error(
                     f"Error crítico en el motor de análisis: {e}"
                 )
+
+                st.code(
+                    traceback.format_exc(),
+                    language="text"
+                )
+
+                st.stop()
