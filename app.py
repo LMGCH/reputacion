@@ -1337,7 +1337,7 @@ def generar_html(analysis_json):
                 <strong>Perfil analizado</strong>
 
                 <span>
-                    Luis Miguel
+                    {linkedin_name}
                 </span>
 
             </div>
@@ -1347,11 +1347,11 @@ def generar_html(analysis_json):
                 <strong>Informe</strong>
 
                 <span>
-                    Generado:
+                    Generado: {report_generated_at}
                 </span>
 
                 <span>
-                    Periodo: 01/03/2026 — 11/08/2026
+                    Periodo: {analysis_period}
                 </span>
 
             </div>
