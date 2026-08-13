@@ -962,6 +962,78 @@ class LinkedInAnalyzer:
         return estadisticas
 
     # ======================================================
+    # ANÁLISIS DE RENDIMIENTO
+    # ======================================================
+    def analisis_rendimiento(self):
+        """
+        Resume los principales indicadores de rendimiento de las
+        publicaciones disponibles para el análisis.
+
+        IMPORTANTE:
+        - Utiliza únicamente las publicaciones disponibles en
+        PUBLICACIONES PRINCIPALES.
+        - No interpreta el número de publicaciones disponibles como
+        el total de publicaciones realizadas.
+        - No utiliza estos datos para medir experiencia en LinkedIn.
+        """
+
+        publicaciones = self.obtener_publicaciones()
+
+        resultado = {
+            "Publicaciones analizadas": 0,
+            "Impresiones medias": 0,
+            "Mayor alcance": 0,
+            "Porcentaje sobre la media": 0
+        }
+
+        publicaciones_con_impresiones = [
+            p
+            for p in publicaciones
+            if p.get("Impresiones") is not None
+        ]
+
+        if not publicaciones_con_impresiones:
+            return resultado
+
+        impresiones = [
+            p.get("Impresiones", 0)
+            for p in publicaciones_con_impresiones
+        ]
+
+        media = float(np.mean(impresiones))
+        mayor_alcance = int(max(impresiones))
+
+        publicaciones_sobre_media = sum(
+            1
+            for valor in impresiones
+            if valor > media
+        )
+
+        porcentaje_sobre_media = (
+            publicaciones_sobre_media
+            / len(impresiones)
+        ) * 100
+
+        resultado["Publicaciones analizadas"] = len(
+            publicaciones_con_impresiones
+        )
+
+        resultado["Impresiones medias"] = round(
+            media,
+            1
+        )
+
+        resultado["Mayor alcance"] = mayor_alcance
+
+        resultado["Porcentaje sobre la media"] = round(
+            porcentaje_sobre_media,
+            1
+        )
+
+        return resultado
+
+
+    # ======================================================
     # NIVEL DE MADUREZ
     # ======================================================
     def nivel_madurez(self):
