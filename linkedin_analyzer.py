@@ -16,7 +16,15 @@ class LinkedInAnalyzer:
     la duración del periodo histórico ni la frecuencia real de publicación.
     """
 
-    def __init__(self, dataframe, interaccion_dataframe=None):
+    # ======================================================
+    # INICIALIZACIÓN
+    # ======================================================
+    def __init__(
+        self,
+        dataframe,
+        interaccion_dataframe=None,
+        fecha_corte=None
+    ):
         self.df_original = dataframe.copy()
         self.df = self._limpiar_dataframe()
 
@@ -26,6 +34,29 @@ class LinkedInAnalyzer:
             else pd.DataFrame()
         )
         self.df_interaccion = self._limpiar_interaccion()
+
+        # --------------------------------------------------
+        # FECHA DE CORTE DE LA AUDITORÍA
+        # --------------------------------------------------
+        # Se utiliza para calcular la antigüedad de cada
+        # publicación en el momento de la auditoría.
+        #
+        # Si la aplicación no proporciona una fecha concreta,
+        # se utiliza la fecha actual del sistema.
+        # --------------------------------------------------
+
+        if fecha_corte is None:
+            self.fecha_corte = pd.Timestamp.today().normalize()
+        else:
+            self.fecha_corte = pd.to_datetime(
+                fecha_corte,
+                errors="coerce"
+            )
+
+            if pd.isna(self.fecha_corte):
+                self.fecha_corte = pd.Timestamp.today().normalize()
+            else:
+                self.fecha_corte = self.fecha_corte.normalize()
 
         self._publicaciones_cache = None
 
@@ -268,18 +299,161 @@ class LinkedInAnalyzer:
                         if pd.notna(impresiones):
                             publicacion["Impresiones"] = int(impresiones)
 
+
         publicaciones = list(registros.values())
 
-        # Engagement calculado solo cuando existen ambos datos.
+        # ==================================================
+        # EDAD TEMPORAL DE LAS PUBLICACIONES
+        #
+        # La edad se calcula respecto al FINAL DEL HISTÓRICO
+        # exportado por LinkedIn, no respecto a la fecha actual.
+        #
+        # Esto permite comparar correctamente publicaciones
+        # que han tenido diferentes ventanas de distribución.
+        # ==================================================
+
+        periodo = self.obtener_periodo()
+
+        fecha_referencia = None
+
+        if periodo:
+            fecha_referencia = pd.to_datetime(
+                periodo[1],
+                dayfirst=True,
+                errors="coerce"
+            )
+
         for publicacion in publicaciones:
+
+            fecha_texto = publicacion.get("Fecha")
+
+            if (
+                fecha_referencia is not None
+                and pd.notna(fecha_referencia)
+                and fecha_texto
+            ):
+
+                fecha_publicacion = pd.to_datetime(
+                    fecha_texto,
+                    dayfirst=True,
+                    errors="coerce"
+                )
+
+                if pd.notna(fecha_publicacion):
+
+                    edad = max(
+                        0,
+                        (fecha_referencia - fecha_publicacion).days
+                    )
+
+                    publicacion["Edad (días)"] = int(edad)
+
+                    # ------------------------------------------
+                    # CLASIFICACIÓN TEMPORAL
+                    # ------------------------------------------
+
+                    if edad <= 2:
+
+                        publicacion["Madurez temporal"] = "Muy reciente"
+
+                        publicacion["Nivel de observación"] = (
+                            "Insuficiente para evaluar rendimiento acumulado"
+                        )
+
+                    elif edad <= 6:
+
+                        publicacion["Madurez temporal"] = "Reciente"
+
+                        publicacion["Nivel de observación"] = (
+                            "Observación temprana"
+                        )
+
+                    elif edad < 14:
+
+                        publicacion["Madurez temporal"] = "En observación"
+
+                        publicacion["Nivel de observación"] = (
+                            "Observación todavía limitada"
+                        )
+
+                    elif edad < 30:
+
+                        publicacion["Madurez temporal"] = "Madura"
+
+                        publicacion["Nivel de observación"] = (
+                            "Observación suficiente para comparación acumulada"
+                        )
+
+                    else:
+
+                        publicacion["Madurez temporal"] = "Muy madura"
+
+                        publicacion["Nivel de observación"] = (
+                            "Observación amplia"
+                        )
+
+        # ==================================================
+        # ENGAGEMENT
+        # ==================================================
+
+        for publicacion in publicaciones:
+
             impresiones = publicacion.get("Impresiones")
             interacciones = publicacion.get("Interacciones")
 
-            if impresiones is not None and impresiones > 0 and interacciones is not None:
+            if (
+                impresiones is not None
+                and impresiones > 0
+                and interacciones is not None
+            ):
+
                 publicacion["Engagement"] = round(
                     (interacciones / impresiones) * 100,
                     2
                 )
+
+
+
+        # ==================================================
+        # ENRIQUECIMIENTO ANALÍTICO DE LAS PUBLICACIONES
+        # ==================================================
+
+        for publicacion in publicaciones:
+
+            # ----------------------------------------------
+            # ENGAGEMENT
+            # ----------------------------------------------
+
+            impresiones = publicacion.get("Impresiones")
+            interacciones = publicacion.get("Interacciones")
+
+            if (
+                impresiones is not None
+                and impresiones > 0
+                and interacciones is not None
+            ):
+                publicacion["Engagement"] = round(
+                    (interacciones / impresiones) * 100,
+                    2
+                )
+
+            # ----------------------------------------------
+            # MADUREZ TEMPORAL
+            # ----------------------------------------------
+
+            fecha = publicacion.get("Fecha")
+
+            madurez = self.calcular_madurez_publicacion(
+                fecha
+            )
+
+            publicacion["Edad (días)"] = madurez[
+                "Edad (días)"
+            ]
+
+            publicacion["Madurez"] = madurez[
+                "Madurez"
+            ]
 
         self._publicaciones_cache = publicaciones
         return publicaciones
@@ -343,8 +517,73 @@ class LinkedInAnalyzer:
         return estadisticas
 
     # ======================================================
+    # MADUREZ TEMPORAL DE LAS PUBLICACIONES
+    # ======================================================
+    def calcular_madurez_publicacion(self, fecha_publicacion):
+        """
+        Determina la antigüedad de una publicación respecto
+        a la fecha de corte de la auditoría.
+
+        La antigüedad NO se utiliza para estimar una velocidad
+        lineal de distribución de LinkedIn.
+
+        Su función es evitar comparar directamente publicaciones
+        recién publicadas con publicaciones que llevan mucho
+        tiempo disponibles.
+        """
+
+        fecha = pd.to_datetime(
+            fecha_publicacion,
+            errors="coerce",
+            dayfirst=True
+        )
+
+        if pd.isna(fecha):
+            return {
+                "Edad (días)": None,
+                "Madurez": "NO DETERMINABLE"
+            }
+
+        fecha = fecha.normalize()
+
+        edad = max(
+            0,
+            int((self.fecha_corte - fecha).days)
+        )
+
+        # --------------------------------------------------
+        # CLASIFICACIÓN TEMPORAL
+        # --------------------------------------------------
+
+        if edad <= 2:
+
+            madurez = "MUY RECIENTE"
+
+        elif edad <= 6:
+
+            madurez = "RECIENTE"
+
+        elif edad <= 13:
+
+            madurez = "EN CONSOLIDACIÓN"
+
+        elif edad <= 29:
+
+            madurez = "MADURA"
+
+        else:
+
+            madurez = "HISTÓRICA"
+
+        return {
+            "Edad (días)": edad,
+            "Madurez": madurez
+        }
+
+    # ======================================================
     # PUBLICACIONES DESTACADAS
     # ======================================================
+
     def publicaciones_destacadas(self):
 
         publicaciones = self.obtener_publicaciones()
@@ -353,13 +592,25 @@ class LinkedInAnalyzer:
             return {
                 "Top 5": [],
                 "Bottom 5": [],
-                "Top 5 Engagement": []
+                "Top 5 Engagement": [],
+                "Top 5 Engagement Maduras": [],
+                "Recientes en Observación": [],
+                "Bajo Rendimiento Maduro": []
             }
 
+        # ==================================================
+        # PUBLICACIONES CON IMPRESIONES
+        # ==================================================
+
         publicaciones_con_impresiones = [
-            p for p in publicaciones
+            p
+            for p in publicaciones
             if p.get("Impresiones") is not None
         ]
+
+        # ==================================================
+        # TOP 5 ALCANCE ACUMULADO
+        # ==================================================
 
         top_5 = sorted(
             publicaciones_con_impresiones,
@@ -367,13 +618,27 @@ class LinkedInAnalyzer:
             reverse=True
         )[:5]
 
+        # ==================================================
+        # BOTTOM 5 ALCANCE ACUMULADO
+        #
+        # IMPORTANTE:
+        # Este ranking se conserva como dato descriptivo,
+        # pero NO debe interpretarse automáticamente como
+        # "peores publicaciones".
+        # ==================================================
+
         bottom_5 = sorted(
             publicaciones_con_impresiones,
             key=lambda p: p.get("Impresiones", 0)
         )[:5]
 
+        # ==================================================
+        # TOP 5 ENGAGEMENT GENERAL
+        # ==================================================
+
         publicaciones_con_engagement = [
-            p for p in publicaciones
+            p
+            for p in publicaciones
             if p.get("Engagement") is not None
         ]
 
@@ -383,85 +648,260 @@ class LinkedInAnalyzer:
             reverse=True
         )[:5]
 
+        # ==================================================
+        # PUBLICACIONES MADURAS
+        #
+        # Para comparar rendimiento acumulado evitamos
+        # publicaciones demasiado recientes.
+        # ==================================================
+
+        publicaciones_maduras = [
+            p
+            for p in publicaciones_con_engagement
+            if p.get("Edad (días)") is not None
+            and p.get("Edad (días)") >= 14
+        ]
+
+        # ==================================================
+        # TOP 5 ENGAGEMENT ENTRE PUBLICACIONES MADURAS
+        # ==================================================
+
+        top_engagement_maduras = sorted(
+            publicaciones_maduras,
+            key=lambda p: p.get("Engagement", 0),
+            reverse=True
+        )[:5]
+
+        # ==================================================
+        # PUBLICACIONES RECIENTES EN OBSERVACIÓN
+        # ==================================================
+
+        recientes_observacion = [
+            p
+            for p in publicaciones
+            if p.get("Edad (días)") is not None
+            and p.get("Edad (días)") <= 6
+        ]
+
+        recientes_observacion = sorted(
+            recientes_observacion,
+            key=lambda p: p.get("Edad (días)", 999)
+        )
+
+        # ==================================================
+        # PUBLICACIONES MADURAS CON MENOR ALCANCE
+        #
+        # Este ranking sí es mucho más útil que un Bottom 5
+        # absoluto para detectar publicaciones que han tenido
+        # suficiente tiempo para acumular distribución.
+        # ==================================================
+
+        bajo_rendimiento_maduro = [
+            p
+            for p in publicaciones_con_impresiones
+            if p.get("Edad (días)") is not None
+            and p.get("Edad (días)") >= 14
+        ]
+
+        bajo_rendimiento_maduro = sorted(
+            bajo_rendimiento_maduro,
+            key=lambda p: p.get("Impresiones", 0)
+        )[:5]
+
         return {
             "Top 5": top_5,
             "Bottom 5": bottom_5,
-            "Top 5 Engagement": top_engagement
+            "Top 5 Engagement": top_engagement,
+            "Top 5 Engagement Maduras": top_engagement_maduras,
+            "Recientes en Observación": recientes_observacion,
+            "Bajo Rendimiento Maduro": bajo_rendimiento_maduro
         }
 
-
     # ======================================================
-    # DATOS DE REFERENCIA PARA VALIDACIÓN DE LA IA
+    # MADUREZ TEMPORAL DE LAS PUBLICACIONES
     # ======================================================
-    def datos_validacion(self):
+    def analizar_antiguedad_publicaciones(self):
+        """
+        Analiza cuánto tiempo lleva disponible cada publicación
+        dentro del periodo histórico exportado.
 
-        return {
-            "metricas": self.metricas(),
-            "periodo": self.obtener_periodo(),
-            "publicaciones_destacadas": self.publicaciones_destacadas()
-        }
+        IMPORTANTE:
+        - No considera automáticamente una publicación reciente como
+          fracaso por tener pocas impresiones.
+        - No convierte impresiones/día en una métrica de calidad.
+        - Permite distinguir rendimiento acumulado de tiempo de exposición.
+        - La fecha de referencia es el FINAL DEL HISTÓRICO EXPORTADO,
+          no la fecha actual del sistema.
+        """
 
-
-    # ======================================================
-    # ANÁLISIS DE RENDIMIENTO
-    # ======================================================
-
-    def analisis_rendimiento(self):
         publicaciones = self.obtener_publicaciones()
 
-        publicaciones_validas = [
-            p for p in publicaciones
-            if p.get("Impresiones") is not None
-        ]
+        if not publicaciones:
+            return []
 
-        if not publicaciones_validas:
-            return {}
+        periodo = self.obtener_periodo()
 
-        impresiones = [p["Impresiones"] for p in publicaciones_validas]
-        media = sum(impresiones) / len(impresiones)
-        mediana = float(np.median(impresiones))
+        if not periodo:
+            return []
 
-        sobre_media = [p for p in publicaciones_validas if p["Impresiones"] > media]
-        bajo_media = [p for p in publicaciones_validas if p["Impresiones"] < media]
-
-        analisis = {
-            "Publicaciones con impresiones": len(publicaciones_validas),
-            "Media de impresiones de publicaciones disponibles": round(media, 1),
-            "Mediana de impresiones de publicaciones disponibles": round(mediana, 1),
-            "Publicaciones sobre la media": len(sobre_media),
-            "Porcentaje sobre la media": round(len(sobre_media) / len(publicaciones_validas) * 100, 1),
-            "Publicaciones bajo la media": len(bajo_media),
-            "Porcentaje bajo la media": round(len(bajo_media) / len(publicaciones_validas) * 100, 1),
-            "Diferencia media-mediana": round(media - mediana, 1),
-            "Ratio media/mediana": round(media / mediana, 2) if mediana > 0 else 0,
-        }
-
-        mejor_alcance = max(
-            publicaciones_validas,
-            key=lambda p: p["Impresiones"]
-        )
-        analisis["Mayor alcance"] = mejor_alcance["Impresiones"]
-        analisis["Interacciones mayor alcance"] = mejor_alcance.get("Interacciones", 0)
-        analisis["Engagement mayor alcance"] = mejor_alcance.get("Engagement", 0)
-        analisis["Fecha mayor alcance"] = mejor_alcance.get("Fecha", "N/D")
-
-        publicaciones_con_engagement = [
-            p for p in publicaciones_validas
-            if p.get("Engagement") is not None
-        ]
-
-        if publicaciones_con_engagement:
-            mejor_engagement = max(
-                publicaciones_con_engagement,
-                key=lambda p: p.get("Engagement", 0)
+        try:
+            fecha_referencia = pd.to_datetime(
+                periodo[1],
+                dayfirst=True,
+                errors="coerce"
             )
-            analisis["Mejor engagement"] = mejor_engagement.get("Engagement", 0)
-            analisis["Impresiones mejor engagement"] = mejor_engagement.get("Impresiones", 0)
-            analisis["Interacciones mejor engagement"] = mejor_engagement.get("Interacciones", 0)
-            analisis["Fecha mejor engagement"] = mejor_engagement.get("Fecha", "N/D")
-            analisis["URL mejor engagement"] = mejor_engagement.get("URL", "N/D")
+        except Exception:
+            return []
 
-        return analisis
+        if pd.isna(fecha_referencia):
+            return []
+
+        resultado = []
+
+        for publicacion in publicaciones:
+
+            fecha_texto = publicacion.get("Fecha")
+
+            if not fecha_texto:
+                continue
+
+            fecha_publicacion = pd.to_datetime(
+                fecha_texto,
+                dayfirst=True,
+                errors="coerce"
+            )
+
+            if pd.isna(fecha_publicacion):
+                continue
+
+            dias_desde_publicacion = max(
+                0,
+                (fecha_referencia - fecha_publicacion).days
+            )
+
+            publicacion_analizada = publicacion.copy()
+
+            publicacion_analizada[
+                "Días desde publicación"
+            ] = int(dias_desde_publicacion)
+
+            # --------------------------------------------------
+            # CLASIFICACIÓN DE MADUREZ
+            # --------------------------------------------------
+
+            if dias_desde_publicacion <= 2:
+
+                madurez = "Muy reciente"
+
+            elif dias_desde_publicacion <= 7:
+
+                madurez = "Reciente"
+
+            elif dias_desde_publicacion <= 30:
+
+                madurez = "Maduración"
+
+            else:
+
+                madurez = "Madura"
+
+            publicacion_analizada[
+                "Madurez temporal"
+            ] = madurez
+
+            # --------------------------------------------------
+            # NIVEL DE OBSERVACIÓN
+            # --------------------------------------------------
+
+            if dias_desde_publicacion <= 2:
+
+                observacion = (
+                    "Insuficiente para evaluar rendimiento acumulado"
+                )
+
+            elif dias_desde_publicacion <= 7:
+
+                observacion = (
+                    "Observación temprana"
+                )
+
+            else:
+
+                observacion = (
+                    "Observación suficiente para comparación acumulada"
+                )
+
+            publicacion_analizada[
+                "Nivel de observación"
+            ] = observacion
+
+            # --------------------------------------------------
+            # VELOCIDAD DE DISTRIBUCIÓN
+            # --------------------------------------------------
+            # Se calcula SOLO como indicador auxiliar.
+            # Nunca debe interpretarse automáticamente como
+            # calidad o éxito de la publicación.
+
+            impresiones = publicacion.get("Impresiones")
+
+            if impresiones is not None:
+
+                dias_observacion = max(
+                    1,
+                    dias_desde_publicacion + 1
+                )
+
+                publicacion_analizada[
+                    "Impresiones por día de observación"
+                ] = round(
+                    impresiones / dias_observacion,
+                    2
+                )
+
+            resultado.append(publicacion_analizada)
+
+        return resultado
+
+    # ======================================================
+    # PUBLICACIONES COMPARABLES TEMPORALMENTE
+    # ======================================================
+    def publicaciones_comparables(self, dias_minimos=7):
+        """
+        Devuelve únicamente publicaciones que han tenido al menos
+        'dias_minimos' de exposición.
+
+        Sirve para evitar que las publicaciones recién publicadas
+        sean clasificadas prematuramente como éxitos o fracasos.
+        """
+
+        publicaciones = self.analizar_antiguedad_publicaciones()
+
+        if not publicaciones:
+            return []
+
+        return [
+            p for p in publicaciones
+            if p.get("Días desde publicación", 0) >= dias_minimos
+        ]
+
+    # ======================================================
+    # PUBLICACIONES DEMASIADO RECIENTES PARA EVALUAR
+    # ======================================================
+    def publicaciones_recientes(self, dias_maximos=6):
+        """
+        Identifica publicaciones que todavía no deberían utilizarse
+        como evidencia de bajo rendimiento acumulado.
+        """
+
+        publicaciones = self.analizar_antiguedad_publicaciones()
+
+        if not publicaciones:
+            return []
+
+        return [
+            p for p in publicaciones
+            if p.get("Días desde publicación", 0) <= dias_maximos
+        ]
 
     # ======================================================
     # MÉTRICAS
@@ -585,14 +1025,44 @@ class LinkedInAnalyzer:
         # CABECERA
         # ==================================================
 
-        texto.append("RESUMEN DEL HISTÓRICO DE LINKEDIN")
+        texto.append("RESUMEN ANALÍTICO DEL HISTÓRICO DE LINKEDIN")
         texto.append("")
+        texto.append(
+            "Este bloque constituye la fuente estructurada de datos que "
+            "recibirá la IA para elaborar la auditoría estratégica."
+        )
+
+        # ==================================================
+        # REGLA FUNDAMENTAL DE INTERPRETACIÓN
+        # ==================================================
+
+        texto.append("")
+        texto.append("REGLA FUNDAMENTAL DE INTERPRETACIÓN")
+
+        texto.append(
+            "Los valores numéricos calculados por Python son la fuente de "
+            "verdad del análisis cuantitativo. La IA no debe modificar, "
+            "recalcular, sustituir ni inventar cifras."
+        )
+
+        texto.append(
+            "La IA puede interpretar los datos y formular hipótesis "
+            "estratégicas, pero debe distinguir siempre entre HECHO, "
+            "INFERENCIA e HIPÓTESIS."
+        )
+
+        texto.append(
+            "Ninguna relación causal debe afirmarse como hecho si los datos "
+            "disponibles únicamente permiten establecer una correlación, "
+            "coincidencia o posible explicación."
+        )
 
         # ==================================================
         # MADUREZ DEL PERFIL
         # ==================================================
 
-        texto.append("NIVEL DE MADUREZ DEL PERFIL")
+        texto.append("")
+        texto.append("NIVEL DE MADUREZ CALCULADO POR EL SISTEMA")
 
         texto.append(
             f"Actividad: {madurez.get('actividad', 'N/D')}"
@@ -607,34 +1077,107 @@ class LinkedInAnalyzer:
             f"{madurez.get('madurez_estrategica', 'N/D')}"
         )
 
+        texto.append("")
+        texto.append(
+            "IMPORTANTE: estos niveles son indicadores analíticos calculados "
+            "por el sistema a partir de los datos disponibles. No deben "
+            "interpretarse automáticamente como una medida de experiencia "
+            "profesional, experiencia laboral, antigüedad en LinkedIn o "
+            "competencia del usuario."
+        )
+
         # ==================================================
-        # PERIODO
+        # PERIODO DEL HISTÓRICO
         # ==================================================
 
         if periodo:
 
             texto.append("")
+            texto.append("PERIODO DEL HISTÓRICO EXPORTADO")
 
             texto.append(
-                f"Periodo histórico exportado: "
-                f"{periodo[0]} - {periodo[1]}"
+                f"Desde: {periodo[0]}"
+            )
+
+            texto.append(
+                f"Hasta: {periodo[1]}"
             )
 
         # ==================================================
-        # NOTA SOBRE LOS DATOS
+        # ALCANCE Y NATURALEZA DE LAS FUENTES
         # ==================================================
 
         texto.append("")
-
-        texto.append("NOTA SOBRE EL ALCANCE DE LOS DATOS")
+        texto.append("ALCANCE Y NATURALEZA DE LOS DATOS")
 
         texto.append(
-            "PUBLICACIONES PRINCIPALES contiene las publicaciones "
-            "disponibles en la exportación analizada. El análisis "
-            "cuantitativo debe basarse exclusivamente en las métricas "
-            "calculadas por Python. No deben inventarse métricas, "
-            "publicaciones, causas ni conclusiones que no estén "
-            "respaldadas por los datos."
+            "El archivo exportado de LinkedIn contiene diferentes fuentes "
+            "de información que no deben mezclarse automáticamente."
+        )
+
+        texto.append("")
+        texto.append(
+            "1. HISTÓRICO DIARIO DE INTERACCIÓN"
+        )
+
+        texto.append(
+            "El histórico diario representa los datos disponibles para cada "
+            "día del periodo exportado. Cuando Python utiliza estos datos "
+            "para calcular impresiones, interacciones u otras métricas "
+            "acumuladas del periodo, dichas métricas deben considerarse "
+            "representativas del histórico exportado."
+        )
+
+        texto.append("")
+        texto.append(
+            "2. PUBLICACIONES PRINCIPALES"
+        )
+
+        texto.append(
+            "La lista de publicaciones principales contiene únicamente las "
+            "publicaciones disponibles en la exportación analizada. LinkedIn "
+            "puede limitar esta relación y presentar rankings independientes "
+            "por distintas métricas."
+        )
+
+        texto.append(
+            "Por tanto, el número de publicaciones disponibles para análisis "
+            "NO debe interpretarse automáticamente como el número total de "
+            "publicaciones realizadas durante el periodo."
+        )
+
+        texto.append(
+            "Tampoco debe utilizarse esta lista para calcular o afirmar la "
+            "frecuencia real de publicación del usuario."
+        )
+
+        # ==================================================
+        # REGLAS PARA LA FRECUENCIA
+        # ==================================================
+
+        texto.append("")
+        texto.append("REGLAS SOBRE FRECUENCIA Y ACTIVIDAD")
+
+        texto.append(
+            "No debe inferirse la frecuencia real de publicación a partir "
+            "del número de registros presentes en PUBLICACIONES PRINCIPALES."
+        )
+
+        texto.append(
+            "Si Python proporciona métricas de frecuencia calculadas a partir "
+            "de una fuente temporal válida, la IA puede utilizarlas."
+        )
+
+        texto.append(
+            "Si no existe una métrica de frecuencia calculada por Python, "
+            "la IA debe indicar que la frecuencia exacta no puede determinarse "
+            "con los datos disponibles."
+        )
+
+        texto.append(
+            "Nunca debe utilizarse la expresión 'publica frecuentemente', "
+            "'publica poco', 'actividad intermitente' o similares únicamente "
+            "porque existan pocos o muchos registros en PUBLICACIONES PRINCIPALES."
         )
 
         # ==================================================
@@ -642,9 +1185,7 @@ class LinkedInAnalyzer:
         # ==================================================
 
         texto.append("")
-
         texto.append("MÉTRICAS CALCULADAS POR PYTHON")
-
         texto.append("")
 
         for clave, valor in resumen.items():
@@ -654,13 +1195,35 @@ class LinkedInAnalyzer:
             )
 
         # ==================================================
+        # REGLAS PARA LAS MÉTRICAS
+        # ==================================================
+
+        texto.append("")
+        texto.append("REGLAS PARA INTERPRETAR LAS MÉTRICAS")
+
+        texto.append(
+            "Las métricas anteriores son las cifras oficiales que deben "
+            "utilizarse en el informe."
+        )
+
+        texto.append(
+            "Si una métrica no aparece en este bloque, la IA no debe inventarla "
+            "ni estimarla salvo que pueda derivarse directamente de otra cifra "
+            "proporcionada y dicha derivación sea matemáticamente inequívoca."
+        )
+
+        texto.append(
+            "Las métricas procedentes de fuentes diferentes deben mantenerse "
+            "separadas y no deben sumarse, compararse o relacionarse sin "
+            "justificación metodológica."
+        )
+
+        # ==================================================
         # PUBLICACIONES DESTACADAS
         # ==================================================
 
         texto.append("")
-
         texto.append("PUBLICACIONES DESTACADAS")
-
         texto.append("")
 
         # --------------------------------------------------
@@ -668,7 +1231,7 @@ class LinkedInAnalyzer:
         # --------------------------------------------------
 
         texto.append(
-            "TOP 5 PUBLICACIONES POR IMPRESIONES"
+            "TOP 5 PUBLICACIONES DISPONIBLES POR IMPRESIONES"
         )
 
         for posicion, publicacion in enumerate(
@@ -690,9 +1253,8 @@ class LinkedInAnalyzer:
         # --------------------------------------------------
 
         texto.append("")
-
         texto.append(
-            "BOTTOM 5 PUBLICACIONES POR IMPRESIONES"
+            "BOTTOM 5 PUBLICACIONES DISPONIBLES POR IMPRESIONES"
         )
 
         for posicion, publicacion in enumerate(
@@ -714,9 +1276,8 @@ class LinkedInAnalyzer:
         # --------------------------------------------------
 
         texto.append("")
-
         texto.append(
-            "TOP 5 PUBLICACIONES POR ENGAGEMENT"
+            "TOP 5 PUBLICACIONES DISPONIBLES POR ENGAGEMENT"
         )
 
         for posicion, publicacion in enumerate(
@@ -734,8 +1295,47 @@ class LinkedInAnalyzer:
             )
 
         # ==================================================
-        # DEVOLVER RESUMEN
+        # LIMITACIONES METODOLÓGICAS
         # ==================================================
+
+        texto.append("")
+        texto.append("LIMITACIONES METODOLÓGICAS")
+
+        texto.append(
+            "La auditoría debe reconocer explícitamente cualquier limitación "
+            "derivada de la estructura de la exportación de LinkedIn."
+        )
+
+        texto.append(
+            "La ausencia de determinados registros no demuestra que una "
+            "actividad no haya ocurrido."
+        )
+
+        texto.append(
+            "La presencia de una publicación en un ranking no demuestra por "
+            "sí sola que sus características sean la causa de su rendimiento."
+        )
+
+        texto.append(
+            "Las publicaciones destacadas deben utilizarse como evidencia "
+            "para identificar patrones y formular hipótesis, no como prueba "
+            "causal."
+        )
+
+        # ==================================================
+        # CRITERIO FINAL PARA LA IA
+        # ==================================================
+
+        texto.append("")
+        texto.append("CRITERIO FINAL")
+
+        texto.append(
+            "La auditoría debe priorizar precisión metodológica sobre "
+            "apariencia de certeza. Cuando los datos permitan una conclusión, "
+            "debe expresarse con claridad. Cuando solo permitan una hipótesis, "
+            "debe presentarse como hipótesis. Cuando no permitan responder, "
+            "debe indicarse expresamente que el dato no puede determinarse."
+        )
 
         return "\n".join(texto)
 
