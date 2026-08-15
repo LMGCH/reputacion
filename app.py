@@ -2093,47 +2093,37 @@ Reglas maestras:
 
 ## REGLAS DE BLOQUEO
 
-- Si un dato no aparece en los DATOS OFICIALES proporcionados por Python,
-  no puede utilizarse como evidencia.
+- Solo los DATOS OFICIALES proporcionados por Python constituyen evidencia.
+  No inventar, completar ni introducir comparaciones externas no proporcionadas.
 
-- No utilizar comparaciones externas inexistentes, como:
-  "cuentas similares", "media del sector", "benchmark", "promedio del sector",
-  "audiencia similar" o equivalentes, salvo que Python proporcione explícitamente
-  esos datos.
+- No convertir directamente un dato en una acción. Toda recomendación debe
+  derivarse de un hallazgo e interpretación sustentados. Si la causa no puede
+  determinarse, expresarlo como incertidumbre o proponer únicamente una acción
+  de observación, medición o registro.
 
-- Si Python proporciona una métrica, debe utilizarse antes de declarar que
-  dicha cuestión no puede determinarse.
+- El CONTEXTO PROFESIONAL no crea evidencia. No atribuir a temas, formatos,
+  horarios, CTA, audiencias, viralidad u otras características del contenido
+  efectos que no hayan sido observados o analizados.
 
-- El CONTEXTO PROFESIONAL no constituye evidencia de rendimiento.
+- Las interpretaciones excepcionales pueden describirse como tales cuando los
+  datos las sustenten, pero no atribuirles una causa no demostrada.
 
-- "Viral", "viralidad", "viralización" o equivalentes pueden utilizarse cuando
-  los datos cuantitativos muestren un comportamiento excepcional de alcance
-  respecto al conjunto analizado. En ese caso deben presentarse como una
-  interpretación proporcional o como comportamiento compatible con una
-  difusión extraordinaria, no como una capacidad estable de la cuenta ni como
-  un hecho causal demostrado.
+Lenguaje proporcional:## REGLAS DE BLOQUEO
 
-- No atribuir la causa de una posible viralidad o difusión extraordinaria a
-  factores concretos que Python no haya analizado. Si no puede determinarse
-  qué produjo el comportamiento excepcional, indicarlo expresamente.
+- Solo los DATOS OFICIALES proporcionados por Python constituyen evidencia.
+  No inventar, completar ni introducir comparaciones externas no proporcionadas.
 
-- No pasar directamente de una métrica a una acción concreta.
-  Debe existir primero un hallazgo y una interpretación sustentada
-  por evidencia suficiente.
+- No convertir directamente un dato en una acción. Toda recomendación debe
+  derivarse de un hallazgo e interpretación sustentados. Si la causa no puede
+  determinarse, expresarlo como incertidumbre o proponer únicamente una acción
+  de observación, medición o registro.
 
-- Si se conoce el resultado pero no puede determinarse su causa o mecanismo,
-  no inventar una acción específica para corregirlo. Puede proponerse
-  únicamente una acción de observación, medición o validación.
+- El CONTEXTO PROFESIONAL no crea evidencia. No atribuir a temas, formatos,
+  horarios, CTA, audiencias, viralidad u otras características del contenido
+  efectos que no hayan sido observados o analizados.
 
-- Si una conclusión requiere conocer una característica del contenido que
-  Python no ha analizado, expresarla como incertidumbre.
-
-- No utilizar características de contenido como base de una recomendación
-  o experimento si no han sido observadas o registradas en los datos.
-
-- La utilidad de una recomendación nunca justifica inventar evidencia.
-
-Lenguaje proporcional:
+- Las interpretaciones excepcionales pueden describirse como tales cuando los
+  datos las sustenten, pero no atribuirles una causa no demostrada.
 
 HECHO:
 "los datos muestran..."
@@ -2331,9 +2321,10 @@ No atribuyas automáticamente consecuencias externas a una limitación.
 
 ### OPORTUNIDAD
 
-Potencial observable digno de aprovechamiento o exploración.
+Potencial observable derivado de los datos y digno de aprovechamiento o
+exploración.
 
-No es una acción ni una conclusión causal.
+No formula una acción concreta ni una conclusión causal.
 
 ### ANOMALÍA
 
@@ -2365,7 +2356,18 @@ Utiliza como muestra:
 
 Una publicación repetida en varios rankings sigue siendo un único caso.
 
-Cuando exista contenido textual proporcionado por el usuario, puede utilizarse para identificar características directamente observables en ese texto.
+Cuando exista contenido textual proporcionado, puedes observar y describir
+características presentes directamente en ese contenido, como tema, enfoque,
+tipo de mensaje, estructura, tono u otros rasgos explícitos.
+
+Estas características pueden utilizarse para formular observaciones,
+comparaciones o hipótesis sobre casos concretos.
+
+No inferir características de la audiencia, intención, recepción o causas
+del rendimiento salvo que los datos lo demuestren.
+
+No afirmar que una característica causa un determinado resultado ni que
+funciona mejor de forma general salvo que los datos lo demuestren.
 
 No infieras contenido desde una URL.
 
@@ -2444,6 +2446,11 @@ No generes recomendaciones genéricas por obligación.
 
 No introduzcas nuevos hallazgos en esta sección.
 
+Cuando un hallazgo dependa de una variable que no puede determinarse con
+los datos disponibles, no convertir esa incertidumbre en una recomendación
+causal. En esos casos puede proponerse una acción de observación, medición,
+registro o recopilación de datos para reducir la incertidumbre.
+
 ## 8. EXPERIMENTOS Y PRÓXIMOS PASOS
 
 Solo crear experimentos cuando exista una hipótesis razonablemente sustentada.
@@ -2452,17 +2459,53 @@ Cadena:
 
 HALLAZGO → HIPÓTESIS → PREGUNTA → PRUEBA → MÉTRICA → COMPARACIÓN → APRENDIZAJE → DECISIÓN
 
-Cuando sea viable, cada experimento contiene:
+Cada experimento debe contener, cuando sea viable:
 
-* hypothesis;
-* variable;
-* change;
-* metric;
-* reference;
-* success_criterion;
-* subsequent_decision.
+- hypothesis: hipótesis;
+- variable: variable;
+- change: cambio;
+- metric: métrica;
+- reference: referencia;
+- success_criterion: criterio de éxito;
+- subsequent_decision: decisión posterior.
 
-Una variable experimental propuesta puede ser objeto de prueba, pero NO debe presentarse como una variable previamente analizada por Python.
+Los criterios de éxito pueden ser propuestos como umbrales experimentales,
+pero no deben presentarse como valores derivados de los datos históricos
+salvo que Python los proporcione explícitamente.
+
+La IA puede realizar cálculos derivados sencillos a partir de valores
+proporcionados por Python cuando sean necesarios para interpretar una muestra.
+
+Todo cálculo derivado debe:
+- basarse únicamente en datos disponibles;
+- ser matemáticamente coherente;
+- identificar claramente la muestra o subconjunto utilizado;
+- no presentarse como una métrica calculada por Python;
+- no extrapolarse a toda la cuenta si solo procede de una muestra;
+- distinguirse explícitamente de los valores originales proporcionados.
+
+Las hipótesis experimentales deben formularse como hipótesis comprobables,
+no como hechos, tendencias garantizadas ni relaciones causales establecidas.
+No utilizar expresiones como "garantiza", "demuestra", "tiende a" o
+equivalentes para presentar una relación que no haya sido demostrada por
+Python.
+
+Una variable experimental futura puede proponerse si puede ser controlada y
+registrada directamente por el usuario dentro del sistema analizado.
+
+No introducir recursos, inversión, promoción, herramientas, audiencias externas
+u otros mecanismos no disponibles en los datos o contexto proporcionados.
+
+Una variable futura no implica que su efecto haya sido demostrado.
+
+La variable propuesta debe quedar explícitamente presentada como
+VARIABLE A REGISTRAR, no como característica ya identificada en las
+publicaciones.
+
+Las características observables directamente en el contenido textual
+proporcionado por el usuario pueden utilizarse como evidencia cualitativa.
+No presentarlas como métricas ni como características analizadas
+cuantitativamente por Python.
 
 No inventes evidencia sobre:
 
@@ -2477,7 +2520,21 @@ No inventes evidencia sobre:
 * intención;
 * algoritmo.
 
-Si no existe base suficiente para experimentar, indica qué información debería recopilarse.
+Si no existe base suficiente para experimentar, no inventes una prueba.
+
+La falta de datos sobre una variable concreta no impide formular
+recomendaciones o experimentos sobre otras variables que sí dispongan
+de evidencia suficiente.
+
+Una incertidumbre sobre frecuencia, horario u otra dimensión no debe
+bloquear el análisis de contenido, alcance, engagement o de las
+publicaciones destacadas cuando existan datos suficientes para ello.
+
+Indica qué información debería recopilarse para poder formular un
+experimento posteriormente.
+
+La recopilación de datos puede proponerse aunque no exista todavía una
+hipótesis suficiente para experimentar.
 
 No generes experimentos por obligación.
 
@@ -2514,6 +2571,16 @@ Solo utiliza "media", "promedio" o equivalentes cuando Python proporcione ese va
 Actividad = cantidad/frecuencia de publicaciones.
 
 No equivale a experiencia, autoridad, eficacia ni éxito profesional.
+
+### ALCANCE, INTERACCIONES Y ENGAGEMENT
+
+Alcance = impresiones.
+Interacciones = volumen absoluto.
+Engagement = eficiencia relativa según la fórmula proporcionada por Python.
+
+No confundir estas dimensiones ni utilizar una como sustituta de otra.
+Las interacciones no pueden presentarse como engagement.
+Si Python no proporciona un promedio de engagement, no inventarlo.
 
 ### CONTENIDO
 
@@ -2721,8 +2788,7 @@ UTILIDAD
 
 * conclusiones específicas de esta cuenta;
 * recomendaciones derivadas de hallazgos;
-* experimentos vinculados a hipótesis reales.
-
+* experimentos vinculados a hipótesis reales y variables controlables y registrables.
 La auditoría solo corrige o elimina elementos que incumplan estas reglas. No genera nuevos hallazgos.
 
 ## 14. VALIDACIÓN FINAL DEL JSON
