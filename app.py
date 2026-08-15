@@ -194,8 +194,8 @@ with col2:
 fecha_alta = st.date_input("Fecha de Activación Real del Perfil", date(2026, 3, 1))
 
 st.subheader("2. Input de Datos (LinkedIn Nativos)")
-ssi_image = st.file_uploader("Captura del Social Selling Index (Imagen PNG/JPG)", type=["png", "jpg", "jpeg"])
-analytics_file = st.file_uploader("Histórico Analítico de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"])
+ssi_image = st.file_uploader("Captura del Social Selling Index (Imagen PNG/JPG)", type=["png", "jpg", "jpeg"], key="ssi_image_uploader")
+analytics_file = st.file_uploader("Histórico Analítico de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"], key="analytics_file_uploader")
 
 def encode_image(uploaded_file):
     return base64.b64encode(uploaded_file.read()).decode('utf-8')
@@ -1018,6 +1018,26 @@ body {
 def generar_html(analysis_json):
 
     metadata = analysis_json.get("metadata", {})
+
+
+    linkedin_name = metadata.get(
+        "usuario",
+        "Usuario LinkedIn"
+    )
+
+    report_generated_at = (
+        metadata.get("fecha_generacion")
+        or metadata.get("fecha_de_generacion")
+        or metadata.get("fecha_generación")
+        or metadata.get("fecha_de_generación")
+        or "No disponible"
+    )
+ 
+    analysis_period = metadata.get(
+        "periodo",
+        "No disponible"
+    )
+
     sections = analysis_json.get("sections", [])
 
     def escapar(valor):
@@ -1123,17 +1143,23 @@ def generar_html(analysis_json):
         # --------------------------------------------------
         # DIAGNÓSTICO
         # --------------------------------------------------
+
         elif item_type == "diagnosis":
+
             category = item.get("category", "")
-            text = item.get("text", item.get("content", ""))
+            content = item.get("content", "")
+
             return f"""
             <div class="diagnosis">
-            <div class="diagnosis-label">
-            {escapar(category)}
-            </div>
-            <div class="diagnosis-text">
-            {escapar(text)}
-            </div>
+
+                <div class="diagnosis-label">
+                    {escapar(category)}
+                </div>
+
+                <div class="diagnosis-text">
+                    {escapar(content)}
+                </div>
+
             </div>
             """
 
@@ -1385,24 +1411,58 @@ def generar_html(analysis_json):
         # TIPO DESCONOCIDO
         # --------------------------------------------------
 
+        print("DEBUG USUARIO:", linkedin_name)
+        print("DEBUG FECHA:", report_generated_at)
+        print("DEBUG PERIODO:", analysis_period)
+
+
+
         return ""
 
     # ======================================================
     # METADATOS
     # ======================================================
 
-    usuario = escapar(metadata.get("usuario", ""))
-    periodo = escapar(metadata.get("periodo", ""))
-    fecha_inicio = escapar(metadata.get("fecha_de_inicio", ""))
-    fecha_fin = escapar(metadata.get("fecha_de_fin", ""))
-    fecha_generacion = escapar(metadata.get("fecha_de_generacion", ""))
-    estado = escapar(metadata.get("estado", ""))
-    version = escapar(metadata.get("version", ""))
+    usuario = escapar(
+        metadata.get("usuario", "")
+    )
+
+    periodo = escapar(
+        metadata.get("periodo", "")
+    )
+
+    fecha_inicio = escapar(
+        metadata.get("fecha_inicio")
+        or metadata.get("fecha_de_inicio", "")
+    )
+
+    fecha_fin = escapar(
+        metadata.get("fecha_fin")
+        or metadata.get("fecha_de_fin", "")
+    )
+
+    fecha_generacion = escapar(
+        metadata.get("fecha_generacion")
+        or metadata.get("fecha_de_generacion")
+        or metadata.get("fecha_generación")
+        or metadata.get("fecha_de_generación", "")
+    )
+
+    estado = escapar(
+        metadata.get("estado", "")
+    )
+
+    version = escapar(
+        metadata.get("version", "")
+    )
 
     # ======================================================
     # DOCUMENTO HTML
     # ======================================================
-
+    print("🔥 ANTES DE CONSTRUIR HTML")
+    print("🔥 report_generated_at =", repr(report_generated_at))
+    print("🔥 analysis_period =", repr(analysis_period))
+    # ======================================================
     # ======================================================
     # INICIO DEL DOCUMENTO
     # ======================================================
@@ -1439,66 +1499,65 @@ def generar_html(analysis_json):
             CABECERA
             ========================================== -->
 
-    <header class="report-header">
+        <header class="report-header">
 
-        <div class="report-header-main">
+            <div class="report-header-main">
 
-            <div class="report-kicker">
-                AUDITORÍA ESTRATÉGICA DE LINKEDIN
-            </div>
+                <div class="report-kicker">
+                    AUDITORÍA ESTRATÉGICA DE LINKEDIN
+                </div>
 
-            <h1>
-                Informe Ejecutivo
-            </h1>
-
-        </div>
-
-        <div class="metadata">
-
-            <div class="metadata-item">
-
-                <strong>Perfil analizado</strong>
-
-                <span>
-                    {linkedin_name}
-                </span>
+                <h1>
+                    Informe Ejecutivo
+                </h1>
 
             </div>
 
-            <div class="metadata-item">
+            <div class="metadata">
 
-                <strong>Informe</strong>
+                <div class="metadata-item">
 
-                <span>
-                    Generado: {report_generated_at}
-                </span>
+                    <strong>Perfil analizado</strong>
 
-                <span>
-                    Periodo: {analysis_period}
-                </span>
+                    <span>
+                        {linkedin_name}
+                    </span>
+
+                </div>
+
+                <div class="metadata-item">
+
+                    <strong>Informe</strong>
+
+                    <span>
+                        Generado: {report_generated_at}
+                    </span>
+
+                    <span>
+                        Periodo: {analysis_period}
+                    </span>
+
+                </div>
+
+                <div class="metadata-item metadata-credit">
+
+                    <strong>Elaborado por</strong>
+
+                    <span>
+                        Ruta TI
+                    </span>
+
+                    <span class="metadata-assistance">
+                        Análisis asistido por ChatGPT
+                    </span>
+
+                </div>
 
             </div>
 
-            <div class="metadata-item metadata-credit">
+        </header>
 
-                <strong>Elaborado por</strong>
-
-                <span>
-                    Ruta TI
-                </span>
-
-                <span class="metadata-assistance">
-                    Análisis asistido por ChatGPT
-                </span>
-
-            </div>
-
-        </div>
-
-    </header>
-
-                """
-
+"""
     # ======================================================
     # SECCIONES
     # ======================================================
@@ -1606,16 +1665,31 @@ def generar_html(analysis_json):
 
     return html
 
-# 3. Procesamiento y Renderizado del Informe Ejecutivo
+    # 3. Procesamiento y Renderizado del Informe Ejecutivo
+
+
+# ======================================================
+# ESTADO PERSISTENTE DE LA AUDITORÍA
+# ======================================================
+
+if "auditoria_activa" not in st.session_state:
+    st.session_state.auditoria_activa = False
+
+
+# ======================================================
+# BOTÓN DE INICIO DE LA AUDITORÍA
+# ======================================================
 
 if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
     if not api_key:
+
         st.error(
             "Error de autenticación: Introduce tu OpenAI API Key del menú lateral."
         )
 
     elif not ssi_image or not analytics_file:
+
         st.error(
             "Error de datos: Es obligatorio adjuntar tanto la captura visual "
             "del SSI como el registro analítico."
@@ -1623,209 +1697,373 @@ if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
 
     else:
 
-        with st.spinner(
-            "Generando auditoría corporativa y maquetando PDF ejecutivo... "
-            "Por favor, espera."
-        ):
+        st.session_state.auditoria_activa = True
 
-            try:
 
-                hoy = date.today()
-                dias_activos = (hoy - fecha_alta).days
-                meses_activos = max(1, round(dias_activos / 30.4))
+# ======================================================
+# EJECUCIÓN PERSISTENTE DE LA AUDITORÍA
+# ======================================================
+
+if st.session_state.auditoria_activa:
+
+    with st.spinner(
+        "Generando auditoría corporativa y maquetando PDF ejecutivo... "
+        "Por favor, espera."
+    ):
+
+        try:
+
+            hoy = date.today()
+            dias_activos = (hoy - fecha_alta).days
+            meses_activos = max(1, round(dias_activos / 30.4))
+
+            # ======================================================
+            # IDENTIDAD DEL USUARIO
+            # ======================================================
+
+            linkedin_name = "Usuario LinkedIn"
+
+            # ======================================================
+            # CARGA DEL ARCHIVO ANALÍTICO
+            # ======================================================
+
+            if analytics_file.name.endswith(".pdf"):
+
+                reader = PdfReader(analytics_file)
+
+                analytics_text = "".join(
+                    [
+                        (page.extract_text() or "") + "\n"
+                        for page in reader.pages
+                    ]
+                )
+
+            else:
+
+                from linkedin_analyzer import LinkedInAnalyzer
+
+                excel = pd.ExcelFile(analytics_file)
+
+                df = pd.read_excel(
+                    analytics_file,
+                    sheet_name="PUBLICACIONES PRINCIPALES",
+                    header=2
+                )
+
+                df_interaccion = pd.read_excel(
+                    analytics_file,
+                    sheet_name="INTERACCIÓN"
+                )
 
                 # ======================================================
-                # CARGA DEL ARCHIVO ANALÍTICO
+                # ANALIZADOR
                 # ======================================================
 
-                if analytics_file.name.endswith(".pdf"):
+                analizador = LinkedInAnalyzer(
+                    df,
+                    df_interaccion
+                )
 
-                    reader = PdfReader(analytics_file)
+                st.dataframe(df.head())
 
-                    analytics_text = "".join(
-                        [
-                            (page.extract_text() or "") + "\n"
-                            for page in reader.pages
-                        ]
+                # ==================================================
+                # PROPIEDADES DEL EXCEL
+                # ==================================================
+
+                from openpyxl import load_workbook
+
+                wb = load_workbook(
+                    analytics_file,
+                    read_only=True
+                )
+
+                props = wb.properties
+
+                wb.close()
+
+                # ==================================================
+                # IDENTIFICACIÓN DEL USUARIO
+                # ==================================================
+
+                import re
+
+                excel_title = props.title or ""
+
+                linkedin_name = excel_title
+
+                # Eliminar prefijo generado por LinkedIn
+                if linkedin_name.startswith("AnalisisConjunto_"):
+                    linkedin_name = linkedin_name[
+                        len("AnalisisConjunto_"):
+                    ]
+
+                # Eliminar extensión
+                if linkedin_name.lower().endswith(".xlsx"):
+                    linkedin_name = linkedin_name[:-5]
+
+                # Eliminar las dos fechas finales
+                linkedin_name = re.sub(
+                    r"_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}$",
+                    "",
+                    linkedin_name
+                )
+
+                # Eliminar emojis e iconos del nombre
+                linkedin_name = re.sub(
+                    r"[\U0001F000-\U0001FAFF"
+                    r"\U00002600-\U000027BF"
+                    r"\U0001F1E6-\U0001F1FF]+",
+                    "",
+                    linkedin_name
+                )
+
+                # Limpiar espacios sobrantes
+                linkedin_name = re.sub(
+                    r"\s+",
+                    " ",
+                    linkedin_name
+                ).strip()
+
+                # ==================================================
+                # DATOS DERIVADOS DEL ANALIZADOR
+                # ==================================================
+
+                destacadas = analizador.publicaciones_destacadas()
+
+                rendimiento = analizador.analisis_rendimiento()
+
+                analytics_text = analizador.resumen_para_ia()
+
+                madurez = analizador.nivel_madurez()
+
+                publicaciones_contexto = destacadas.get(
+                    "Top 5 Engagement Maduras",
+                    []
+                )
+
+                # ==================================================
+                # INICIALIZAR PUBLICACIONES EN SESSION STATE
+                # ==================================================
+
+                if "contenidos_publicaciones" not in st.session_state:
+
+                    st.session_state.contenidos_publicaciones = []
+
+                    for publicacion in publicaciones_contexto:
+
+                        st.session_state.contenidos_publicaciones.append({
+                            "URL": publicacion.get("URL", ""),
+                            "Fecha": publicacion.get("Fecha"),
+                            "Impresiones": publicacion.get("Impresiones"),
+                            "Interacciones": publicacion.get("Interacciones"),
+                            "Engagement": publicacion.get("Engagement"),
+                            "Madurez": publicacion.get("Madurez"),
+                            "Contenido": ""
+                        })
+
+
+                # ==================================================
+                # CONTEXTO CUALITATIVO DE PUBLICACIONES DESTACADAS
+                # ==================================================
+
+                st.subheader("3. Contexto de publicaciones destacadas")
+
+                st.write(
+                    "Para mejorar nuestra analítica, necesitamos que nos copies "
+                    "el contenido de estas publicaciones:"
+                )
+                
+                # --------------------------------------------------
+                # MOSTRAR CAMPOS DE CONTENIDO
+                # --------------------------------------------------
+
+                for i, publicacion in enumerate(
+                    st.session_state.contenidos_publicaciones,
+                    1
+                ):
+
+                    url = publicacion.get("URL", "")
+
+                    st.markdown(f"**Publicación {i}**")
+
+                    if url:
+                        st.markdown(
+                            f"[Ver publicación ↗]({url})"
+                        )
+
+                    contenido = st.text_area(
+                        "Contenido de la publicación",
+                        key=f"contenido_publicacion_{i}",
+                        height=180,
+                        placeholder=(
+                            "Copia y pega aquí el contenido de la publicación..."
+                        )
                     )
 
-                else:
-
-                    from linkedin_analyzer import LinkedInAnalyzer
-
-                    excel = pd.ExcelFile(analytics_file)
-
-                    df = pd.read_excel(
-                        analytics_file,
-                        sheet_name="PUBLICACIONES PRINCIPALES",
-                        header=2
+                    st.session_state.contenidos_publicaciones[i - 1]["Contenido"] = (
+                        contenido
                     )
 
-                    df_interaccion = pd.read_excel(
-                        analytics_file,
-                        sheet_name="INTERACCIÓN"
-                    )
 
-                    # ==================================================
-                    # ANALIZADOR
-                    # ==================================================
+                # --------------------------------------------------
+                # BOTÓN DE CONTINUACIÓN
+                # --------------------------------------------------
 
-                    analizador = LinkedInAnalyzer(
-                        df,
-                        df_interaccion
-                    )
+                continuar_analisis = st.button(
+                    "➡️ Continuar con el análisis",
+                    key="continuar_analisis"
+                )
 
-                    st.dataframe(df.head())
 
-                    # ==================================================
-                    # PROPIEDADES DEL EXCEL
-                    # ==================================================
+                # --------------------------------------------------
+                # SI TODAVÍA NO SE HA PULSADO CONTINUAR
+                # --------------------------------------------------
 
-                    from openpyxl import load_workbook
-
-                    wb = load_workbook(
-                        analytics_file,
-                        read_only=True
-                    )
-
-                    props = wb.properties
-
-                    wb.close()
-
-                    # ==================================================
-                    # IDENTIFICACIÓN DEL USUARIO
-                    # ==================================================
-
-                    import re
-
-                    excel_title = props.title or ""
-
-                    linkedin_name = excel_title
-
-                    # Eliminar prefijo generado por LinkedIn
-                    if linkedin_name.startswith("AnalisisConjunto_"):
-                        linkedin_name = linkedin_name[
-                            len("AnalisisConjunto_"):
-                        ]
-
-                    # Eliminar extensión
-                    if linkedin_name.lower().endswith(".xlsx"):
-                        linkedin_name = linkedin_name[:-5]
-
-                    # Eliminar las dos fechas finales
-                    linkedin_name = re.sub(
-                        r"_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}$",
-                        "",
-                        linkedin_name
-                    )
-
-                    # Eliminar emojis e iconos del nombre
-                    linkedin_name = re.sub(
-                        r"[\U0001F000-\U0001FAFF"
-                        r"\U00002600-\U000027BF"
-                        r"\U0001F1E6-\U0001F1FF]+",
-                        "",
-                        linkedin_name
-                    )
-
-                    # Limpiar espacios sobrantes
-                    linkedin_name = re.sub(
-                        r"\s+",
-                        " ",
-                        linkedin_name
-                    ).strip()
- 
-                    # ==================================================
-                    # DATOS DERIVADOS DEL ANALIZADOR
-                    # ==================================================
-
-                    destacadas = analizador.publicaciones_destacadas()
-
-                    rendimiento = analizador.analisis_rendimiento()
-
-                    analytics_text = analizador.resumen_para_ia()
-
-                    madurez = analizador.nivel_madurez()
-
-                    # ======================================================
-                    # PROCESAMIENTO DEL SSI
-                    # ======================================================
-
-                    base64_image = encode_image(ssi_image)
+                if not continuar_analisis:
 
                     st.info(
-                        f"SSI cargado correctamente: {ssi_image.name}"
+                        "Puedes abrir las publicaciones en nuevas pestañas, "
+                        "copiar su contenido y volver aquí. "
+                        "Los textos introducidos se conservarán."
                     )
 
-                    client = openai.OpenAI(
-                        api_key=api_key
+                    st.stop()
+
+
+                # ==================================================
+                # CONSTRUIR CONTEXTO CUALITATIVO PARA LA IA
+                # ==================================================
+
+                contexto_publicaciones = ""
+
+                for i, publicacion in enumerate(
+                    st.session_state.contenidos_publicaciones,
+                    1
+                ):
+
+                    contenido = publicacion.get("Contenido", "").strip()
+
+                    if not contenido:
+                        continue
+
+                    contexto_publicaciones += f"""
+--- PUBLICACIÓN DESTACADA {i} ---
+
+Fecha:
+{publicacion.get("Fecha", "No disponible")}
+
+Impresiones:
+{publicacion.get("Impresiones", "No disponible")}
+
+Interacciones:
+{publicacion.get("Interacciones", "No disponible")}
+
+Engagement:
+{publicacion.get("Engagement", "No disponible")}%
+
+Madurez:
+{publicacion.get("Madurez", "No disponible")}
+
+URL:
+{publicacion.get("URL", "No disponible")}
+
+CONTENIDO PROPORCIONADO POR EL USUARIO:
+{contenido}
+
+--- FIN PUBLICACIÓN {i} ---
+"""
+
+                # --------------------------------------------------
+                # FALLBACK SI NO SE INTRODUJO NINGÚN CONTENIDO
+                # --------------------------------------------------
+
+                if not contexto_publicaciones:
+
+                    contexto_publicaciones = (
+                        "No se ha proporcionado contenido textual de publicaciones "
+                        "destacadas para realizar análisis cualitativo."
                     )
 
-                    ssi_text = extraer_datos_ssi(
-                        client,
-                        ssi_image
-                    )
+                # ======================================================
+                # PROCESAMIENTO DEL SSI
+                # ======================================================
 
-                    sector_real = (
-                        sector
-                        if sector
-                        else "Ciberseguridad y Formación Profesional"
-                    )
+                base64_image = encode_image(ssi_image)
 
-                    intereses_real = (
-                        intereses
-                        if intereses
-                        else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
-                    )
+                st.info(
+                    f"SSI cargado correctamente: {ssi_image.name}"
+                )
 
-                    # ======================================================
-                    # METADATOS OFICIALES DEL INFORME
-                    # ======================================================
+                client = openai.OpenAI(
+                    api_key=api_key
+                )
 
-                    from datetime import datetime
+                ssi_text = extraer_datos_ssi(
+                    client,
+                    ssi_image
+                )
 
-                    report_generated_at = datetime.now().strftime(
-                        "%d/%m/%Y %H:%M"
-                    )
+                sector_real = (
+                    sector
+                    if sector
+                    else "Ciberseguridad y Formación Profesional"
+                )
 
-                    fecha_alta_display = (
-                        fecha_alta.strftime("%d/%m/%Y")
-                        if hasattr(fecha_alta, "strftime")
-                        else str(fecha_alta)
-                    )
+                intereses_real = (
+                    intereses
+                    if intereses
+                    else "FP, Empleo, Redes, SMR, ASIR, DAM, DAW"
+                )
 
-                    hoy_display = (
-                        hoy.strftime("%d/%m/%Y")
-                        if hasattr(hoy, "strftime")
-                        else str(hoy)
-                    )
 
-                    # Periodo REAL del análisis
-                    analysis_period = (
-                        f"{fecha_alta_display} — {hoy_display}"
-                    )
+                # ======================================================
+                # METADATOS OFICIALES DEL INFORME
+                # ======================================================
 
-                    # Estado del informe
-                    report_status = "BETA · FASE PRELIMINAR"
+                from datetime import datetime
 
-                    # Metadatos oficiales
-                    report_metadata = {
-                        "usuario": linkedin_name,
-                        "periodo": analysis_period,
-                        "fecha_inicio": fecha_alta_display,
-                        "fecha_fin": hoy_display,
-                        "fecha_generacion": report_generated_at,
-                        "estado": report_status
-                    }
+                report_generated_at = datetime.now().strftime(
+                    "%d/%m/%Y %H:%M"
+                )
 
-                    system_prompt = f"""
+                fecha_alta_display = (
+                    fecha_alta.strftime("%d/%m/%Y")
+                    if hasattr(fecha_alta, "strftime")
+                    else str(fecha_alta)
+                )
+
+                hoy_display = (
+                    hoy.strftime("%d/%m/%Y")
+                    if hasattr(hoy, "strftime")
+                    else str(hoy)
+                )
+
+                # Periodo REAL del análisis
+                analysis_period = (
+                    f"{fecha_alta_display} — {hoy_display}"
+                )
+
+                # Estado del informe
+                report_status = "BETA · FASE PRELIMINAR"
+
+                # Metadatos oficiales
+                report_metadata = {
+                    "usuario": linkedin_name,
+                    "periodo": analysis_period,
+                    "fecha_inicio": fecha_alta_display,
+                    "fecha_fin": hoy_display,
+                    "fecha_generacion": report_generated_at,
+                    "estado": report_status
+                }
+
+                system_prompt = f"""
 # ======================================================
-# LINKEDIN ANALYTICAL AUDIT — SYSTEM PROMPT
+# LINKEDIN ANALYTICAL AUDIT — SYSTEM PROMPT V2
 # ======================================================
 
 ## 0. ROL Y PRINCIPIOS
 
-Actúas como ANALISTA ESTRATÉGICO Y MENTOR especializado en analítica de actividad profesional en LinkedIn.
+Actúas como ANALISTA ESTRATÉGICO Y MENTOR especializado en analítica profesional de LinkedIn.
 
 Tu misión es transformar los datos disponibles de ESTA CUENTA en conocimiento específico, riguroso y útil.
 
@@ -1833,26 +2071,69 @@ Flujo obligatorio:
 
 DATOS → EVIDENCIA → INTERPRETACIÓN → DIAGNÓSTICO → DECISIÓN → APRENDIZAJE
 
-No eres un generador de consejos genéricos.
+Python es la fuente de verdad cuantitativa.
 
-Reglas fundamentales:
+Reglas maestras:
 
-- Python es la fuente de verdad cuantitativa.
-- No inventes métricas, publicaciones, características, causas, tendencias ni resultados.
-- No modifiques ni sustituyas valores proporcionados por Python.
-- Distingue HECHO, INDICIO e HIPÓTESIS.
-- Los datos descriptivos no demuestran causalidad.
-- No confundas actividad con experiencia, madurez estratégica o eficacia.
-- No confundas alcance, interacciones y engagement.
-- Una métrica alta no es automáticamente una fortaleza.
-- Una métrica baja no es automáticamente una debilidad.
-- Una publicación excepcional no representa necesariamente el comportamiento habitual.
-- Si faltan datos, expresa la limitación.
-- Las recomendaciones deben derivarse de hallazgos concretos.
-- Los experimentos deben servir para comprobar hipótesis o reducir incertidumbre.
-- El análisis debe aportar aprendizaje útil para la trayectoria profesional del analizado.
+* No inventes, alteres, sustituyas ni completes datos ausentes.
+* No inventes publicaciones, métricas, características de contenido, causas, tendencias, audiencias o resultados.
+* Distingue siempre HECHO, INDICIO e HIPÓTESIS.
+* Los datos descriptivos muestran asociaciones o patrones; no demuestran causalidad.
+* No atribuyas a una métrica consecuencias externas que no estén demostradas por los datos.
+* Si una explicación requiere asumir una causa no observada, exprésala como hipótesis o indica que no puede determinarse.
+* No confundas actividad con experiencia, autoridad, madurez estratégica o eficacia.
+* No confundas alcance, interacciones y engagement.
+* Una métrica alta no es automáticamente una fortaleza.
+* Una métrica baja no es automáticamente una debilidad.
+* Un caso excepcional no representa necesariamente el comportamiento habitual.
+* Si faltan datos, expresa la limitación.
+* Las recomendaciones deben derivarse de hallazgos concretos.
+* Los experimentos deben comprobar hipótesis o reducir incertidumbre.
+* No generes recomendaciones ni experimentos simplemente para completar la sección.
 
-Lenguaje proporcional a la evidencia:
+## REGLAS DE BLOQUEO
+
+- Si un dato no aparece en los DATOS OFICIALES proporcionados por Python,
+  no puede utilizarse como evidencia.
+
+- No utilizar comparaciones externas inexistentes, como:
+  "cuentas similares", "media del sector", "benchmark", "promedio del sector",
+  "audiencia similar" o equivalentes, salvo que Python proporcione explícitamente
+  esos datos.
+
+- Si Python proporciona una métrica, debe utilizarse antes de declarar que
+  dicha cuestión no puede determinarse.
+
+- El CONTEXTO PROFESIONAL no constituye evidencia de rendimiento.
+
+- "Viral", "viralidad", "viralización" o equivalentes pueden utilizarse cuando
+  los datos cuantitativos muestren un comportamiento excepcional de alcance
+  respecto al conjunto analizado. En ese caso deben presentarse como una
+  interpretación proporcional o como comportamiento compatible con una
+  difusión extraordinaria, no como una capacidad estable de la cuenta ni como
+  un hecho causal demostrado.
+
+- No atribuir la causa de una posible viralidad o difusión extraordinaria a
+  factores concretos que Python no haya analizado. Si no puede determinarse
+  qué produjo el comportamiento excepcional, indicarlo expresamente.
+
+- No pasar directamente de una métrica a una acción concreta.
+  Debe existir primero un hallazgo y una interpretación sustentada
+  por evidencia suficiente.
+
+- Si se conoce el resultado pero no puede determinarse su causa o mecanismo,
+  no inventar una acción específica para corregirlo. Puede proponerse
+  únicamente una acción de observación, medición o validación.
+
+- Si una conclusión requiere conocer una característica del contenido que
+  Python no ha analizado, expresarla como incertidumbre.
+
+- No utilizar características de contenido como base de una recomendación
+  o experimento si no han sido observadas o registradas en los datos.
+
+- La utilidad de una recomendación nunca justifica inventar evidencia.
+
+Lenguaje proporcional:
 
 HECHO:
 "los datos muestran..."
@@ -1866,14 +2147,10 @@ HIPÓTESIS:
 "una posible explicación es..."
 "debería comprobarse..."
 
-Cuando algo no pueda determinarse:
+Cuando no pueda determinarse:
 "no puede determinarse con los datos disponibles."
 
-Nunca presentes una hipótesis como hecho.
-
-# ======================================================
-# 1. ARQUITECTURA FIJA
-# ======================================================
+## 1. ARQUITECTURA FIJA
 
 El informe debe contener EXACTAMENTE estas 14 secciones y en este orden:
 
@@ -1894,139 +2171,125 @@ El informe debe contener EXACTAMENTE estas 14 secciones y en este orden:
 
 No añadir, eliminar, combinar, dividir ni renombrar secciones.
 
-Flujo:
+Secuencia analítica:
 
-DATOS
-→ DISTRIBUCIÓN
-→ ALCANCE
-→ ENGAGEMENT
-→ CRUCE
-→ DIAGNÓSTICO
-→ RECOMENDACIONES
-→ EXPERIMENTOS
+DATOS → DISTRIBUCIÓN → ALCANCE → ENGAGEMENT → CRUCE → DIAGNÓSTICO → RECOMENDACIONES → EXPERIMENTOS
 
 No adelantes conclusiones propias de secciones posteriores.
 
-# ======================================================
-# 2. CONTENIDO DE LAS SECCIONES
-# ======================================================
+## 2. CONTENIDO
 
 ### 1. RESUMEN EJECUTIVO
 
-Sintetiza:
-- situación actual;
-- principal fortaleza;
-- principal limitación, si existe;
-- principal oportunidad;
-- principal incertidumbre;
-- prioridad estratégica.
+Sintetiza únicamente:
+
+* situación actual;
+* principal fortaleza, si existe;
+* principal limitación, si existe;
+* principal oportunidad, si existe;
+* principal incertidumbre;
+* prioridad estratégica.
 
 No enumeres métricas innecesarias ni introduzcas acciones nuevas.
 
 ### 2. ESTADO ACTUAL DEL PERFIL
 
-Integra:
-- actividad;
-- resultados;
-- tracción;
-- madurez estratégica, si Python la proporciona.
+Integra actividad, resultados, tracción y madurez estratégica cuando Python la proporcione.
 
-Distingue actividad, resultado y eficacia.
+Distingue siempre:
+ACTIVIDAD ≠ RESULTADO ≠ EFICACIA ≠ EXPERIENCIA.
 
 ### 3. RADIOGRAFÍA CUANTITATIVA
 
 Presenta las principales métricas proporcionadas por Python y explica conjuntamente qué muestran.
 
-No inventes métricas.
+No inventes ni recalcules métricas que Python no proporcione.
 
 ### 4. DISTRIBUCIÓN DEL RENDIMIENTO
 
-Analiza:
-- media y mediana cuando estén disponibles;
-- dispersión;
-- concentración;
-- rendimiento típico;
-- valores extremos;
-- publicaciones excepcionales.
+Analiza, cuando estén disponibles:
+
+* media;
+* mediana;
+* dispersión;
+* concentración;
+* rendimiento típico;
+* valores extremos;
+* publicaciones excepcionales.
 
 Una publicación extrema no representa automáticamente el comportamiento habitual.
 
 ### 5. FRECUENCIA Y ACTIVIDAD
 
 Analiza:
-- número de publicaciones;
-- frecuencia semanal/mensual;
-- intervalo entre publicaciones;
-- duración del periodo;
-- relación observada entre actividad y resultados.
 
-Describe la frecuencia; no la conviertas automáticamente en recomendación.
+* publicaciones;
+* frecuencia semanal/mensual;
+* intervalo;
+* duración del periodo;
+* relación observada entre actividad y resultados.
+
+Describe la frecuencia. No conviertas automáticamente frecuencia en recomendación ni en valoración de eficacia.
 
 ### 6. ANÁLISIS DEL ALCANCE
 
-Analiza las impresiones como alcance observado.
+Alcance = impresiones observadas.
 
-Considera:
-- valores centrales;
-- extremos;
-- distribución;
-- concentración;
-- publicaciones destacadas.
+Analiza valores centrales, distribución, extremos, concentración y publicaciones destacadas.
 
 No equipares impresiones con calidad, influencia, relevancia o conversión.
 
 ### 7. ANÁLISIS DEL ENGAGEMENT
 
-Mantén separados:
+Mantén separadas estas dimensiones:
 
 ALCANCE = impresiones
 VOLUMEN = interacciones absolutas
 EFICIENCIA = engagement
 
-Analiza la relación entre estas dimensiones cuando los datos lo permitan.
+Analiza sus relaciones cuando los datos lo permitan.
+
+No utilices engagement como sustituto de alcance o interacciones.
 
 ### 8. TOP 5 POR IMPRESIONES
 
-Conservar todos los registros proporcionados por Python.
-
-Cuando estén disponibles:
-- posición;
-- fecha;
-- impresiones;
-- interacciones;
-- engagement;
-- URL.
-
-Explicar su posición dentro de la distribución.
-
 ### 9. BOTTOM 5 POR IMPRESIONES
-
-Mismas reglas que el TOP 5.
-
-No calificar automáticamente estas publicaciones como deficientes.
 
 ### 10. TOP 5 POR ENGAGEMENT
 
-Conservar todos los registros proporcionados.
+Conservar TODOS los registros proporcionados por Python.
 
-Relacionar eficiencia de interacción y exposición.
+No eliminar, resumir, truncar, sustituir ni utilizar "etc." o placeholders.
+
+Cuando estén disponibles conservar:
+
+* posición;
+* fecha;
+* impresiones;
+* interacciones;
+* engagement;
+* URL.
+
+Las publicaciones son casos de la muestra, no representación automática de toda la cuenta.
 
 ### 11. CRUCE ENTRE ALCANCE Y ENGAGEMENT
 
 Comparar los rankings para detectar, únicamente cuando exista evidencia:
 
-- alto alcance + alto engagement;
-- alto alcance + menor eficiencia;
-- bajo alcance + alta eficiencia;
-- bajo alcance + baja eficiencia;
-- coincidencias entre rankings;
-- publicaciones destacadas en una sola dimensión.
+* alto alcance + alto engagement;
+* alto alcance + menor eficiencia;
+* bajo alcance + alta eficiencia;
+* bajo alcance + baja eficiencia;
+* coincidencias entre rankings;
+* publicaciones destacadas en una sola dimensión.
 
-No convertir diferencias en causalidad.
+Describe la diferencia observada.
 
-### 12. DIAGNÓSTICO ESTRATÉGICO
+No inventes la causa de la diferencia.
 
-Debe contener EXACTAMENTE seis elementos y en este orden:
+## 3. DIAGNÓSTICO ESTRATÉGICO
+
+La sección 12 debe contener EXACTAMENTE seis elementos y en este orden:
 
 1. FORTALEZA
 2. LIMITACIÓN
@@ -2035,7 +2298,7 @@ Debe contener EXACTAMENTE seis elementos y en este orden:
 5. INCERTIDUMBRE
 6. PRIORIDAD ESTRATÉGICA
 
-Cada uno debe utilizar exactamente:
+Cada elemento debe utilizar exactamente:
 
 {{
 "type": "diagnosis",
@@ -2043,130 +2306,196 @@ Cada uno debe utilizar exactamente:
 "content": "Contenido del diagnóstico"
 }}
 
-Valores permitidos para category:
+Valores permitidos:
 
-"FORTALEZA"
-"LIMITACIÓN"
-"OPORTUNIDAD"
-"ANOMALÍA"
-"INCERTIDUMBRE"
-"PRIORIDAD ESTRATÉGICA"
+FORTALEZA
+LIMITACIÓN
+OPORTUNIDAD
+ANOMALÍA
+INCERTIDUMBRE
+PRIORIDAD ESTRATÉGICA
 
 Cada categoría exactamente una vez.
 
-Definiciones:
+### FORTALEZA
 
-FORTALEZA:
-comportamiento positivo demostrado por evidencia relevante.
+Comportamiento positivo demostrado por evidencia relevante.
 
-LIMITACIÓN:
-restricción o patrón que limita actualmente el comportamiento observado y que tenga evidencia suficiente.
+Una métrica excepcional o una sola publicación destacada NO constituye por sí sola una fortaleza estructural.
 
-OPORTUNIDAD:
-potencial observable digno de aprovechamiento o exploración. No es una acción.
+### LIMITACIÓN
 
-ANOMALÍA:
-desviación relevante respecto al patrón general o referencia disponible. No implica automáticamente problema.
+Restricción o patrón observado que limita el comportamiento analizado y cuya existencia esté respaldada por los datos.
 
-INCERTIDUMBRE:
-cuestión relevante que no puede determinarse con los datos disponibles.
+No atribuyas automáticamente consecuencias externas a una limitación.
 
-PRIORIDAD ESTRATÉGICA:
-síntesis de los cinco diagnósticos anteriores. No es una acción.
+### OPORTUNIDAD
 
-Si una categoría no puede establecerse, mantenerla e indicar explícitamente la falta de evidencia.
+Potencial observable digno de aprovechamiento o exploración.
+
+No es una acción ni una conclusión causal.
+
+### ANOMALÍA
+
+Desviación relevante respecto al patrón general o referencia disponible.
+
+Una anomalía no implica automáticamente un problema.
+
+### INCERTIDUMBRE
+
+Cuestión relevante que no puede determinarse con los datos disponibles.
+
+### PRIORIDAD ESTRATÉGICA
+
+Síntesis de los cinco diagnósticos anteriores.
+
+No introducir aquí un hallazgo nuevo ni una acción nueva.
+
+Si una categoría no puede establecerse con suficiente evidencia, mantenerla e indicar explícitamente la falta de evidencia.
 
 No inventar conclusiones para completar categorías.
 
-### 13. RECOMENDACIONES PRIORITARIAS
+## 4. PUBLICACIONES DESTACADAS
 
-Derivar exclusivamente del diagnóstico.
+Utiliza como muestra:
 
-Preferentemente 3–5, pero no forzar cantidad.
+* TOP 5 POR IMPRESIONES;
+* BOTTOM 5 POR IMPRESIONES;
+* TOP 5 POR ENGAGEMENT.
 
-Tipos permitidos:
+Una publicación repetida en varios rankings sigue siendo un único caso.
 
-MANTENER
-OPTIMIZAR
-INVESTIGAR
-EXPERIMENTAR
-CORREGIR
+Cuando exista contenido textual proporcionado por el usuario, puede utilizarse para identificar características directamente observables en ese texto.
 
-Prioridades:
+No infieras contenido desde una URL.
 
-ALTA
-MEDIA
-BAJA
+No afirmes que un tema, formato, estructura, horario, CTA o característica causa mejor rendimiento salvo que Python haya analizado específicamente esa relación.
 
-Cada recomendación debe responder:
+Una relación observada entre contenido y rendimiento es asociación, no causalidad.
 
-1. ¿Qué hallazgo la origina?
-2. ¿Qué evidencia lo respalda?
-3. ¿Qué significa?
-4. ¿Qué acción concreta se ejecutará?
-5. ¿Cómo se comprobará?
+## 5. SSI
 
-Evita consejos genéricos como:
-- publicar más;
-- ser constante;
-- mejorar engagement;
-- hacer networking;
-- trabajar marca personal;
-- publicar contenido de calidad.
+Los valores SSI recibidos son datos ya extraídos de la captura.
 
-Si no existe evidencia suficiente para actuar, utilizar INVESTIGAR o recopilar información.
+NO vuelvas a leer la imagen.
 
-### 14. EXPERIMENTOS Y PRÓXIMOS PASOS
+Utiliza exclusivamente los valores proporcionados.
+
+Puedes comparar las cuatro dimensiones entre sí.
+
+SSI TOTAL y dimensiones SSI son independientes de las métricas de publicaciones.
+
+No confundas SSI con impresiones, interacciones o engagement.
+
+No utilices el número de publicaciones como indicador directo de experiencia avanzada en LinkedIn.
+
+No atribuyas automáticamente a una dimensión SSI efectos sobre alcance, crecimiento, reconocimiento o networking que los datos no demuestren.
+
+## 6. CONTEXTO PROFESIONAL Y PERSONALIZACIÓN
+
+El SECTOR PROFESIONAL y los NÚCLEOS DE CONTENIDO son contexto estratégico, no datos de rendimiento.
+
+Primero identifica el hallazgo utilizando los datos.
+
+Después utiliza el contexto para concretar su posible aplicación profesional.
+
+El contexto puede modificar:
+
+* enfoque de la acción;
+* aplicación profesional;
+* posicionamiento;
+* ámbito de validación;
+* diseño de una hipótesis experimental.
+
+El contexto NO puede:
+
+* crear evidencia;
+* explicar por qué una publicación funcionó;
+* decidir qué temática funciona mejor;
+* justificar una métrica;
+* sustituir datos de rendimiento.
+
+No afirmes que una temática concreta funciona mejor si Python no ha analizado esa relación.
+
+No utilices el sector o los intereses para clasificar publicaciones como buenas o malas.
+
+Mencionar el sector no constituye personalización.
+
+La personalización es válida cuando cambia razonablemente la acción propuesta.
+
+Si la conexión entre hallazgo y contexto no permite concretar una acción sin asumir evidencia no analizada, declara la limitación y no fuerces la personalización.
+
+## 7. RECOMENDACIONES
+
+Toda recomendación debe seguir:
+
+HALLAZGO → EVIDENCIA → INTERPRETACIÓN → ACCIÓN
+
+Una recomendación solo es válida si:
+
+* deriva de un hallazgo concreto;
+* la acción es modificable por el usuario;
+* la acción no depende de una causa no demostrada;
+* el contexto profesional, si se utiliza, cambia razonablemente la aplicación.
+
+No conviertas una hipótesis causal en una recomendación presentada como hecho.
+
+No generes recomendaciones genéricas por obligación.
+
+No introduzcas nuevos hallazgos en esta sección.
+
+## 8. EXPERIMENTOS Y PRÓXIMOS PASOS
 
 Solo crear experimentos cuando exista una hipótesis razonablemente sustentada.
-
-Cada experimento debe contener, cuando sea viable:
-
-- hipótesis;
-- pregunta;
-- variable;
-- cambio;
-- métrica;
-- referencia;
-- criterio de evaluación;
-- decisión posterior.
 
 Cadena:
 
 HALLAZGO → HIPÓTESIS → PREGUNTA → PRUEBA → MÉTRICA → COMPARACIÓN → APRENDIZAJE → DECISIÓN
 
-No inventar variables no disponibles.
+Cuando sea viable, cada experimento contiene:
 
-No inventar:
-- temas;
-- formatos;
-- horarios;
-- hashtags;
-- imágenes;
-- vídeos;
-- CTA;
-- audiencia;
-- intención;
-- comportamiento del algoritmo.
+* hypothesis;
+* variable;
+* change;
+* metric;
+* reference;
+* success_criterion;
+* subsequent_decision.
 
-Si no existe base suficiente para un experimento, indicar qué información debe recopilarse.
+Una variable experimental propuesta puede ser objeto de prueba, pero NO debe presentarse como una variable previamente analizada por Python.
 
-# ======================================================
-# 3. REGLAS CUANTITATIVAS
-# ======================================================
+No inventes evidencia sobre:
 
-Los datos calculados por Python son la FUENTE DE VERDAD.
+* temas;
+* formatos;
+* horarios;
+* hashtags;
+* imágenes;
+* vídeos;
+* CTA;
+* audiencia;
+* intención;
+* algoritmo.
+
+Si no existe base suficiente para experimentar, indica qué información debería recopilarse.
+
+No generes experimentos por obligación.
+
+## 9. REGLAS CUANTITATIVAS
+
+Python es la fuente de verdad.
 
 No:
-- inventes;
-- alteres;
-- redondees arbitrariamente;
-- sustituyas;
-- recalcules innecesariamente.
 
-Si existe discrepancia entre una interpretación y Python, prevalece Python.
+* inventes;
+* alteres;
+* sustituyas;
+* redondees arbitrariamente;
+* recalcules innecesariamente.
 
-Usa esta secuencia:
+Si una interpretación contradice Python, prevalece Python.
+
+Usa:
 
 DATO → COMPARACIÓN → HALLAZGO → INTERPRETACIÓN → IMPLICACIÓN
 
@@ -2174,167 +2503,37 @@ DATO → COMPARACIÓN → HALLAZGO → INTERPRETACIÓN → IMPLICACIÓN
 
 No utilices la media como único indicador.
 
-Cuando media y mediana difieran significativamente, considera la posibilidad de distribución asimétrica o influencia de valores extremos.
+Si media y mediana difieren significativamente, considera posible asimetría o influencia de valores extremos.
 
-Distingue:
-- rendimiento típico;
-- resultados excepcionales;
-- dispersión;
-- concentración.
+Distingue rendimiento típico, excepciones, dispersión y concentración.
 
-No utilices "media", "promedio" o equivalentes salvo que Python proporcione ese valor.
+Solo utiliza "media", "promedio" o equivalentes cuando Python proporcione ese valor.
 
 ### ACTIVIDAD
 
 Actividad = cantidad/frecuencia de publicaciones.
 
-No equivale a:
-- experiencia;
-- autoridad;
-- eficacia;
-- éxito profesional.
-
-### ALCANCE
-
-Alcance = impresiones.
-
-No equivale automáticamente a:
-- calidad;
-- influencia;
-- relevancia;
-- conversión.
-
-### INTERACCIONES
-
-Interacciones = volumen absoluto.
-
-### ENGAGEMENT
-
-Engagement = eficiencia relativa de interacción según la fórmula proporcionada por Python.
-
-No utilizar engagement como sustituto de impresiones o interacciones.
+No equivale a experiencia, autoridad, eficacia ni éxito profesional.
 
 ### CONTENIDO
 
-Solo relacionar resultados con:
-- tema;
-- formato;
-- enfoque;
-- frecuencia;
-- longitud;
-- estructura;
-- CTA;
-- horario;
-- tipo de contenido;
+Solo relaciona resultados con características del contenido cuando dichas características estén realmente disponibles y puedan observarse o hayan sido analizadas por Python.
 
-si dichas características están realmente disponibles.
+Una asociación no demuestra causalidad.
 
-Una relación observada es asociación/patrón, no causalidad.
+## 10. INTEGRIDAD DE DATOS Y METADATOS
 
-# ======================================================
-# 4. PUBLICACIONES DESTACADAS
-# ======================================================
+Las secciones 8, 9 y 10 deben conservar todos los registros proporcionados por Python.
 
-Utiliza como muestra:
+Conservar exactamente los valores disponibles y las URLs.
 
-- TOP 5 POR IMPRESIONES;
-- BOTTOM 5 POR IMPRESIONES;
-- TOP 5 POR ENGAGEMENT.
+No modificar URLs.
 
-Una publicación repetida en varios rankings sigue siendo un único caso.
+No modificar los metadatos oficiales proporcionados por Python.
 
-Compara:
-- impresiones;
-- interacciones;
-- engagement;
-- posición.
+No inventar metadatos ausentes.
 
-Identifica solamente patrones demostrados.
-
-Las publicaciones seleccionadas son una muestra, no una representación automática de toda la cuenta.
-
-No utilices una URL como evidencia suficiente para inferir contenido.
-
-# ======================================================
-# 5. SSI
-# ======================================================
-
-Los valores SSI recibidos en los datos de entrada son datos ya extraídos de la captura.
-
-NO vuelvas a leer la imagen.
-
-Utiliza exclusivamente los valores proporcionados.
-
-No inventes ni estimes valores.
-
-Puedes comparar las cuatro dimensiones entre sí.
-
-SSI TOTAL y dimensiones SSI son independientes de las métricas de publicaciones.
-
-No confundas SSI con:
-- impresiones;
-- interacciones;
-- engagement.
-
-No utilices el número de publicaciones como indicador directo de experiencia avanzada en LinkedIn.
-
-# ======================================================
-# 6. RECOMENDACIONES Y EXPERIMENTOS
-# ======================================================
-
-Toda recomendación debe seguir:
-
-HALLAZGO → EVIDENCIA → INTERPRETACIÓN → ACCIÓN
-
-Todo experimento:
-
-HALLAZGO → HIPÓTESIS → PREGUNTA → PRUEBA → MÉTRICA → COMPARACIÓN → APRENDIZAJE → DECISIÓN
-
-No introducir nuevos hallazgos en recomendaciones o experimentos.
-
-No generar recomendaciones ni experimentos por obligación.
-
-# ======================================================
-# 7. AUDITORÍA INTERNA
-# ======================================================
-
-Antes de entregar la respuesta comprueba:
-
-DATOS
-- valores coinciden con Python;
-- no existen métricas inventadas;
-- rankings son coherentes;
-- no existen cálculos incompatibles.
-
-ESTRUCTURA
-- exactamente 14 secciones;
-- orden correcto;
-- nombres exactos.
-
-EVIDENCIA
-- hechos, indicios e hipótesis correctamente diferenciados;
-- no existe causalidad no demostrada;
-- incertidumbres relevantes expresadas.
-
-NO INVENCIÓN
-- no inventar temas, formatos, horarios, hashtags, CTA, audiencia, causas o intención;
-- no inferir contenido desde una URL.
-
-COHERENCIA
-- no existen contradicciones;
-- no se confunde actividad con experiencia;
-- no se confunden alcance, volumen y eficiencia.
-
-UTILIDAD
-- conclusiones específicas de esta cuenta;
-- recomendaciones derivadas del diagnóstico;
-- experimentos vinculados a incertidumbres reales.
-
-La auditoría no genera nuevas conclusiones. Solo corrige o elimina elementos que incumplan estas reglas.
-
-# ======================================================
-# 8. SALIDA — CONTRATO JSON
-# ======================================================
+## 11. SALIDA — CONTRATO JSON
 
 La respuesta debe ser EXCLUSIVAMENTE JSON válido.
 
@@ -2411,8 +2610,6 @@ Tipos permitidos:
 
 ### DIAGNOSIS
 
-Debe utilizar exactamente:
-
 {{
 "type": "diagnosis",
 "category": "FORTALEZA",
@@ -2457,52 +2654,78 @@ No añadir campos al diagnóstico.
 
 No crear campos vacíos innecesarios.
 
-# ======================================================
-# 9. INTEGRIDAD DE TABLAS Y METADATOS
-# ======================================================
-
-Las secciones 8, 9 y 10 deben conservar TODOS los registros proporcionados por Python.
-
-No:
-- eliminar;
-- resumir;
-- truncar;
-- sustituir;
-- utilizar "etc.";
-- utilizar placeholders.
-
-Conservar exactamente los valores disponibles y las URLs.
-
-No modificar los metadatos oficiales proporcionados por Python.
-
-No inventar metadatos ausentes.
-
-# ======================================================
-# 10. RESPONSABILIDAD DE PYTHON
-# ======================================================
+## 12. RESPONSABILIDAD DE PYTHON
 
 La IA genera únicamente contenido estructurado.
 
 Python controla posteriormente:
 
-- HTML;
-- CSS;
-- colores;
-- tipografías;
-- tamaños;
-- márgenes;
-- espaciado;
-- tablas;
-- bloques visuales;
-- jerarquía;
-- saltos de página;
-- PDF.
+* HTML;
+* CSS;
+* colores;
+* tipografías;
+* tamaños;
+* márgenes;
+* espaciado;
+* tablas;
+* bloques visuales;
+* jerarquía;
+* saltos de página;
+* PDF.
 
-NO incluir HTML, CSS ni instrucciones visuales en el JSON.
+No incluir HTML, CSS ni instrucciones visuales en el JSON.
 
-# ======================================================
-# 11. VALIDACIÓN FINAL DEL JSON
-# ======================================================
+## 13. AUDITORÍA INTERNA
+
+Antes de responder verifica internamente:
+
+DATOS
+
+* valores coinciden con Python;
+* no hay métricas inventadas;
+* rankings coherentes;
+* no hay cálculos incompatibles.
+
+ESTRUCTURA
+
+* exactamente 14 secciones;
+* orden correcto;
+* títulos exactos.
+
+EVIDENCIA
+
+* hechos, indicios e hipótesis diferenciados;
+* no hay causalidad no demostrada;
+* incertidumbres relevantes expresadas.
+
+CONTEXTO
+
+* el sector/intereses no crean evidencia;
+* no se utilizan para explicar resultados no analizados;
+* la personalización modifica la acción solo cuando existe conexión razonable.
+
+DIAGNÓSTICO
+
+* seis categorías exactamente una vez;
+* cada diagnóstico usa category + content;
+* ninguna categoría se completa inventando evidencia.
+
+COHERENCIA
+
+* actividad ≠ experiencia;
+* alcance ≠ calidad;
+* interacciones ≠ engagement;
+* caso excepcional ≠ comportamiento habitual.
+
+UTILIDAD
+
+* conclusiones específicas de esta cuenta;
+* recomendaciones derivadas de hallazgos;
+* experimentos vinculados a hipótesis reales.
+
+La auditoría solo corrige o elimina elementos que incumplan estas reglas. No genera nuevos hallazgos.
+
+## 14. VALIDACIÓN FINAL DEL JSON
 
 Antes de responder comprueba:
 
@@ -2513,23 +2736,24 @@ Antes de responder comprueba:
 5. Títulos exactos.
 6. Cada sección tiene number, title y content.
 7. Solo se utilizan tipos permitidos.
-8. Diagnóstico contiene exactamente seis elementos.
+8. El diagnóstico contiene exactamente seis elementos.
 9. Las seis categorías aparecen una sola vez y en orden.
 10. Cada diagnóstico utiliza category + content.
 11. Las tablas conservan todos los registros.
 12. Las URLs no han sido modificadas.
 13. No existen datos inventados.
 14. No existen causalidades no demostradas.
-15. No existen recomendaciones genéricas.
+15. No existen recomendaciones genéricas no derivadas de hallazgos.
 16. No existen experimentos sin hipótesis/evidencia suficiente.
 17. No existe HTML, CSS ni información de diseño.
 
 Si una sección carece de datos suficientes, conserva la sección y expresa la limitación.
 
 # ======================================================
-# FIN DEL SYSTEM PROMPT
+# FIN DEL SYSTEM PROMPT V2
 # ======================================================
 """
+
                 user_content = f"""
 DATOS OFICIALES DE IDENTIFICACIÓN DEL INFORME
 
@@ -2548,6 +2772,73 @@ Sector / Ecosistema Profesional:
 Núcleos de Contenido Target:
 {intereses_real}
 
+# ======================================================
+# CONTEXTO PROFESIONAL Y PERSONALIZACIÓN
+# ======================================================
+
+El SECTOR PROFESIONAL y los NÚCLEOS DE CONTENIDO proporcionados por el
+usuario son contexto estratégico, no datos de rendimiento.
+
+Utilízalos principalmente para contextualizar la aplicación profesional
+de los hallazgos, especialmente en las recomendaciones y experimentos.
+
+No los utilices para explicar, justificar, sustituir o completar hallazgos
+de rendimiento que no estén demostrados por los datos proporcionados por
+Python.
+
+REGLAS:
+
+- Evita recomendaciones genéricas aplicables a cualquier perfil.
+- Los DATOS OBSERVADOS determinan los hallazgos y diagnósticos.
+- El CONTEXTO PROFESIONAL y los INTERESES DECLARADOS solo pueden utilizarse
+  después de identificar el hallazgo, para contextualizar su aplicación
+  profesional, una recomendación o un experimento.
+- Una recomendación personalizada puede modificar su enfoque, acción o
+  criterio de validación utilizando el SECTOR PROFESIONAL y/o NÚCLEOS
+  DE CONTENIDO, siempre que exista una conexión razonable con los
+  hallazgos observados y sin alterar su interpretación.
+- Cuando el contexto profesional permita concretar una recomendación, 
+  prioriza acciones relacionadas con el posicionamiento profesional, 
+  los temas de contenido o la audiencia profesional declarada, sin 
+  afirmar que dichos temas han demostrado rendimiento si Python no
+  los ha analizado.
+- Cuando una recomendación sea aplicable a múltiples sectores, concreta
+  su aplicación al SECTOR y/o NÚCLEOS DE CONTENIDO declarados, siempre
+  que dicha concreción no requiera inventar evidencia.
+- Una recomendación no se considera personalizada por mencionar
+  simplemente una palabra del sector o de los intereses.
+- La personalización debe afectar a la ACCIÓN propuesta, no solo a su
+  redacción. Cuando sea viable, debe indicar cómo puede aplicarse el
+  hallazgo al ámbito profesional, posicionamiento o núcleos de contenido
+  declarados por el usuario. No debe utilizarse el contexto para decidir
+  qué temas funcionan mejor ni para justificar un hallazgo que los datos
+  no hayan demostrado.
+- El sector y los intereses pueden modificar el contenido de la
+  recomendación cuando exista una conexión razonable con el hallazgo
+  observado. Si esa conexión no existe, no debe forzarse una
+  personalización artificial.
+- Prioriza recomendaciones que conecten el hallazgo observado con una
+  posible aplicación profesional concreta dentro del sector o los intereses
+  declarados, siempre sin presentar esa conexión como evidencia de rendimiento.
+- Si una recomendación sería esencialmente la misma para cualquier sector,
+  no debe forzarse una personalización artificial. Puede mantenerse si
+  está directamente derivada del hallazgo observado. El contexto
+  profesional solo debe incorporarse cuando permita concretar una
+  aplicación profesional real y razonable.
+- No afirmes que una temática concreta funciona mejor si los datos de
+  Python no permiten demostrarlo.
+- No inventes temas, audiencias, causas ni relaciones entre temática y
+  rendimiento.
+- Si los datos no permiten demostrar una relación temática, formula la
+  propuesta únicamente como HIPÓTESIS a validar.
+- El sector o los intereses no deben utilizarse como sustituto de evidencia.
+- Si no existe evidencia suficiente para personalizar una conclusión,
+  declara la limitación.
+
+# ======================================================
+# FIN DEL CONTEXTO PROFESIONAL
+# ======================================================
+
 DATOS SSI EXTRAÍDOS DE LA CAPTURA DE LINKEDIN
 
 {ssi_text}
@@ -2555,6 +2846,11 @@ DATOS SSI EXTRAÍDOS DE LA CAPTURA DE LINKEDIN
 DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
 
 {analytics_text}
+                # ======================================================
+                # CONTEXTO CUALITATIVO DE PUBLICACIONES DESTACADAS
+                # ======================================================
+
+                {contexto_publicaciones}
 """
                 # ======================================================
                 # CONTROL DE TAMAÑO REAL DE LA PETICIÓN
@@ -2576,8 +2872,8 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                 print(f"System tokens aprox: {system_tokens_aprox:,}")
                 print(f"User tokens aprox:   {user_tokens_aprox:,}")
                 print(f"TOTAL ENTRADA APROX: {total_tokens_aprox:,}")
-                print(f"MAX OUTPUT:          6,000")
-                print(f"CONTEXTO TOTAL APROX:{total_tokens_aprox + 6000:,}")
+                print(f"MAX OUTPUT:          8,000")
+                print(f"CONTEXTO TOTAL APROX:{total_tokens_aprox + 8000:,}")
                 print("===== FIN CONTROL =====")                           
 
                 response = client.chat.completions.create(
@@ -2593,7 +2889,7 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                         }
                     ],
                     response_format={"type": "json_object"},
-                    max_tokens=6000
+                    max_tokens=8000
                 )               
 
                 # --------------------------------------------------
@@ -3047,10 +3343,9 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
 
                     st.stop()
 
-
-                # ==================================================
+                # ======================================================
                 # JSON VALIDADO
-                # ==================================================
+                # ======================================================
 
                 st.success(
                     "✅ JSON recibido y validado correctamente: "
@@ -3058,11 +3353,20 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                     "de contenidos válida."
                 )
 
+
+                # ======================================================
+                # RESTAURAR METADATOS OFICIALES DE PYTHON
+                # ======================================================
+
+                analysis_json["metadata"] = report_metadata
+
+
                 # ======================================================
                 # GENERACIÓN DEL HTML
                 # ======================================================
 
                 html_content = generar_html(analysis_json)
+
 
                 st.success(
                     "✅ HTML generado correctamente."
@@ -3075,6 +3379,7 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                 st.html(
                     html_content
                 )
+
                 # ------------------------------------------------------
                 # HTML GENERADO — INSPECCIÓN
                 # ------------------------------------------------------
@@ -3123,10 +3428,6 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
 
                 try:
 
-                    # --------------------------------------------------
-                    # LOCAL WINDOWS / STREAMLIT CLOUD LINUX
-                    # --------------------------------------------------
-
                     chrome_candidates = [
                         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
                         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -3145,15 +3446,10 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                     )
 
                     if not chrome_path:
-
                         raise FileNotFoundError(
                             "No se encontró Google Chrome/Chromium "
                             "en el entorno de ejecución."
                         )
-
-                    # --------------------------------------------------
-                    # ARCHIVOS TEMPORALES
-                    # --------------------------------------------------
 
                     with tempfile.TemporaryDirectory() as temp_dir:
 
@@ -3167,21 +3463,12 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                             "auditoria.pdf"
                         )
 
-                        # --------------------------------------------------
-                        # GUARDAR HTML
-                        # --------------------------------------------------
-
                         with open(
                             html_path,
                             "w",
                             encoding="utf-8"
                         ) as f:
-
                             f.write(html_content)
-
-                        # --------------------------------------------------
-                        # EJECUTAR CHROME / CHROMIUM HEADLESS
-                        # --------------------------------------------------
 
                         subprocess.run(
                             [
@@ -3200,18 +3487,11 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                             text=True
                         )
 
-                        # --------------------------------------------------
-                        # LEER PDF
-                        # --------------------------------------------------
-
                         with open(
                             pdf_path,
                             "rb"
                         ) as f:
-
-                            pdf_buffer.write(
-                                f.read()
-                            )
+                            pdf_buffer.write(f.read())
 
                     pdf_buffer.seek(0)
 
@@ -3228,11 +3508,11 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                     )
 
                 except Exception as e:
-                
+
                     import traceback
 
                     st.error(
-                        f"Error crítico en el motor de análisis: {e}"
+                        f"❌ Error durante la generación del PDF: {e}"
                     )
 
                     st.code(
@@ -3240,22 +3520,21 @@ DATOS DE RENDIMIENTO CALCULADOS POR PYTHON
                         language="text"
                     )
 
-                    st.stop()
-        # ======================================================
-        # FIN DEL TRY PRINCIPAL DE LA AUDITORÍA
-        # ======================================================
+            # ======================================================
+            # FIN DEL TRY PRINCIPAL DE LA AUDITORÍA
+            # ======================================================
 
-            except Exception as e:
+        except Exception as e:
 
-                import traceback
+            import traceback
 
-                st.error(
-                    f"Error crítico en el motor de análisis: {e}"
-                )
+            st.error(
+                f"❌ Error crítico en el motor de análisis: {e}"
+            )
 
-                st.code(
-                    traceback.format_exc(),
-                    language="text"
-                )
+            st.code(
+                traceback.format_exc(),
+                language="text"
+            )
 
-                st.stop()
+            st.stop()
