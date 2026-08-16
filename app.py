@@ -12,15 +12,8 @@ import os
 import subprocess
 
 # ======================================================
-# CABECERA DE LA APLICACIÓN
+# CABECERA PRINCIPAL
 # ======================================================
-
-# Configuración visual
-st.set_page_config(
-    page_title="LinkedIn Analytical Audit",
-    layout="centered",
-    page_icon="🧭"
-)
 
 st.markdown("""
 <style>
@@ -31,53 +24,52 @@ st.markdown("""
         #123B5D 0%,
         #0A66C2 100%
     );
-
     color: white;
-    padding: 28px 32px 25px;
-    border-radius: 14px;
-    margin-bottom: 22px;
-    box-shadow: 0 5px 16px rgba(18, 59, 93, 0.12);
+    padding: 34px 38px 32px;
+    border-radius: 18px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 24px rgba(18, 59, 93, 0.14);
 }
 
 .app-kicker {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.6px;
     opacity: 0.78;
-    margin-bottom: 7px;
+    margin-bottom: 9px;
 }
 
 .app-title {
-    font-size: 30px;
-    line-height: 1.2;
-    font-weight: 700;
-    margin: 0 0 8px 0;
+    font-size: 32px;
+    line-height: 1.15;
+    font-weight: 750;
+    margin: 0 0 10px 0;
 }
 
 .app-subtitle {
-    font-size: 14px;
-    line-height: 1.5;
-    opacity: 0.88;
+    font-size: 15px;
+    line-height: 1.55;
+    opacity: 0.92;
     margin: 0;
+    max-width: 760px;
 }
 
 .app-badge {
     display: inline-block;
-    margin-top: 15px;
-    padding: 5px 10px;
+    margin-top: 17px;
+    padding: 6px 11px;
     border-radius: 20px;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.11);
     border: 1px solid rgba(255,255,255,0.20);
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.7px;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 
 st.html("""
 <div class="app-header">
@@ -87,28 +79,25 @@ st.html("""
     </div>
 
     <div class="app-title">
-        🧭 LinkedIn Analytical Audit
+        Auditoría Estratégica de LinkedIn
     </div>
 
     <p class="app-subtitle">
-        Convierte tus datos de LinkedIn en una auditoría estratégica
-        basada en evidencia y genera un informe profesional en PDF.
+        Convierte tus datos reales de LinkedIn en un diagnóstico claro:
+        descubre qué está funcionando, qué necesita mejorar y qué deberías
+        comprobar a continuación.
     </p>
 
     <div class="app-badge">
-        Análisis cuantitativo + interpretación estratégica asistida por IA
+        Datos reales · Evidencia · Diagnóstico · Acción
     </div>
 
 </div>
-""",)
-
-# ======================================================
-# GUÍA DE USO
-# ======================================================
+""")
 
 with st.expander(
-    "📖 Manual de operación y transparencia de costes",
-    expanded=True
+    "ℹ️ Cómo funciona · privacidad y transparencia",
+    expanded=False
 ):
 
     st.markdown("""
@@ -174,28 +163,253 @@ automáticamente el inicio de la auditoría.
         "https://www.linkedin.com/sales/ssi/"
     )
 
+# ======================================================
+# FLUJO DE LA AUDITORÍA
+# ======================================================
+
+# ======================================================
+# MAPA DEL PROCESO
+# ======================================================
+
+st.markdown("## Tu auditoría en 4 pasos")
+
+st.markdown(
+    "Tú aportas los datos. Nosotros los convertimos en análisis."
+)
+
+st.markdown("""
+<style>
+
+.audit-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 18px 0 28px;
+}
+
+.audit-step {
+    background: #F8FAFC;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 17px 16px 16px;
+    min-height: 145px;
+    position: relative;
+}
+
+.audit-step::before {
+    content: "";
+    display: block;
+    width: 28px;
+    height: 3px;
+    border-radius: 4px;
+    background: #0A66C2;
+    margin-bottom: 14px;
+}
+
+.audit-step-number {
+    color: #0A66C2;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+}
+
+.audit-step-title {
+    color: #123B5D;
+    font-size: 14px;
+    font-weight: 750;
+    margin-bottom: 8px;
+}
+
+.audit-step-text {
+    color: #5B6472;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+
+    .audit-steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .audit-steps {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.html("""
+<div class="audit-steps">
+
+    <div class="audit-step">
+        <div class="audit-step-number">01</div>
+        <div class="audit-step-title">CONTEXTO</div>
+        <div class="audit-step-text">
+            Define tu ámbito profesional y los temas en los que quieres
+            posicionarte.
+        </div>
+    </div>
+
+    <div class="audit-step">
+        <div class="audit-step-number">02</div>
+        <div class="audit-step-title">DATOS</div>
+        <div class="audit-step-text">
+            Aporta tu SSI y el histórico real de actividad de LinkedIn.
+        </div>
+    </div>
+
+    <div class="audit-step">
+        <div class="audit-step-number">03</div>
+        <div class="audit-step-title">PUBLICACIONES</div>
+        <div class="audit-step-text">
+            Añade el contenido real de las publicaciones seleccionadas.
+        </div>
+    </div>
+
+    <div class="audit-step">
+        <div class="audit-step-number">04</div>
+        <div class="audit-step-title">AUDITORÍA</div>
+        <div class="audit-step-text">
+            Obtén diagnóstico, recomendaciones, experimentos y PDF.
+        </div>
+    </div>
+
+</div>
+""")
 
 # ======================================================
 # 1. CREDENCIALES DE SEGURIDAD
 # ======================================================
 
 with st.sidebar:
-    st.header("⚙️ Seguridad de la API")
-    api_key = st.text_input("OpenAI API Key", type="default", placeholder="Pega tu clave sk-...")
 
-# 2. Captura de Variables
-st.subheader("1. Parámetros Estratégicos")
+    with st.expander("⚙ Configuración avanzada", expanded=False):
+
+        st.caption(
+            "Configuración necesaria para ejecutar la auditoría."
+        )
+
+        api_key = st.text_input(
+            "OpenAI API Key",
+            type="password",
+            placeholder="Pega tu clave sk-..."
+        )
+
+        st.caption(
+            "La clave se utiliza para ejecutar el análisis mediante la API."
+        )
+
+# ======================================================
+# PASO 01 — CONTEXTO PROFESIONAL
+# ======================================================
+
+st.markdown("## 01 · Cuéntanos dónde quieres crecer")
+
+st.markdown(
+    "Este contexto ayuda a personalizar la interpretación y las "
+    "recomendaciones. No modifica tus métricas ni crea evidencia."
+)
+
 col1, col2 = st.columns(2)
+
 with col1:
-    sector = st.text_input("Ecosistema / Sector Profesional", placeholder="Ej: Ciberseguridad y Formación Profesional Informática")
+
+    sector = st.text_input(
+        "¿Cuál es tu ámbito profesional?",
+        placeholder=(
+            "Ej.: Formación Profesional Informática, "
+            "Ciberseguridad, Redes..."
+        )
+    )
+
 with col2:
-    intereses = st.text_input("Núcleos de Contenido Target", placeholder="Ej: FP, Empleo, Redes, SMR, ASIR, DAM, DAW")
 
-fecha_alta = st.date_input("Fecha de Activación Real del Perfil", date(2026, 3, 1))
+    intereses = st.text_input(
+        "¿Sobre qué temas quieres posicionarte?",
+        placeholder=(
+            "Ej.: SMR, ASIR, Redes, Empleo, "
+            "Sistemas..."
+        )
+    )
 
-st.subheader("2. Input de Datos (LinkedIn Nativos)")
-ssi_image = st.file_uploader("Captura del Social Selling Index (Imagen PNG/JPG)", type=["png", "jpg", "jpeg"], key="ssi_image_uploader")
-analytics_file = st.file_uploader("Histórico Analítico de Creador (Excel .xlsx o PDF)", type=["xlsx", "pdf"], key="analytics_file_uploader")
+fecha_alta = st.date_input(
+    "¿Desde cuándo trabajas estratégicamente tu presencia en LinkedIn?",
+    date(2026, 3, 1)
+)
+
+st.caption(
+    "La fecha se utiliza como contexto temporal y no sustituye "
+    "el periodo real disponible en tus datos."
+)
+
+st.divider()
+
+# ======================================================
+# PASO 02 — DATOS REALES DE LINKEDIN
+# ======================================================
+
+st.markdown("## 02 · Aporta tus datos reales de LinkedIn")
+
+st.markdown(
+    "Necesitamos dos fuentes distintas para construir una visión "
+    "más completa de tu actividad."
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.markdown("### 🎯 Tu SSI")
+
+    st.caption(
+        "Una fotografía de tu posicionamiento actual dentro de LinkedIn."
+    )
+
+    ssi_image = st.file_uploader(
+        "Selecciona tu captura SSI",
+        type=["png", "jpg", "jpeg"],
+        key="ssi_image_uploader"
+    )
+
+    if ssi_image:
+        st.success("✓ Captura SSI recibida")
+
+    st.link_button(
+        "Consultar mi SSI en LinkedIn ↗",
+        "https://www.linkedin.com/sales/ssi/"
+    )
+
+with col2:
+
+    st.markdown("### 📊 Tus analíticas")
+
+    st.caption(
+        "Datos de actividad, impresiones e interacciones de tus publicaciones."
+    )
+
+    analytics_file = st.file_uploader(
+        "Selecciona tu archivo analítico",
+        type=["xlsx", "pdf"],
+        key="analytics_file_uploader"
+    )
+
+    if analytics_file:
+        st.success("✓ Archivo analítico recibido")
+
+    st.link_button(
+        "Importar datos de LinkedIn ↗",
+        "https://www.linkedin.com/analytics/creator/content/"
+    )
+
+st.divider()
 
 def encode_image(uploaded_file):
     return base64.b64encode(uploaded_file.read()).decode('utf-8')
@@ -1680,7 +1894,7 @@ if "auditoria_activa" not in st.session_state:
 # BOTÓN DE INICIO DE LA AUDITORÍA
 # ======================================================
 
-if st.button("🚀 Ejecutar Auditoría Estratégica Completa"):
+if st.button("➡️ Continuar y preparar mis publicaciones"):
 
     if not api_key:
 
@@ -1861,74 +2075,475 @@ if st.session_state.auditoria_activa:
                             "Contenido": ""
                         })
 
+                # ======================================================
+                # PASO 03 — CONTEXTO DE PUBLICACIONES DESTACADAS
+                # ======================================================
 
-                # ==================================================
-                # CONTEXTO CUALITATIVO DE PUBLICACIONES DESTACADAS
-                # ==================================================
+                st.markdown("## 03 · Dale contexto a tus publicaciones")
 
-                st.subheader("3. Contexto de publicaciones destacadas")
-
-                st.write(
-                    "Para mejorar nuestra analítica, necesitamos que nos copies "
-                    "el contenido de estas publicaciones:"
+                st.info(
+                    "**Las métricas nos dicen qué ocurrió.**\n\n"
+                    "El contenido nos ayuda a entender qué estaba ocurriendo en esas "
+                    "publicaciones. Copia el texto real de cada publicación para que la "
+                    "auditoría pueda observar características presentes en ellas y "
+                    "relacionarlas con sus resultados."
                 )
-                
-                # --------------------------------------------------
-                # MOSTRAR CAMPOS DE CONTENIDO
-                # --------------------------------------------------
+
+                st.caption(
+                    "No necesitas resumir ni editar el contenido. "
+                    "Cópialo tal como fue publicado."
+                )
+
+                # ======================================================
+                # ESTILOS DE LAS TARJETAS
+                # ======================================================
+
+                st.markdown("""
+                <style>
+
+                .publication-card {
+                    background: #FFFFFF;
+                    border: 1px solid #E5E7EB;
+                    border-radius: 14px;
+                    padding: 20px 22px 18px;
+                    margin: 0 0 18px 0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.025);
+                }
+
+                .publication-card-header {
+                    display:flex;
+                    align-items:flex-start;
+                    justify-content:space-between;
+                    gap:18px;
+                    margin-bottom:14px;
+                }
+
+                .publication-card-number {
+                    color:#0A66C2;
+                    font-size:10px;
+                    font-weight:800;
+                    text-transform:uppercase;
+                    letter-spacing:0.8px;
+                    margin-bottom:5px;
+                }
+
+                .publication-card-title {
+                    color:#123B5D;
+                    font-size:16px;
+                    font-weight:750;
+                    line-height:1.3;
+                }
+
+                .publication-status {
+                    font-size:10px;
+                    font-weight:700;
+                    padding:5px 9px;
+                    border-radius:18px;
+                    white-space:nowrap;
+                }
+
+                .publication-status-ready {
+                    background:#EAF7F0;
+                    color:#198754;
+                }
+
+                .publication-status-pending {
+                    background:#F3F4F6;
+                    color:#6B7280;
+                }
+
+                .publication-metrics {
+                    display:flex;
+                    flex-wrap:wrap;
+                    gap:8px;
+                    margin:0 0 14px;
+                }
+
+                .publication-metric {
+                    display:inline-block;
+                    background:#F8FAFC;
+                    border:1px solid #E5E7EB;
+                    border-radius:7px;
+                    padding:6px 9px;
+                    color:#4B5563;
+                    font-size:11px;
+                }
+
+                .publication-metric strong {
+                    color:#123B5D;
+                }
+
+                .publication-content-label {
+                    color:#6B7280;
+                    font-size:10px;
+                    font-weight:750;
+                    text-transform:uppercase;
+                    letter-spacing:0.05em;
+                    margin:12px 0 6px;
+                }
+
+                </style>
+                """, unsafe_allow_html=True)
+
+
+                # ======================================================
+                # MOSTRAR PUBLICACIONES
+                # ======================================================
 
                 for i, publicacion in enumerate(
                     st.session_state.contenidos_publicaciones,
                     1
                 ):
-
                     url = publicacion.get("URL", "")
 
-                    st.markdown(f"**Publicación {i}**")
+                    fecha = publicacion.get(
+                        "Fecha",
+                        "No disponible"
+                    )
+
+                    impresiones = publicacion.get(
+                        "Impresiones",
+                        "No disponible"
+                    )
+
+                    interacciones = publicacion.get(
+                        "Interacciones",
+                        "No disponible"
+                    )
+
+                    engagement = publicacion.get(
+                        "Engagement",
+                        "No disponible"
+                    )
+
+                    contenido_actual = publicacion.get(
+                        "Contenido",
+                        ""
+                    ).strip()
+
+                    completada = bool(contenido_actual)
+
+                    estado_clase = (
+                        "publication-status-ready"
+                        if completada
+                        else "publication-status-pending"
+                    )
+
+                    estado_texto = (
+                        "✓ Contenido recibido"
+                        if completada
+                        else "Pendiente"
+                    )
+
+                    st.html(f"""
+                    <div class="publication-card">
+
+                        <div class="publication-card-header">
+
+                            <div>
+
+                                <div class="publication-card-number">
+                                    PUBLICACIÓN DESTACADA · {i:02d}
+                                </div>
+
+                                <div class="publication-card-title">
+                                    {fecha}
+                                </div>
+
+                            </div>
+
+                            <div class="publication-status {estado_clase}">
+                                {estado_texto}
+                            </div>
+
+                        </div>
+
+                        <div class="publication-metrics">
+
+                            <span class="publication-metric">
+                                <strong>{impresiones}</strong> impresiones
+                            </span>
+
+                            <span class="publication-metric">
+                                <strong>{interacciones}</strong> interacciones
+                            </span>
+
+                            <span class="publication-metric">
+                                <strong>{engagement}%</strong> engagement
+                            </span>
+
+                        </div>
+
+                    </div>
+                    """)
 
                     if url:
-                        st.markdown(
-                            f"[Ver publicación ↗]({url})"
+
+                        st.link_button(
+                            "Ver publicación en LinkedIn ↗",
+                            url,
+                            use_container_width=False
                         )
+
+                    st.markdown(
+                        '<div class="publication-content-label">'
+                        '¿Qué publicaste?'
+                        '</div>',
+                        unsafe_allow_html=True
+                    )
 
                     contenido = st.text_area(
                         "Contenido de la publicación",
+                        value=contenido_actual,
                         key=f"contenido_publicacion_{i}",
                         height=180,
                         placeholder=(
-                            "Copia y pega aquí el contenido de la publicación..."
-                        )
+                            "Copia y pega aquí el contenido tal como fue publicado..."
+                        ),
+                        label_visibility="collapsed"
                     )
 
-                    st.session_state.contenidos_publicaciones[i - 1]["Contenido"] = (
-                        contenido
+                    st.session_state.contenidos_publicaciones[
+                        i - 1
+                    ]["Contenido"] = contenido
+
+                    # ------------------------------------------------------
+                    # PROGRESO
+                    # ------------------------------------------------------
+
+                    publicaciones_totales = len(
+                        st.session_state.contenidos_publicaciones
+                    )
+
+                    publicaciones_completadas = sum(
+                        1
+                        for publicacion in st.session_state.contenidos_publicaciones
+                        if publicacion.get("Contenido", "").strip()
+                    )
+
+                    st.markdown(
+                        f"**Contenido aportado: "
+                        f"{publicaciones_completadas} / {publicaciones_totales}**"
+                    )
+
+                    progreso = (
+                        publicaciones_completadas / publicaciones_totales
+                        if publicaciones_totales
+                        else 0
+                    )
+
+                    st.progress(progreso)
+
+                    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                    st.markdown(
+                        "<div style='height:4px'></div>",
+                        unsafe_allow_html=True
                     )
 
 
-                # --------------------------------------------------
-                # BOTÓN DE CONTINUACIÓN
-                # --------------------------------------------------
+                # ======================================================
+                # RESUMEN DEL PROGRESO
+                # ======================================================
 
-                continuar_analisis = st.button(
-                    "➡️ Continuar con el análisis",
-                    key="continuar_analisis"
+                publicaciones_completadas = sum(
+                    1
+                    for publicacion in st.session_state.contenidos_publicaciones
+                    if publicacion.get("Contenido", "").strip()
+                )
+
+                if publicaciones_completadas == publicaciones_totales:
+
+                    st.success(
+                        f"✓ Has completado las {publicaciones_totales} "
+                        "publicaciones destacadas."
+                    )
+
+                elif publicaciones_completadas > 0:
+
+                    st.info(
+                        f"Has añadido contenido a {publicaciones_completadas} "
+                        f"de {publicaciones_totales} publicaciones. "
+                        "Puedes continuar cuando estés preparado."
+                    )
+
+                else:
+
+                    st.info(
+                        "Abre las publicaciones en nuevas pestañas, copia su contenido "
+                        "y vuelve aquí. Los textos introducidos se conservarán."
+                    )
+
+                # ======================================================
+                # QUÉ RECIBIRÁS
+                # ======================================================
+
+                st.markdown("## ¿Qué vas a recibir?")
+
+                st.markdown(
+                    "La auditoría combina tus datos, tus publicaciones y tu contexto "
+                    "profesional para construir un informe estratégico personalizado."
+                )
+
+                resultado_col1, resultado_col2, resultado_col3 = st.columns(3)
+
+                with resultado_col1:
+
+                    st.markdown("### 📊 Radiografía")
+
+                    st.caption(
+                        "Tus principales métricas, distribución, alcance y engagement."
+                    )
+
+                with resultado_col2:
+
+                    st.markdown("### 🧠 Diagnóstico")
+
+                    st.caption(
+                        "Fortaleza, limitación, oportunidad, anomalía, incertidumbre "
+                        "y prioridad estratégica."
+                    )
+
+                with resultado_col3:
+
+                    st.markdown("### 🎯 Acción")
+
+                    st.caption(
+                        "Recomendaciones y experimentos derivados de los hallazgos."
+                    )
+
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+                resultado_col4, resultado_col5, resultado_col6 = st.columns(3)
+
+                with resultado_col4:
+
+                    st.markdown("### 🔎 Publicaciones")
+
+                    st.caption(
+                        "Análisis de los casos destacados y cruce entre alcance "
+                        "y engagement."
+                    )
+
+                with resultado_col5:
+
+                    st.markdown("### 🧪 Experimentos")
+
+                    st.caption(
+                        "Hipótesis que podrás comprobar con nuevos datos."
+                    )
+
+                with resultado_col6:
+
+                    st.markdown("### 📄 Informe PDF")
+
+                    st.caption(
+                        "Un informe ejecutivo completo listo para consultar y descargar."
+                    )
+
+                st.divider()
+                
+                # ======================================================
+                # CTA FINAL — GENERAR AUDITORÍA
+                # ======================================================
+
+                st.markdown("""
+                <style>
+
+                /* ==================================================
+                BOTÓN PRINCIPAL DE LA AUDITORÍA
+                ================================================== */
+
+                .stButton > button[kind="primary"] {
+
+                    width: 100% !important;
+
+                    min-height: 58px !important;
+
+                    border-radius: 12px !important;
+
+                    border: 1px solid #0A66C2 !important;
+
+                    background: linear-gradient(
+                        135deg,
+                        #123B5D 0%,
+                        #0A66C2 100%
+                    ) !important;
+
+                    color: #FFFFFF !important;
+
+                    font-size: 16px !important;
+
+                    font-weight: 750 !important;
+
+                    letter-spacing: 0.1px !important;
+
+                    box-shadow:
+                        0 6px 16px rgba(10, 102, 194, 0.18) !important;
+
+                    transition:
+                        transform 0.15s ease,
+                        box-shadow 0.15s ease !important;
+
+                }
+
+                /* Hover */
+
+                .stButton > button[kind="primary"]:hover {
+
+                    transform: translateY(-1px);
+
+                    box-shadow:
+                        0 9px 22px rgba(10, 102, 194, 0.24) !important;
+
+                    border-color: #0A66C2 !important;
+
+                }
+
+                /* Click */
+
+                .stButton > button[kind="primary"]:active {
+
+                    transform: translateY(0);
+
+                    box-shadow:
+                        0 4px 10px rgba(10, 102, 194, 0.18) !important;
+
+                }
+
+                </style>
+                """, unsafe_allow_html=True)
+
+
+                st.markdown("## ¿Todo preparado?")
+
+                st.markdown(
+                    """
+                    <div style="
+                        color:#5B6472;
+                        font-size:13px;
+                        line-height:1.55;
+                        margin-bottom:14px;
+                    ">
+                        Tu contexto, tus datos y tus publicaciones ya están preparados.
+                        Ahora puedes generar la auditoría estratégica completa.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
                 )
 
 
-                # --------------------------------------------------
-                # SI TODAVÍA NO SE HA PULSADO CONTINUAR
-                # --------------------------------------------------
+                continuar_analisis = st.button(
+                    "🚀  Generar mi auditoría",
+                    key="continuar_analisis",
+                    type="primary",
+                    use_container_width=True
+                )
 
-                if not continuar_analisis:
 
-                    st.info(
-                        "Puedes abrir las publicaciones en nuevas pestañas, "
-                        "copiar su contenido y volver aquí. "
-                        "Los textos introducidos se conservarán."
-                    )
-
+                if continuar_analisis:
+                    st.session_state.auditoria_activa = True
+                else:
                     st.stop()
-
 
                 # ==================================================
                 # CONSTRUIR CONTEXTO CUALITATIVO PARA LA IA
@@ -2473,6 +3088,11 @@ Los criterios de éxito pueden ser propuestos como umbrales experimentales,
 pero no deben presentarse como valores derivados de los datos históricos
 salvo que Python los proporcione explícitamente.
 
+Las referencias cuantitativas de un experimento deben proceder exclusivamente
+de valores proporcionados por Python. Si un promedio, mediana, tasa o valor
+histórico no está disponible en los datos de Python, no calcularlo ni
+utilizarlo como referencia.
+
 La IA puede realizar cálculos derivados sencillos a partir de valores
 proporcionados por Python cuando sean necesarios para interpretar una muestra.
 
@@ -2895,6 +3515,10 @@ REGLAS:
   Python no permiten demostrarlo.
 - No inventes temas, audiencias, causas ni relaciones entre temática y
   rendimiento.
+- Las etiquetas y títulos de los insights deben describir únicamente
+  el fenómeno realmente analizado en esa sección. No introducir
+  categorías ajenas al dato analizado salvo que hayan sido observadas
+  explícitamente en el contenido proporcionado o analizadas por Python.
 - Si los datos no permiten demostrar una relación temática, formula la
   propuesta únicamente como HIPÓTESIS a validar.
 - El sector o los intereses no deben utilizarse como sustituto de evidencia.
