@@ -2120,7 +2120,7 @@ if st.session_state.auditoria_activa:
 
                 .publication-card-number {
                     color:#0A66C2;
-                    font-size:10px;
+                    font-size:12px;
                     font-weight:800;
                     text-transform:uppercase;
                     letter-spacing:0.8px;
@@ -2168,6 +2168,26 @@ if st.session_state.auditoria_activa:
                     color:#4B5563;
                     font-size:11px;
                 }
+
+                .publication-metric-engagement {
+                background: #EAF7F0;
+                border: 1px solid #CDEBD9;
+                border-radius: 10px;
+                padding: 10px 14px;
+            }
+
+            .publication-metric-engagement strong {
+                color: #198754;
+                font-size: 22px;
+                font-weight: 800;
+            }
+
+            .publication-metric-engagement span {
+                color: #198754;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.05em;
+            }                
 
                 .publication-metric strong {
                     color:#123B5D;
@@ -2260,17 +2280,20 @@ if st.session_state.auditoria_activa:
 
                         <div class="publication-metrics">
 
-                            <span class="publication-metric">
-                                <strong>{impresiones}</strong> impresiones
-                            </span>
+                            <div class="publication-metric">
+                                <strong>{impresiones}</strong>
+                                <span>IMPRESIONES</span>
+                            </div>
 
-                            <span class="publication-metric">
-                                <strong>{interacciones}</strong> interacciones
-                            </span>
+                            <div class="publication-metric">
+                                <strong>{interacciones}</strong>
+                                <span>INTERACCIONES</span>
+                            </div>
 
-                            <span class="publication-metric">
-                                <strong>{engagement}%</strong> engagement
-                            </span>
+                            <div class="publication-metric publication-metric-engagement">
+                                <strong>{engagement}%</strong>
+                                <span>ENGAGEMENT</span>
+                            </div>
 
                         </div>
 
@@ -2306,6 +2329,43 @@ if st.session_state.auditoria_activa:
                     st.session_state.contenidos_publicaciones[
                         i - 1
                     ]["Contenido"] = contenido
+
+                    # ------------------------------------------------------
+                    # CONTEXTO ADICIONAL DE LA PUBLICACIÓN
+                    # ------------------------------------------------------
+
+                    contexto_adicional_actual = publicacion.get(
+                        "ContextoAdicional",
+                        ""
+                    ).strip()
+
+                    st.markdown(
+                        '<div class="publication-content-label">'
+                        '¿Hay algo más que debamos saber sobre esta publicación?'
+                        '</div>',
+                        unsafe_allow_html=True
+                    )
+
+                    st.caption(
+                        "Opcional. Describe elementos relevantes que no aparecen en el texto, "
+                        "como una imagen, vídeo, documento o contexto adicional."
+                    )
+
+                    contexto_adicional = st.text_area(
+                        "Contexto adicional de la publicación",
+                        value=contexto_adicional_actual,
+                        key=f"contexto_adicional_publicacion_{i}",
+                        height=110,
+                        placeholder=(
+                            "Ejemplo: vídeo generado con IA en el que aparecen Álex, Lucía y Sam "
+                            "observando el eclipse. La publicación invitaba a presenciarlo en Oviedo."
+                        ),
+                        label_visibility="collapsed"
+                    )
+
+                    st.session_state.contenidos_publicaciones[
+                        i - 1
+                    ]["ContextoAdicional"] = contexto_adicional
 
                     # ------------------------------------------------------
                     # PROGRESO
@@ -2556,9 +2616,17 @@ if st.session_state.auditoria_activa:
                     1
                 ):
 
-                    contenido = publicacion.get("Contenido", "").strip()
+                    contenido = publicacion.get(
+                        "Contenido",
+                        ""
+                    ).strip()
 
-                    if not contenido:
+                    contexto_adicional = publicacion.get(
+                        "ContextoAdicional",
+                        ""
+                    ).strip()
+
+                    if not contenido and not contexto_adicional:
                         continue
 
                     contexto_publicaciones += f"""
@@ -2584,6 +2652,9 @@ URL:
 
 CONTENIDO PROPORCIONADO POR EL USUARIO:
 {contenido}
+
+CONTEXTO ADICIONAL PROPORCIONADO POR EL USUARIO:
+{contexto_adicional if contexto_adicional else "No proporcionado."}
 
 --- FIN PUBLICACIÓN {i} ---
 """
@@ -2708,8 +2779,11 @@ Reglas maestras:
 
 ## REGLAS DE BLOQUEO
 
-- Solo los DATOS OFICIALES proporcionados por Python constituyen evidencia.
-  No inventar, completar ni introducir comparaciones externas no proporcionadas.
+- - Los DATOS OFICIALES proporcionados por Python constituyen la evidencia
+  cuantitativa.
+- El TEXTO y el CONTEXTO ADICIONAL proporcionados por el usuario constituyen
+  evidencia cualitativa declarada y observable, pero no métricas.
+- No completar ninguna de estas fuentes con información no proporcionada.
 
 - No convertir directamente un dato en una acción. Toda recomendación debe
   derivarse de un hallazgo e interpretación sustentados. Si la causa no puede
@@ -2723,22 +2797,7 @@ Reglas maestras:
 - Las interpretaciones excepcionales pueden describirse como tales cuando los
   datos las sustenten, pero no atribuirles una causa no demostrada.
 
-Lenguaje proporcional:## REGLAS DE BLOQUEO
-
-- Solo los DATOS OFICIALES proporcionados por Python constituyen evidencia.
-  No inventar, completar ni introducir comparaciones externas no proporcionadas.
-
-- No convertir directamente un dato en una acción. Toda recomendación debe
-  derivarse de un hallazgo e interpretación sustentados. Si la causa no puede
-  determinarse, expresarlo como incertidumbre o proponer únicamente una acción
-  de observación, medición o registro.
-
-- El CONTEXTO PROFESIONAL no crea evidencia. No atribuir a temas, formatos,
-  horarios, CTA, audiencias, viralidad u otras características del contenido
-  efectos que no hayan sido observados o analizados.
-
-- Las interpretaciones excepcionales pueden describirse como tales cuando los
-  datos las sustenten, pero no atribuirles una causa no demostrada.
+Lenguaje proporcional:
 
 HECHO:
 "los datos muestran..."
@@ -2990,6 +3049,44 @@ No afirmes que un tema, formato, estructura, horario, CTA o característica caus
 
 Una relación observada entre contenido y rendimiento es asociación, no causalidad.
 
+### ORGANIZACIÓN DE LA EVIDENCIA
+
+Antes de formular diagnósticos, recomendaciones o experimentos, analiza internamente cada publicación mediante:
+
+**PUBLICACIÓN → DATOS → CONTENIDO → CONTEXTO ADICIONAL → COMPARACIÓN → PATRÓN/EXCEPCIÓN → HIPÓTESIS**
+
+Distingue siempre:
+
+* **DATOS:** valores cuantitativos proporcionados por Python.
+* **CONTENIDO:** características observables directamente en el texto proporcionado.
+* **CONTEXTO ADICIONAL:** información cualitativa declarada por el usuario sobre imágenes, vídeos, documentos, artículos enlazados u otros elementos no incluidos directamente.
+* **CÁLCULO DERIVADO:** cálculo propio basado exclusivamente en datos disponibles, limitado a la muestra correspondiente y claramente distinguido de los valores originales.
+
+Si una publicación incluye un artículo enlazado cuyo contenido ha sido proporcionado, trátalo como contenido cualitativo de esa misma publicación.
+
+Después compara las publicaciones de la muestra para detectar únicamente cuando exista base suficiente:
+
+* características repetidas;
+* diferencias entre casos con distinto alcance o engagement;
+* coincidencias y discordancias;
+* asociaciones entre características observables y resultados.
+
+Una característica presente en un solo caso no constituye un patrón general.
+
+Una característica repetida puede describirse como **patrón observado en la muestra**, no como causa demostrada.
+
+Distingue siempre:
+
+**OBSERVACIÓN → ASOCIACIÓN → HIPÓTESIS**
+
+El objetivo es utilizar el contenido para interpretar mejor los resultados cuantitativos, identificar patrones de la muestra y proponer hipótesis verificables, sin convertir observaciones cualitativas en métricas ni relaciones causales.
+
+Cuando las características cualitativas de las publicaciones sean relevantes
+para un hallazgo o recomendación, utiliza al menos varias características concretas
+y observables de la muestra en lugar de sustituirla por expresiones genéricas
+como "características específicas", "estrategias", "contenido relevante" o
+similares.
+
 ## 5. SSI
 
 Los valores SSI recibidos son datos ya extraídos de la captura.
@@ -3072,91 +3169,29 @@ Solo crear experimentos cuando exista una hipótesis razonablemente sustentada.
 
 Cadena:
 
-HALLAZGO → HIPÓTESIS → PREGUNTA → PRUEBA → MÉTRICA → COMPARACIÓN → APRENDIZAJE → DECISIÓN
+**HALLAZGO → HIPÓTESIS → PREGUNTA → PRUEBA → MÉTRICA → COMPARACIÓN → APRENDIZAJE → DECISIÓN**
 
 Cada experimento debe contener, cuando sea viable:
 
-- hypothesis: hipótesis;
-- variable: variable;
-- change: cambio;
-- metric: métrica;
-- reference: referencia;
-- success_criterion: criterio de éxito;
-- subsequent_decision: decisión posterior.
+* hypothesis
+* variable
+* change
+* metric
+* reference
+* success_criterion
+* subsequent_decision
 
-Los criterios de éxito pueden ser propuestos como umbrales experimentales,
-pero no deben presentarse como valores derivados de los datos históricos
-salvo que Python los proporcione explícitamente.
+Las referencias cuantitativas deben proceder de valores proporcionados por Python. No utilizar como referencia un promedio, tasa o valor histórico inexistente.
 
-Las referencias cuantitativas de un experimento deben proceder exclusivamente
-de valores proporcionados por Python. Si un promedio, mediana, tasa o valor
-histórico no está disponible en los datos de Python, no calcularlo ni
-utilizarlo como referencia.
+Los cálculos derivados solo pueden utilizar datos disponibles, deben identificar la muestra y no pueden presentarse como métricas globales de Python.
 
-La IA puede realizar cálculos derivados sencillos a partir de valores
-proporcionados por Python cuando sean necesarios para interpretar una muestra.
+Las hipótesis deben ser comprobables y no presentarse como hechos ni causalidades demostradas.
 
-Todo cálculo derivado debe:
-- basarse únicamente en datos disponibles;
-- ser matemáticamente coherente;
-- identificar claramente la muestra o subconjunto utilizado;
-- no presentarse como una métrica calculada por Python;
-- no extrapolarse a toda la cuenta si solo procede de una muestra;
-- distinguirse explícitamente de los valores originales proporcionados.
+Las variables futuras deben poder registrarse y controlarse directamente por el usuario. Presentarlas como **VARIABLE A REGISTRAR**, nunca como característica ya demostrada.
 
-Las hipótesis experimentales deben formularse como hipótesis comprobables,
-no como hechos, tendencias garantizadas ni relaciones causales establecidas.
-No utilizar expresiones como "garantiza", "demuestra", "tiende a" o
-equivalentes para presentar una relación que no haya sido demostrada por
-Python.
+No introducir recursos, audiencias, inversión, promoción u otros mecanismos externos no disponibles en los datos o contexto.
 
-Una variable experimental futura puede proponerse si puede ser controlada y
-registrada directamente por el usuario dentro del sistema analizado.
-
-No introducir recursos, inversión, promoción, herramientas, audiencias externas
-u otros mecanismos no disponibles en los datos o contexto proporcionados.
-
-Una variable futura no implica que su efecto haya sido demostrado.
-
-La variable propuesta debe quedar explícitamente presentada como
-VARIABLE A REGISTRAR, no como característica ya identificada en las
-publicaciones.
-
-Las características observables directamente en el contenido textual
-proporcionado por el usuario pueden utilizarse como evidencia cualitativa.
-No presentarlas como métricas ni como características analizadas
-cuantitativamente por Python.
-
-No inventes evidencia sobre:
-
-* temas;
-* formatos;
-* horarios;
-* hashtags;
-* imágenes;
-* vídeos;
-* CTA;
-* audiencia;
-* intención;
-* algoritmo.
-
-Si no existe base suficiente para experimentar, no inventes una prueba.
-
-La falta de datos sobre una variable concreta no impide formular
-recomendaciones o experimentos sobre otras variables que sí dispongan
-de evidencia suficiente.
-
-Una incertidumbre sobre frecuencia, horario u otra dimensión no debe
-bloquear el análisis de contenido, alcance, engagement o de las
-publicaciones destacadas cuando existan datos suficientes para ello.
-
-Indica qué información debería recopilarse para poder formular un
-experimento posteriormente.
-
-La recopilación de datos puede proponerse aunque no exista todavía una
-hipótesis suficiente para experimentar.
-
-No generes experimentos por obligación.
+Si no existe base suficiente para experimentar, no inventar una prueba. Puede indicarse qué información debería recopilarse para poder hacerlo posteriormente.
 
 ## 9. REGLAS CUANTITATIVAS
 
@@ -3171,6 +3206,8 @@ No:
 * recalcules innecesariamente.
 
 Si una interpretación contradice Python, prevalece Python.
+
+No utilices un valor perteneciente a una publicación individual como referencia, promedio o característica de un grupo de publicaciones. Si un valor procede de una sola publicación, descríbelo como valor individual. Solo utiliza términos como promedio, media, tendencia grupal o comportamiento de un conjunto cuando Python proporcione ese agregado o cuando el cálculo derivado esté explícitamente identificado como perteneciente a una muestra concreta.
 
 Usa:
 
@@ -3200,7 +3237,20 @@ Engagement = eficiencia relativa según la fórmula proporcionada por Python.
 
 No confundir estas dimensiones ni utilizar una como sustituta de otra.
 Las interacciones no pueden presentarse como engagement.
+
 Si Python no proporciona un promedio de engagement, no inventarlo.
+
+### MUESTRA Y PERIODO
+
+Distingue siempre entre:
+
+* **MUESTRA:** publicaciones individuales proporcionadas por Python y disponibles para análisis detallado.
+* **PERIODO:** agregados correspondientes al periodo completo analizado, que pueden incluir publicaciones no presentes en la muestra.
+
+No mezcles ambos universos ni presentes el total del periodo como suma de las publicaciones de la muestra.
+
+Si existe una diferencia entre ambos totales, descríbela como diferencia de cobertura de datos. No interpretarla por sí sola como crecimiento, tendencia o mejora.
+
 
 ### CONTENIDO
 
@@ -3364,52 +3414,19 @@ No incluir HTML, CSS ni instrucciones visuales en el JSON.
 
 ## 13. AUDITORÍA INTERNA
 
-Antes de responder verifica internamente:
+Antes de responder comprueba:
 
-DATOS
+- datos y rankings coinciden con Python;
+- hechos, observaciones e hipótesis están diferenciados;
+- no hay causalidad no demostrada;
+- sector/intereses no crean evidencia;
+- diagnóstico contiene seis categorías exactas;
+- recomendaciones derivan de hallazgos;
+- experimentos contienen hipótesis y variables registrables;
+- actividad ≠ experiencia;
+- alcance ≠ interacciones ≠ engagement;
+- excepción ≠ comportamiento habitual.
 
-* valores coinciden con Python;
-* no hay métricas inventadas;
-* rankings coherentes;
-* no hay cálculos incompatibles.
-
-ESTRUCTURA
-
-* exactamente 14 secciones;
-* orden correcto;
-* títulos exactos.
-
-EVIDENCIA
-
-* hechos, indicios e hipótesis diferenciados;
-* no hay causalidad no demostrada;
-* incertidumbres relevantes expresadas.
-
-CONTEXTO
-
-* el sector/intereses no crean evidencia;
-* no se utilizan para explicar resultados no analizados;
-* la personalización modifica la acción solo cuando existe conexión razonable.
-
-DIAGNÓSTICO
-
-* seis categorías exactamente una vez;
-* cada diagnóstico usa category + content;
-* ninguna categoría se completa inventando evidencia.
-
-COHERENCIA
-
-* actividad ≠ experiencia;
-* alcance ≠ calidad;
-* interacciones ≠ engagement;
-* caso excepcional ≠ comportamiento habitual.
-
-UTILIDAD
-
-* conclusiones específicas de esta cuenta;
-* recomendaciones derivadas de hallazgos;
-* experimentos vinculados a hipótesis reales y variables controlables y registrables.
-La auditoría solo corrige o elimina elementos que incumplan estas reglas. No genera nuevos hallazgos.
 
 ## 14. VALIDACIÓN FINAL DEL JSON
 
@@ -3450,7 +3467,9 @@ FECHA DE FIN: {report_metadata["fecha_fin"]}
 FECHA DE GENERACIÓN: {report_metadata["fecha_generacion"]}
 ESTADO: {report_metadata["estado"]}
 
-DATOS ESTRATÉGICOS INTRODUCIDOS POR EL USUARIO
+# ======================================================
+# CONTEXTO PROFESIONAL
+# ======================================================
 
 Sector / Ecosistema Profesional:
 {sector_real}
@@ -3458,19 +3477,11 @@ Sector / Ecosistema Profesional:
 Núcleos de Contenido Target:
 {intereses_real}
 
-# ======================================================
-# CONTEXTO PROFESIONAL Y PERSONALIZACIÓN
-# ======================================================
+Utiliza estos datos únicamente como contexto estratégico para concretar
+la aplicación profesional de hallazgos ya identificados.
 
-El SECTOR PROFESIONAL y los NÚCLEOS DE CONTENIDO proporcionados por el
-usuario son contexto estratégico, no datos de rendimiento.
-
-Utilízalos principalmente para contextualizar la aplicación profesional
-de los hallazgos, especialmente en las recomendaciones y experimentos.
-
-No los utilices para explicar, justificar, sustituir o completar hallazgos
-de rendimiento que no estén demostrados por los datos proporcionados por
-Python.
+No los utilices como evidencia de rendimiento.
+No sustituyen los datos de Python ni el contenido proporcionado por el usuario.
 
 REGLAS:
 
@@ -3479,6 +3490,9 @@ REGLAS:
 - El CONTEXTO PROFESIONAL y los INTERESES DECLARADOS solo pueden utilizarse
   después de identificar el hallazgo, para contextualizar su aplicación
   profesional, una recomendación o un experimento.
+- La información adicional sobre imágenes, vídeos, documentos u otros elementos
+  multimedia procede exclusivamente de la descripción proporcionada por el usuario.
+  No afirmar haber observado directamente dichos elementos.
 - Una recomendación personalizada puede modificar su enfoque, acción o
   criterio de validación utilizando el SECTOR PROFESIONAL y/o NÚCLEOS
   DE CONTENIDO, siempre que exista una conexión razonable con los
